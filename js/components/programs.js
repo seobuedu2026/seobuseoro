@@ -11,7 +11,7 @@ export function renderPrograms(container) {
   const allEvents = getEvents();
 
   const categories = [
-    { key: "all", label: "전체 구분" },
+    { key: "all", label: "전체" },
     { key: "workshop", label: "연수·워크숍", cls: "cat-workshop" },
     { key: "lecture", label: "특강", cls: "cat-lecture" },
     { key: "festival", label: "성과공유·보고·한마당", cls: "cat-festival" },
@@ -22,7 +22,7 @@ export function renderPrograms(container) {
 
   const activeMonths = getActiveMonths();
   const months = [
-    { key: "all", label: "전체 월" },
+    { key: "all", label: "전체" },
     ...activeMonths.map(m => ({ key: String(m), label: `${m}월` }))
   ];
 
@@ -53,11 +53,10 @@ export function renderPrograms(container) {
         </div>
       ` : ''}
 
-      <!-- 월 & 카테고리 필터 칩 바 (월별/구분 줄 맞춤 및 중앙 배치) -->
+      <!-- 월 & 카테고리 필터 칩 바 (중앙 정렬) -->
       <div style="display: flex; justify-content: center; margin-bottom: 24px; width: 100%;">
-        <div style="display: inline-flex; flex-direction: column; gap: 10px; align-items: flex-start; max-width: 100%;">
-          <div class="filter-chips-row" id="prog-month-filter" style="margin-bottom: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <span style="font-size: 13px; font-weight: 800; color: #0e3753; min-width: 38px;">월별:</span>
+        <div style="display: inline-flex; flex-direction: column; gap: 10px; align-items: center; max-width: 100%; width: 100%;">
+          <div class="filter-chips-row" id="prog-month-filter" style="margin-bottom: 0; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; width: 100%;">
             ${months.map(m => `
               <button class="m3-chip ${selectedMonth === m.key ? 'active' : ''}" data-month="${m.key}">
                 ${m.label}
@@ -65,8 +64,7 @@ export function renderPrograms(container) {
             `).join("")}
           </div>
 
-          <div class="filter-chips-row" id="prog-cat-filter" style="margin-bottom: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <span style="font-size: 13px; font-weight: 800; color: #0e3753; min-width: 38px;">구분:</span>
+          <div class="filter-chips-row" id="prog-cat-filter" style="margin-bottom: 0; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;">
             ${categories.map(cat => `
               <button class="m3-chip ${selectedCategory === cat.key ? 'active' : ''}" data-cat="${cat.key}">
                 ${cat.label}

@@ -194,19 +194,42 @@
     white-space: nowrap !important;
   }
 
-  /* 캘린더 모드 바 하단: PDF 파일 저장 및 카운트 가로 정렬 */
+  #prog-cat-filter {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+  }
+
+  #prog-cat-filter .m3-chip {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+  }
+
+  /* 캘린더 모드 바 하단: 모바일에서 PDF 링크 숨김 및 카운트 중앙 정렬 */
+  .btn-pdf-download {
+    display: none !important;
+  }
+
   .calendar-utility-row {
     position: static !important;
     display: flex !important;
-    justify-content: space-between !important;
+    justify-content: center !important;
     align-items: center !important;
     width: 100% !important;
-    margin-top: 4px !important;
+    margin-top: 2px !important;
   }
 
   .calendar-view-mode-bar .btn-m3-outlined {
     padding: 6px 12px !important;
     font-size: 12px !important;
+  }
+
+  /* 3개월 모아보기 모바일 세로 1열 나열 */
+  .poster-three-months-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
   }
 
   /* 그리드 및 캘린더 셀 모바일 최적화 */

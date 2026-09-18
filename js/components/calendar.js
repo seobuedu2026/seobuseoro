@@ -118,7 +118,7 @@ function renderCalendarCards(mount, onSelectEventModal, isAdmin, mainContainer) 
     }
 
     mount.innerHTML = `
-      <div class="poster-three-months-grid" style="grid-template-columns: repeat(${Math.min(threeMonths.length, 3)}, 1fr);">
+      <div class="poster-three-months-grid">
         ${threeMonths.map(m => generateMonthCardHTML(m, false, isAdmin)).join("")}
       </div>
     `;
