@@ -1,8 +1,20 @@
-import { getEvents, MONTH_THEMES } from "../data/events.js";
+import { getEvents, MONTH_THEMES, getActiveMonths, getHolidayName } from "../data/events.js";
+import { GoogleAuthService } from "../auth/googleAuth.js";
+import { openEventFormModal } from "./eventFormModal.js";
+import { openMonthManagerModal } from "./monthManagerModal.js";
 
-let currentMonth = "all"; // 'all' (3개월 포스터 모드) | 9 | 10 | 11
+let currentMonth = "all"; // 'all' (3개월 포스터 모드) | 1 ~ 12
 
 export function renderCalendar(container, onSelectEventModal) {
+  const user = GoogleAuthService.getCurrentUser();
+  const isAdmin = !!(user && user.isAdmin);
+  const activeMonths = getActiveMonths();
+
+  // 현재 선택된 월이 활성 월 목록에 없는 경우 첫 번째 활성 월 또는 'all'로 리셋
+  if (currentMonth !== "all" && !activeMonths.includes(currentMonth)) {
+    currentMonth = activeMonths[0] || "all";
+  }
+
   const isSingleMonth = currentMonth !== "all";
 
   container.innerHTML = `
@@ -10,18 +22,22 @@ export function renderCalendar(container, onSelectEventModal) {
       <!-- 상단 월 및 뷰 모드 전환 바 (중앙 정렬 및 컴팩트 1줄 구성) -->
       <div class="calendar-view-mode-bar">
         <div class="filter-chips-row" id="month-chips-row">
-          <button class="m3-chip chip-month-9 ${currentMonth === 9 ? 'active' : ''}" data-month="9">
-            <span>🌿 9월</span><span class="chip-text-extra"> · 수다박스의 달</span>
-          </button>
-          <button class="m3-chip chip-month-10 ${currentMonth === 10 ? 'active' : ''}" data-month="10">
-            <span>🌸 10월</span><span class="chip-text-extra"> · 수업나눔의 달</span>
-          </button>
-          <button class="m3-chip chip-month-11 ${currentMonth === 11 ? 'active' : ''}" data-month="11">
-            <span>🍁 11월</span><span class="chip-text-extra"> · 성과공유의 달</span>
-          </button>
+          ${activeMonths.map(m => {
+            const theme = MONTH_THEMES[m] || { name: `${m}월`, subtitle: '', icon: '📅' };
+            return `
+              <button class="m3-chip chip-month-${m} ${currentMonth === m ? 'active' : ''}" data-month="${m}">
+                <span>${theme.icon || '📅'} ${m}월</span><span class="chip-text-extra"> · ${theme.subtitle || ''}</span>
+              </button>
+            `;
+          }).join("")}
           <button class="m3-chip ${currentMonth === 'all' ? 'active' : ''}" data-month="all">
             <span>✨ 3개월</span><span class="chip-text-extra"> 모아보기</span>
           </button>
+          ${isAdmin ? `
+            <button id="btn-admin-manage-months" class="m3-chip admin-chip-add" style="background: #0e3753; color: #ffffff; border-color: #0e3753; font-weight: 800;" title="관리자: 캘린더 월 추가/관리">
+              <span>➕ 월 추가</span>
+            </button>
+          ` : ''}
         </div>
 
         <div class="calendar-utility-row">
@@ -29,9 +45,11 @@ export function renderCalendar(container, onSelectEventModal) {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             <span>PDF 파일 저장</span>
           </a>
-          <span class="calendar-program-count">
-            총 <strong>${getEvents().length}개</strong>의 성장 프로그램
-          </span>
+          ${!isSingleMonth ? `
+            <span class="calendar-program-count">
+              총 <strong>${getEvents().length}개</strong>의 성장 프로그램
+            </span>
+          ` : ''}
         </div>
       </div>
 
@@ -56,68 +74,111 @@ export function renderCalendar(container, onSelectEventModal) {
   `;
 
   const contentMount = container.querySelector("#calendar-content-mount");
-  renderCalendarCards(contentMount, onSelectEventModal);
+  renderCalendarCards(contentMount, onSelectEventModal, isAdmin, container);
 
   // 칩 클릭 이벤트
-  container.querySelectorAll("#month-chips-row .m3-chip").forEach(chip => {
+  container.querySelectorAll("#month-chips-row .m3-chip[data-month]").forEach(chip => {
     chip.addEventListener("click", () => {
       const val = chip.dataset.month;
       currentMonth = val === "all" ? "all" : parseInt(val, 10);
       renderCalendar(container, onSelectEventModal);
     });
   });
+
+  // 관리자 월 추가/관리 버튼
+  if (isAdmin) {
+    const btnMonthMgr = container.querySelector("#btn-admin-manage-months");
+    if (btnMonthMgr) {
+      btnMonthMgr.addEventListener("click", () => {
+        openMonthManagerModal(() => {
+          renderCalendar(container, onSelectEventModal);
+        });
+      });
+    }
+  }
 }
 
-function renderCalendarCards(container, onSelectEventModal) {
+function renderCalendarCards(mount, onSelectEventModal, isAdmin, mainContainer) {
+  const activeMonths = getActiveMonths();
+
   if (currentMonth === "all") {
-    // 3개월 나란히 포스터 모드 (화면 너비 꽉 참)
-    container.innerHTML = `
-      <div class="poster-three-months-grid">
-        ${[9, 10, 11].map(m => generateMonthCardHTML(m, false)).join("")}
+    // 3개월 모아보기: 현재 달부터 시작하여 등록된 3개 월 순차 표시
+    const currentActualMonth = new Date().getMonth() + 1; // 1~12
+
+    let startIndex = activeMonths.findIndex(m => m >= currentActualMonth);
+    if (startIndex === -1) {
+      startIndex = 0;
+    }
+
+    let threeMonths = activeMonths.slice(startIndex, startIndex + 3);
+    if (threeMonths.length < 3 && activeMonths.length >= 3) {
+      threeMonths = activeMonths.slice(-3);
+    } else if (threeMonths.length === 0) {
+      threeMonths = activeMonths;
+    }
+
+    mount.innerHTML = `
+      <div class="poster-three-months-grid" style="grid-template-columns: repeat(${Math.min(threeMonths.length, 3)}, 1fr);">
+        ${threeMonths.map(m => generateMonthCardHTML(m, false, isAdmin)).join("")}
       </div>
     `;
   } else {
     // 단일 월 집중 모드 (화면 100% 꽉 차는 와이드 뷰)
-    container.innerHTML = `
+    mount.innerHTML = `
       <div style="width:100%; margin-bottom: 24px;">
-        ${generateMonthCardHTML(currentMonth, true)}
+        ${generateMonthCardHTML(currentMonth, true, isAdmin)}
       </div>
     `;
   }
 
+  // 관리자 모드: 날짜 빈 공간 클릭 시 새 행사 추가
+  if (isAdmin) {
+    mount.querySelectorAll(".cal-cell.admin-clickable-cell").forEach(cell => {
+      cell.addEventListener("click", (e) => {
+        if (e.target.closest(".cal-event-pill")) return;
+        const monthVal = parseInt(cell.dataset.month, 10);
+        const dayVal = cell.dataset.day;
+        openEventFormModal(null, { month: monthVal, day: dayVal }, () => {
+          renderCalendar(mainContainer, onSelectEventModal);
+        });
+      });
+    });
+  }
+
   // 행사 칩 클릭 이벤트 바인딩
-  container.querySelectorAll(".cal-event-pill").forEach(pill => {
+  mount.querySelectorAll(".cal-event-pill").forEach(pill => {
     pill.addEventListener("click", (e) => {
       e.stopPropagation();
       const eventId = pill.dataset.eventId;
       const allEvents = getEvents();
       const eventObj = allEvents.find(ev => ev.id === eventId);
-      if (eventObj && onSelectEventModal) {
-        onSelectEventModal(eventObj);
+      if (eventObj) {
+        if (isAdmin) {
+          // 관리자는 즉시 행사 수정 모달 열기
+          openEventFormModal(eventObj, null, () => {
+            renderCalendar(mainContainer, onSelectEventModal);
+          });
+        } else if (onSelectEventModal) {
+          onSelectEventModal(eventObj);
+        }
       }
     });
   });
 }
 
-const HOLIDAYS_2026 = {
-  9: {
-    24: "추석연휴",
-    25: "추석",
-    26: "추석연휴"
-  },
-  10: {
-    3: "개천절",
-    5: "대체공휴일",
-    9: "한글날"
-  }
-};
+function generateMonthCardHTML(month, isFocusView = false, isAdmin = false) {
+  const theme = MONTH_THEMES[month] || {
+    monthNum: month,
+    name: `${month}월`,
+    subtitle: "수업성장의 달",
+    themeColor: "#0e3753",
+    themeBg: "#f0fdf4"
+  };
 
-function generateMonthCardHTML(month, isFocusView = false) {
-  const theme = MONTH_THEMES[month];
   const allEvents = getEvents();
   const monthEvents = allEvents.filter(ev => ev.month === month);
 
-  // 2026년 기준 캘린더 날짜 계산
+  // 2026년 기준 캘린더 날짜 계산 (윤년 및 월별 일수 자동 반영)
   const year = 2026;
   const firstDayOfWeek = new Date(year, month - 1, 1).getDay(); // 0(일) ~ 6(토)
   const totalDays = new Date(year, month, 0).getDate();
@@ -129,30 +190,31 @@ function generateMonthCardHTML(month, isFocusView = false) {
     daysCellsHTML += `<div class="cal-cell empty"></div>`;
   }
 
-  // 해당 월 일자 칸 생성
+  // 해당 월 일자 칸 생성 (공휴일 자동 매핑)
   for (let day = 1; day <= totalDays; day++) {
     const dayOfWeek = (firstDayOfWeek + day - 1) % 7;
     const isSun = dayOfWeek === 0;
     const isSat = dayOfWeek === 6;
-    const holidayName = (HOLIDAYS_2026[month] && HOLIDAYS_2026[month][day]) || null;
+    const holidayName = getHolidayName(year, month, day);
     const isHoliday = !!holidayName || isSun;
     const dayClass = isHoliday ? "sun holiday" : (isSat ? "sat" : "");
 
     // 해당 일자 행사들
-    const dayEvents = monthEvents.filter(ev => ev.day === day);
+    const dayEvents = monthEvents.filter(ev => ev.day === day || ev.day === String(day));
 
     const eventPillsHTML = dayEvents.map(ev => `
-      <div class="cal-event-pill ${ev.categoryClass}" data-event-id="${ev.id}" title="${ev.title} ${ev.subtitle || ''}">
+      <div class="cal-event-pill ${ev.categoryClass}" data-event-id="${ev.id}" title="${isAdmin ? '[관리자] 클릭하여 행사 수정: ' : ''}${ev.title} ${ev.subtitle || ''}">
         <div>${ev.title}</div>
         ${ev.subtitle ? `<div class="pill-sub">${ev.subtitle}</div>` : ''}
       </div>
     `).join("");
 
     daysCellsHTML += `
-      <div class="cal-cell ${dayClass}">
+      <div class="cal-cell ${dayClass} ${isAdmin ? 'admin-clickable-cell' : ''}" data-month="${month}" data-day="${day}" ${isAdmin ? `title="클릭하여 ${month}월 ${day}일 새 행사 추가"` : ''}>
         <div class="cal-cell-daynum">
           <span>${day}</span>
           ${holidayName ? `<span class="cal-holiday-name">${holidayName}</span>` : ''}
+          ${isAdmin ? `<span class="admin-cell-quick-add" title="${month}월 ${day}일 새 행사 추가">+</span>` : ''}
         </div>
         ${eventPillsHTML}
       </div>
@@ -165,16 +227,17 @@ function generateMonthCardHTML(month, isFocusView = false) {
     decDays.forEach(dStr => {
       const decEvents = monthEvents.filter(ev => ev.day === dStr);
       const eventPillsHTML = decEvents.map(ev => `
-        <div class="cal-event-pill ${ev.categoryClass}" data-event-id="${ev.id}">
+        <div class="cal-event-pill ${ev.categoryClass}" data-event-id="${ev.id}" title="${isAdmin ? '[관리자] 클릭하여 행사 수정: ' : ''}${ev.title}">
           <div>${ev.title}</div>
           ${ev.subtitle ? `<div class="pill-sub">${ev.subtitle}</div>` : ''}
         </div>
       `).join("");
 
       daysCellsHTML += `
-        <div class="cal-cell" style="background-color:#fcfcfd;">
+        <div class="cal-cell ${isAdmin ? 'admin-clickable-cell' : ''}" data-month="11" data-day="${dStr}" style="background-color:#fcfcfd;" ${isAdmin ? `title="클릭하여 11월 ${dStr} 새 행사 추가"` : ''}>
           <div class="cal-cell-daynum" style="color:#64748b; font-size:11px;">
             <span>${dStr}</span>
+            ${isAdmin ? `<span class="admin-cell-quick-add" title="새 행사 추가">+</span>` : ''}
           </div>
           ${eventPillsHTML}
         </div>
@@ -193,7 +256,7 @@ function generateMonthCardHTML(month, isFocusView = false) {
 
   return `
     <div class="single-month-card ${focusClass}">
-      <div class="month-card-header month-${month}-header">
+      <div class="month-card-header month-${month}-header" style="background: ${theme.themeBg || '#f8fafc'};">
         <div class="month-title-badge-group">
           <span class="month-big-num">${theme.name}</span>
           <span class="month-subtitle-pill">${theme.subtitle}</span>
@@ -224,3 +287,5 @@ function generateMonthCardHTML(month, isFocusView = false) {
     </div>
   `;
 }
+
+

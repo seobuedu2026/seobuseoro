@@ -2,7 +2,7 @@
 
 const STORAGE_KEY = "seobu_user_session";
 const ADMIN_MODE_KEY = "seobu_admin_mode";
-const DEFAULT_ADMIN_CODE = "seobu2026"; // 기본 관리자 인증 코드
+const DEFAULT_ADMIN_CODE = "seobuedu2026@gmail.com"; // 관리자 인증 코드
 
 // 구글 클라이언트 ID (Google Cloud Console seobuseoro 프로젝트)
 export const GOOGLE_CLIENT_ID = "544520893088-9lj38t9e6qlp6m11q55tfh8hadvd8361.apps.googleusercontent.com";
@@ -13,7 +13,8 @@ const ADMIN_EMAILS = [
   "seobu@senedu.kr",
   "manager@senedu.kr",
   "gogh9@senedu.kr",
-  "gogh9@susaek.sen.es.kr"
+  "gogh9@susaek.sen.es.kr",
+  "seobuedu2026@gmail.com"
 ];
 
 // JWT 토큰 파싱 헬퍼 함수
@@ -91,7 +92,7 @@ export const GoogleAuthService = {
   verifyAdminCode(code) {
     if (!code) return false;
     const clean = code.trim();
-    if (clean === DEFAULT_ADMIN_CODE || clean === "1234") {
+    if (clean.toLowerCase() === DEFAULT_ADMIN_CODE.toLowerCase()) {
       localStorage.setItem(ADMIN_MODE_KEY, "true");
       window.dispatchEvent(new CustomEvent("auth-state-changed", { detail: { user: this.getCurrentUser() } }));
       return true;

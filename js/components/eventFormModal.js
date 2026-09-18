@@ -1,0 +1,235 @@
+import { getEvents, saveEvents } from "../data/events.js";
+
+const CATEGORY_META = {
+  workshop: { label: "연수·워크숍", cls: "cat-workshop" },
+  lecture: { label: "특강", cls: "cat-lecture" },
+  festival: { label: "성과공유·보고·한마당", cls: "cat-festival" },
+  mentoring: { label: "멘토링", cls: "cat-mentoring" },
+  sharing: { label: "수업나눔 교육콘서트", cls: "cat-sharing" },
+  sudabox: { label: "수다박스", cls: "cat-sudabox" }
+};
+
+/**
+ * 새 행사 추가 또는 기존 행사 수정 모달 열기
+ * @param {Object|null} eventObj 수정할 행사 객체 (null이면 새 행사 추가)
+ * @param {Object|null} defaultDate 기본 설정 일자 { month: 9, day: 15 }
+ * @param {Function|null} onSaved 저장 후 콜백
+ */
+export function openEventFormModal(eventObj = null, defaultDate = null, onSaved = null) {
+  const isEdit = !!eventObj;
+  const mount = document.getElementById("modal-mount");
+  if (!mount) return;
+
+  const currentMonth = eventObj ? eventObj.month : (defaultDate?.month || 9);
+  const currentDay = eventObj ? eventObj.day : (defaultDate?.day || 1);
+  const currentCat = eventObj ? (eventObj.category || "workshop") : "workshop";
+
+  mount.innerHTML = `
+    <div class="m3-modal-backdrop open" id="event-form-backdrop">
+      <div class="m3-modal-dialog" style="max-width: 540px; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-header">
+          <h3 style="font-size: 19px; font-weight: 900; color: #0e3753; display: flex; align-items: center; gap: 8px;">
+            <span>${isEdit ? '✏️ 행사(프로그램) 수정' : '➕ 새 행사(프로그램) 추가'}</span>
+            <span style="font-size: 11px; font-weight: 800; background: #0e3753; color: #ffffff; padding: 2px 8px; border-radius: 9999px;">
+              관리자 모드
+            </span>
+          </h3>
+          <button class="modal-close-btn" id="btn-close-event-form" aria-label="닫기">✕</button>
+        </div>
+
+        <form id="event-edit-form" style="display: flex; flex-direction: column; gap: 14px; margin-top: 8px;">
+          <!-- 행사명 & 부제목 -->
+          <div class="form-group">
+            <label for="ef-title" style="font-weight: 800; font-size: 13px; color: #0e3753;">행사명 (주제) *</label>
+            <input type="text" id="ef-title" class="m3-input" placeholder="예: 과학실무사 연수" required value="${eventObj?.title || ''}" />
+          </div>
+
+          <div class="form-group">
+            <label for="ef-subtitle" style="font-weight: 800; font-size: 13px; color: #0e3753;">상세 부제목 (선택)</label>
+            <input type="text" id="ef-subtitle" class="m3-input" placeholder="예: 실험역량 강화" value="${eventObj?.subtitle || ''}" />
+          </div>
+
+          <!-- 일정 및 구분 -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 10px;">
+            <div class="form-group">
+              <label for="ef-month" style="font-weight: 800; font-size: 13px; color: #0e3753;">월 *</label>
+              <select id="ef-month" class="m3-select" required>
+                <option value="9" ${currentMonth == 9 ? 'selected' : ''}>9월</option>
+                <option value="10" ${currentMonth == 10 ? 'selected' : ''}>10월</option>
+                <option value="11" ${currentMonth == 11 ? 'selected' : ''}>11월</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="ef-day" style="font-weight: 800; font-size: 13px; color: #0e3753;">일자 *</label>
+              <input type="text" id="ef-day" class="m3-input" placeholder="예: 18" required value="${currentDay}" />
+            </div>
+
+            <div class="form-group">
+              <label for="ef-category" style="font-weight: 800; font-size: 13px; color: #0e3753;">구분 *</label>
+              <select id="ef-category" class="m3-select" required>
+                <option value="workshop" ${currentCat === 'workshop' ? 'selected' : ''}>연수·워크숍</option>
+                <option value="lecture" ${currentCat === 'lecture' ? 'selected' : ''}>특강</option>
+                <option value="festival" ${currentCat === 'festival' ? 'selected' : ''}>성과공유·보고</option>
+                <option value="mentoring" ${currentCat === 'mentoring' ? 'selected' : ''}>멘토링</option>
+                <option value="sharing" ${currentCat === 'sharing' ? 'selected' : ''}>수업나눔</option>
+                <option value="sudabox" ${currentCat === 'sudabox' ? 'selected' : ''}>수다박스</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 시간 & 장소 -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="form-group">
+              <label for="ef-time" style="font-weight: 800; font-size: 13px; color: #0e3753;">시간</label>
+              <input type="text" id="ef-time" class="m3-input" placeholder="예: 14:00 ~ 17:00" value="${eventObj?.time || '14:00 ~ 17:00'}" />
+            </div>
+
+            <div class="form-group">
+              <label for="ef-location" style="font-weight: 800; font-size: 13px; color: #0e3753;">장소</label>
+              <input type="text" id="ef-location" class="m3-input" placeholder="예: 서부과학교육센터" value="${eventObj?.location || '서부교육지원청'}" />
+            </div>
+          </div>
+
+          <!-- 대상 & 신청 링크 -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="form-group">
+              <label for="ef-target" style="font-weight: 800; font-size: 13px; color: #0e3753;">대상</label>
+              <input type="text" id="ef-target" class="m3-input" placeholder="예: 관내 교원" value="${eventObj?.target || '관내 초·중·고 교원'}" />
+            </div>
+
+            <div class="form-group">
+              <label for="ef-apply-url" style="font-weight: 800; font-size: 13px; color: #0e3753;">신청 링크 URL (선택)</label>
+              <input type="url" id="ef-apply-url" class="m3-input" placeholder="https://..." value="${eventObj?.applyUrl || ''}" />
+            </div>
+          </div>
+
+          <!-- 상세 설명 -->
+          <div class="form-group">
+            <label for="ef-desc" style="font-weight: 800; font-size: 13px; color: #0e3753;">상세 안내 및 개요</label>
+            <textarea id="ef-desc" class="m3-textarea" rows="3" placeholder="프로그램 상세 내용을 입력하세요.">${eventObj?.description || ''}</textarea>
+          </div>
+
+          <!-- 액션 버튼 바 -->
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 12px; border-top: 1px solid #e2e8f0;">
+            ${isEdit ? `
+              <button type="button" id="btn-delete-event" class="btn-m3-outlined" style="color: #dc2626; border-color: #fca5a5; background: #fff1f2;">
+                🗑️ 행사 삭제
+              </button>
+            ` : '<div></div>'}
+
+            <div style="display: flex; gap: 8px;">
+              <button type="button" id="btn-cancel-event-form" class="btn-m3-outlined">취소</button>
+              <button type="submit" class="btn-m3-filled">
+                ${isEdit ? '💾 수정사항 저장' : '➕ 새 행사 등록'}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+
+  const backdrop = mount.querySelector("#event-form-backdrop");
+  const closeBtn = mount.querySelector("#btn-close-event-form");
+  const cancelBtn = mount.querySelector("#btn-cancel-event-form");
+  const deleteBtn = mount.querySelector("#btn-delete-event");
+  const form = mount.querySelector("#event-edit-form");
+
+  const closeModal = () => {
+    backdrop.classList.remove("open");
+    setTimeout(() => { mount.innerHTML = ""; }, 200);
+  };
+
+  closeBtn.addEventListener("click", closeModal);
+  cancelBtn.addEventListener("click", closeModal);
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) closeModal();
+  });
+
+  // 삭제 처리
+  if (deleteBtn && isEdit) {
+    deleteBtn.addEventListener("click", () => {
+      if (confirm(`정말 '${eventObj.title}' 행사를 삭제하시겠습니까?`)) {
+        const all = getEvents();
+        const updated = all.filter(e => e.id !== eventObj.id);
+        saveEvents(updated);
+        alert("🗑️ 행사가 삭제되었습니다.");
+        closeModal();
+        if (onSaved) onSaved();
+      }
+    });
+  }
+
+  // 저장/추가 처리
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const title = document.getElementById("ef-title").value.trim();
+    const subtitle = document.getElementById("ef-subtitle").value.trim();
+    const month = parseInt(document.getElementById("ef-month").value, 10);
+    const rawDay = document.getElementById("ef-day").value.trim();
+    const day = rawDay.includes("/") ? rawDay : (parseInt(rawDay, 10) || 1);
+    const category = document.getElementById("ef-category").value;
+    const time = document.getElementById("ef-time").value.trim() || "14:00 ~ 17:00";
+    const location = document.getElementById("ef-location").value.trim() || "서부교육지원청";
+    const target = document.getElementById("ef-target").value.trim() || "관내 교원";
+    const applyUrl = document.getElementById("ef-apply-url").value.trim();
+    const description = document.getElementById("ef-desc").value.trim() || `${title} 행사입니다.`;
+
+    const catInfo = CATEGORY_META[category] || CATEGORY_META.workshop;
+
+    const allEvents = getEvents();
+
+    if (isEdit) {
+      // 기존 수정
+      const updatedEvents = allEvents.map(item => {
+        if (item.id === eventObj.id) {
+          return {
+            ...item,
+            title,
+            subtitle,
+            month,
+            day,
+            category,
+            categoryLabel: catInfo.label,
+            categoryClass: catInfo.cls,
+            time,
+            location,
+            target,
+            applyUrl,
+            applyMethod: applyUrl ? "온라인 링크" : "추후안내",
+            description
+          };
+        }
+        return item;
+      });
+      saveEvents(updatedEvents);
+      alert("✅ 행사가 성공적으로 수정되었습니다.");
+    } else {
+      // 신규 추가
+      const newEvent = {
+        id: "ev-" + Date.now(),
+        year: 2026,
+        month,
+        day,
+        title,
+        subtitle,
+        category,
+        categoryLabel: catInfo.label,
+        categoryClass: catInfo.cls,
+        time,
+        location,
+        target,
+        applyUrl,
+        applyMethod: applyUrl ? "온라인 링크" : "추후안내",
+        description
+      };
+      saveEvents([newEvent, ...allEvents]);
+      alert("✅ 새 행사가 성공적으로 등록되었습니다.");
+    }
+
+    closeModal();
+    if (onSaved) onSaved();
+  });
+}

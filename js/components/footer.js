@@ -88,10 +88,7 @@ export function openAdminAuthModal(onSuccess) {
         <form id="admin-auth-form">
           <div class="form-group" style="margin-bottom: 20px;">
             <label for="admin-code-input" style="font-weight: 800; font-size: 13px; color: #0e3753;">인증 코드</label>
-            <input type="password" id="admin-code-input" class="m3-input" placeholder="기본 코드: seobu2026 또는 1234" autofocus required style="padding:12px; font-size:15px;" />
-            <div style="font-size: 11px; color: #008080; margin-top: 4px; font-weight: 600;">
-              * 기본 인증 코드: seobu2026 또는 1234
-            </div>
+            <input type="password" id="admin-code-input" class="m3-input" placeholder="관리자 인증 코드를 입력하세요" autofocus required style="padding:12px; font-size:15px;" />
           </div>
 
           <div style="display: flex; gap: 10px; justify-content: flex-end;">
@@ -128,7 +125,7 @@ export function openAdminAuthModal(onSuccess) {
       closeModal();
       if (onSuccess) onSuccess();
     } else {
-      alert("❌ 인증 코드가 일치하지 않습니다. (기본 코드: seobu2026 또는 1234)");
+      alert("❌ 관리자 인증 코드가 일치하지 않습니다.");
       input.focus();
     }
   });

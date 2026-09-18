@@ -1,10 +1,15 @@
-import { getEvents } from "../data/events.js";
+import { getEvents, isEventPastOrToday } from "../data/events.js";
+import { GoogleAuthService } from "../auth/googleAuth.js";
+import { openEventFormModal } from "./eventFormModal.js";
 
 let selectedCategory = "all";
 let selectedMonth = "all";
 
 export function renderPrograms(container) {
+  const user = GoogleAuthService.getCurrentUser();
+  const isAdmin = !!(user && user.isAdmin);
   const allEvents = getEvents();
+
   const categories = [
     { key: "all", label: "전체 구분" },
     { key: "workshop", label: "연수·워크숍", cls: "cat-workshop" },
@@ -15,11 +20,10 @@ export function renderPrograms(container) {
     { key: "sudabox", label: "수다박스", cls: "cat-sudabox" }
   ];
 
+  const activeMonths = getActiveMonths();
   const months = [
     { key: "all", label: "전체 월" },
-    { key: "9", label: "9월" },
-    { key: "10", label: "10월" },
-    { key: "11", label: "11월" }
+    ...activeMonths.map(m => ({ key: String(m), label: `${m}월` }))
   ];
 
   const filteredEvents = allEvents.filter(ev => {
@@ -39,28 +43,40 @@ export function renderPrograms(container) {
         </p>
       </div>
 
-      <!-- 월 & 카테고리 필터 칩 바 -->
-      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;">
-        <div class="filter-chips-row" id="prog-month-filter" style="margin-bottom: 0;">
-          <span style="font-size: 13px; font-weight: 800; color: #0e3753; margin-right: 4px;">월별:</span>
-          ${months.map(m => `
-            <button class="m3-chip ${selectedMonth === m.key ? 'active' : ''}" data-month="${m.key}">
-              ${m.label}
-            </button>
-          `).join("")}
+      <!-- 관리자 모드: 새 프로그램 추가 버튼 -->
+      ${isAdmin ? `
+        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+          <button id="btn-admin-add-program" class="btn-m3-filled" style="padding: 10px 24px; font-size: 14.5px; font-weight: 800; border-radius: var(--shape-pill); box-shadow: 0 4px 14px rgba(14, 55, 83, 0.25); background: #0e3753; display: inline-flex; align-items: center; gap: 6px;">
+            <span>➕ 새 프로그램(행사) 추가</span>
+            <span style="font-size: 11px; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 9999px;">관리자</span>
+          </button>
         </div>
+      ` : ''}
 
-        <div class="filter-chips-row" id="prog-cat-filter" style="margin-bottom: 0;">
-          <span style="font-size: 13px; font-weight: 800; color: #0e3753; margin-right: 4px;">구분:</span>
-          ${categories.map(cat => `
-            <button class="m3-chip ${selectedCategory === cat.key ? 'active' : ''}" data-cat="${cat.key}">
-              ${cat.label}
-            </button>
-          `).join("")}
+      <!-- 월 & 카테고리 필터 칩 바 (월별/구분 줄 맞춤 및 중앙 배치) -->
+      <div style="display: flex; justify-content: center; margin-bottom: 24px; width: 100%;">
+        <div style="display: inline-flex; flex-direction: column; gap: 10px; align-items: flex-start; max-width: 100%;">
+          <div class="filter-chips-row" id="prog-month-filter" style="margin-bottom: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="font-size: 13px; font-weight: 800; color: #0e3753; min-width: 38px;">월별:</span>
+            ${months.map(m => `
+              <button class="m3-chip ${selectedMonth === m.key ? 'active' : ''}" data-month="${m.key}">
+                ${m.label}
+              </button>
+            `).join("")}
+          </div>
+
+          <div class="filter-chips-row" id="prog-cat-filter" style="margin-bottom: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="font-size: 13px; font-weight: 800; color: #0e3753; min-width: 38px;">구분:</span>
+            ${categories.map(cat => `
+              <button class="m3-chip ${selectedCategory === cat.key ? 'active' : ''}" data-cat="${cat.key}">
+                ${cat.label}
+              </button>
+            `).join("")}
+          </div>
         </div>
       </div>
 
-      <div style="font-size: 14px; font-weight: 700; color: #475569; margin-bottom: 16px;">
+      <div style="font-size: 14px; font-weight: 700; color: #475569; margin-bottom: 16px; text-align: center;">
         총 <strong>${filteredEvents.length}개</strong>의 프로그램이 검색되었습니다.
       </div>
 
@@ -74,7 +90,14 @@ export function renderPrograms(container) {
           <div class="program-card" data-card-id="${ev.id}">
             <div class="prog-card-top">
               <span class="prog-category-badge ${ev.categoryClass}">${ev.categoryLabel}</span>
-              <span class="prog-date-badge">${ev.month}월 ${ev.day}일</span>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="prog-date-badge">${ev.month}월 ${ev.day}일</span>
+                ${isAdmin ? `
+                  <button class="btn-admin-edit-prog btn-m3-outlined" data-event-id="${ev.id}" title="프로그램 수정" style="padding: 2px 8px; font-size: 11px; border-radius: 6px; font-weight: 800; border-color: #0e3753; color: #0e3753;" onclick="event.stopPropagation();">
+                    ✏️ 수정
+                  </button>
+                ` : ''}
+              </div>
             </div>
             
             <h3 class="prog-title">${ev.title}</h3>
@@ -113,6 +136,11 @@ export function renderPrograms(container) {
                 <button class="btn-m3-outlined btn-review-shortcut" data-event-id="${ev.id}" onclick="event.stopPropagation();">
                   후기 작성
                 </button>
+                ${isAdmin ? `
+                  <button class="btn-m3-outlined btn-admin-edit-prog" data-event-id="${ev.id}" style="border-color: #0e3753; color: #0e3753; font-weight: 800;" onclick="event.stopPropagation();">
+                    ✏️ 프로그램 수정
+                  </button>
+                ` : ''}
               </div>
             </div>
           </div>
@@ -120,6 +148,29 @@ export function renderPrograms(container) {
       </div>
     </div>
   `;
+
+  // 관리자 새 프로그램 추가 버튼
+  if (isAdmin) {
+    const btnAdd = container.querySelector("#btn-admin-add-program");
+    if (btnAdd) {
+      btnAdd.addEventListener("click", () => {
+        openEventFormModal(null, null, () => renderPrograms(container));
+      });
+    }
+
+    // 관리자 프로그램 수정 버튼들
+    container.querySelectorAll(".btn-admin-edit-prog").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const eventId = btn.dataset.eventId;
+        const currentList = getEvents();
+        const targetEv = currentList.find(ev => ev.id === eventId);
+        if (targetEv) {
+          openEventFormModal(targetEv, null, () => renderPrograms(container));
+        }
+      });
+    });
+  }
 
   // 월 필터 이벤트
   container.querySelectorAll("#prog-month-filter .m3-chip").forEach(chip => {
@@ -152,9 +203,16 @@ export function renderPrograms(container) {
   container.querySelectorAll(".btn-review-shortcut").forEach(btn => {
     btn.addEventListener("click", () => {
       const eventId = btn.dataset.eventId;
+      const allEvents = getEvents();
+      const targetEv = allEvents.find(e => e.id === eventId);
+      if (targetEv && !isEventPastOrToday(targetEv)) {
+        alert(`⚠️ [${targetEv.month}월 ${targetEv.day}일] 행사는 아직 진행 전입니다.\n후기 작성은 행사 진행 당일부터 가능합니다.`);
+        return;
+      }
       window.dispatchEvent(new CustomEvent("navigate-tab", { 
         detail: { tab: "reviews", selectedEventId: eventId } 
       }));
     });
   });
 }
+

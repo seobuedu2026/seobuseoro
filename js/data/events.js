@@ -602,12 +602,21 @@ export const DEFAULT_EVENTS_DATA = [
 ];
 
 export const MONTH_THEMES = {
+  1: { monthNum: 1, name: "1월", subtitle: "새학기 준비의 달", themeColor: "#0284c7", themeBg: "#e0f2fe", icon: "❄️" },
+  2: { monthNum: 2, name: "2월", subtitle: "도약과 배움의 달", themeColor: "#6366f1", themeBg: "#ede9fe", icon: "🌱" },
+  3: { monthNum: 3, name: "3월", subtitle: "첫 만남 성장의 달", themeColor: "#16a34a", themeBg: "#dcfce7", icon: "🌸" },
+  4: { monthNum: 4, name: "4월", subtitle: "탐구와 실천의 달", themeColor: "#0d9488", themeBg: "#ccfbf1", icon: "🌿" },
+  5: { monthNum: 5, name: "5월", subtitle: "배움과 감사의 달", themeColor: "#ea580c", themeBg: "#ffedd5", icon: "🌷" },
+  6: { monthNum: 6, name: "6월", subtitle: "수업나눔 열정의 달", themeColor: "#2563eb", themeBg: "#dbeafe", icon: "☀️" },
+  7: { monthNum: 7, name: "7월", subtitle: "1학기 마무리 성장의 달", themeColor: "#0891b2", themeBg: "#cffafe", icon: "🌊" },
+  8: { monthNum: 8, name: "8월", subtitle: "2학기 준비 연수의 달", themeColor: "#4f46e5", themeBg: "#e0e7ff", icon: "🌻" },
   9: {
     monthNum: 9,
     name: "9월",
     subtitle: "수다박스의 달",
     themeColor: "#009688",
     themeBg: "#e0f2f1",
+    icon: "🌿",
     highlightWeek: "동행장학 주간",
     highlightRange: "9월 7일 ~ 9월 26일"
   },
@@ -617,6 +626,7 @@ export const MONTH_THEMES = {
     subtitle: "수업나눔의 달",
     themeColor: "#e91e63",
     themeBg: "#fce4ec",
+    icon: "🌸",
     highlightWeek: "수업나눔 주간",
     highlightRange: "10월 12일 ~ 11월 14일"
   },
@@ -626,10 +636,77 @@ export const MONTH_THEMES = {
     subtitle: "성과공유의 달",
     themeColor: "#1e40af",
     themeBg: "#e0e7ff",
+    icon: "🍁",
     highlightWeek: "수업나눔 주간",
     highlightRange: "10월 12일 ~ 11월 14일"
+  },
+  12: { monthNum: 12, name: "12월", subtitle: "수업성장 결실의 달", themeColor: "#7c3aed", themeBg: "#f3e8ff", icon: "🎄" }
+};
+
+// ============================================================================
+// 대한민국 법정 공휴일 맵 (초기 설정 및 캘린더 자동 반영)
+// ============================================================================
+export const KOREAN_HOLIDAYS_MAP = {
+  2026: {
+    1: { 1: "신정" },
+    2: { 16: "설날연휴", 17: "설날", 18: "설날연휴" },
+    3: { 1: "삼일절", 2: "대체공휴일" },
+    5: { 5: "어린이날", 24: "부처님오신날", 25: "대체공휴일" },
+    6: { 6: "현충일" },
+    7: { 17: "제헌절" },
+    8: { 15: "광복절", 17: "대체공휴일" },
+    9: { 24: "추석연휴", 25: "추석", 26: "추석연휴" },
+    10: { 3: "개천절", 5: "대체공휴일", 9: "한글날" },
+    12: { 25: "기독탄신일(성탄절)" }
+  },
+  2027: {
+    1: { 1: "신정" },
+    2: { 6: "설날연휴", 7: "설날", 8: "설날연휴", 9: "대체공휴일" },
+    3: { 1: "삼일절" },
+    5: { 5: "어린이날", 13: "부처님오신날" },
+    6: { 6: "현충일", 7: "대체공휴일" },
+    7: { 17: "제헌절" },
+    8: { 15: "광복절", 16: "대체공휴일" },
+    9: { 14: "추석연휴", 15: "추석", 16: "추석연휴" },
+    10: { 3: "개천절", 4: "대체공휴일", 9: "한글날", 11: "대체공휴일" },
+    12: { 25: "기독탄신일(성탄절)" }
   }
 };
+
+export function getHolidayName(year, month, day) {
+  const yMap = KOREAN_HOLIDAYS_MAP[year] || KOREAN_HOLIDAYS_MAP[2026];
+  if (yMap && yMap[month] && yMap[month][day]) {
+    return yMap[month][day];
+  }
+  return null;
+}
+
+// ============================================================================
+// 활성화된 캘린더 월 관리
+// ============================================================================
+const ACTIVE_MONTHS_KEY = "seobu_active_months_v2";
+const DEFAULT_ACTIVE_MONTHS = [9, 10, 11];
+
+export function getActiveMonths() {
+  const saved = localStorage.getItem(ACTIVE_MONTHS_KEY);
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map(m => parseInt(m, 10)).sort((a, b) => a - b);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  return DEFAULT_ACTIVE_MONTHS;
+}
+
+export function saveActiveMonths(months) {
+  const sorted = Array.from(new Set(months.map(m => parseInt(m, 10)))).sort((a, b) => a - b);
+  localStorage.setItem(ACTIVE_MONTHS_KEY, JSON.stringify(sorted));
+  window.dispatchEvent(new CustomEvent("events-updated"));
+}
 
 // ============================================================================
 // 동적 이벤트 데이터 관리 (LocalStorage 연동 & 엑셀 파서)
@@ -661,7 +738,37 @@ export function saveEvents(eventsList) {
 // 기본 데이터로 초기화
 export function resetEventsToDefault() {
   localStorage.removeItem(CUSTOM_EVENTS_KEY);
+  localStorage.removeItem(ACTIVE_MONTHS_KEY);
   window.dispatchEvent(new CustomEvent("events-updated", { detail: { events: DEFAULT_EVENTS_DATA } }));
+}
+
+// 오늘 날짜 및 오늘 이전(진행 완료/진행 중) 행사인지 판별하는 함수 (후기 작성용)
+export function isEventPastOrToday(ev) {
+  if (!ev) return false;
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1; // 1 ~ 12
+  const currentDay = now.getDate();
+
+  const evYear = ev.year || 2026;
+  const evMonth = typeof ev.month === "number" ? ev.month : parseInt(ev.month, 10);
+
+  let evDay = 1;
+  if (typeof ev.day === "number") {
+    evDay = ev.day;
+  } else if (typeof ev.day === "string") {
+    if (ev.day.includes("/")) {
+      const parts = ev.day.split("/");
+      const m = parseInt(parts[0], 10);
+      const d = parseInt(parts[1], 10);
+      return new Date(evYear, m - 1, d) <= new Date(currentYear, currentMonth - 1, currentDay, 23, 59, 59);
+    }
+    evDay = parseInt(ev.day, 10) || 1;
+  }
+
+  const evDate = new Date(evYear, evMonth - 1, evDay, 23, 59, 59);
+  const todayEnd = new Date(currentYear, currentMonth - 1, currentDay, 23, 59, 59);
+  return evDate <= todayEnd;
 }
 
 // ============================================================================

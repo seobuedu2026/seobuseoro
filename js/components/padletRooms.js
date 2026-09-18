@@ -3,12 +3,12 @@ import { PADLET_ROOMS } from "../data/rooms.js";
 export function renderPadletRooms(container) {
   container.innerHTML = `
     <div class="padlet-view-wrapper">
-      <!-- 상단 타이틀 헤더 (좌측 정렬) -->
-      <div class="padlet-header-box">
-        <h2 class="padlet-main-title">
+      <!-- 상단 타이틀 헤더 (가운데 정렬) -->
+      <div class="padlet-header-box" style="text-align: center; margin-bottom: 28px;">
+        <h2 class="padlet-main-title" style="font-size: 32px; font-weight: 900; color: #0e3753; letter-spacing: -0.5px;">
           자료실 · 수업나눔방
         </h2>
-        <p class="padlet-sub-title">
+        <p class="padlet-sub-title" style="font-size: 15px; color: #64748b; margin-top: 6px;">
           교과군별 패들렛에서 선생님들의 수업 사례를 자유롭게 나눠보세요.
         </p>
       </div>

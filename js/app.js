@@ -4,6 +4,9 @@ import { renderCalendar } from "./components/calendar.js";
 import { renderPrograms } from "./components/programs.js";
 import { renderReviews } from "./components/reviews.js";
 import { renderPadletRooms } from "./components/padletRooms.js";
+import { openEventFormModal } from "./components/eventFormModal.js";
+import { GoogleAuthService } from "./auth/googleAuth.js";
+import { isEventPastOrToday } from "./data/events.js";
 
 let activeTab = "calendar"; // 'calendar' | 'programs' | 'reviews' | 'padlet'
 
@@ -20,6 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 모달 팝업 열기 함수
   function showEventModal(eventObj) {
+    const user = GoogleAuthService.getCurrentUser();
+    const isAdmin = !!(user && user.isAdmin);
+
     modalMount.innerHTML = `
       <div class="m3-modal-backdrop open" id="modal-backdrop">
         <div class="m3-modal-dialog">
@@ -66,6 +72,11 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
 
           <div style="display:flex; gap:10px; justify-content:flex-end; align-items:center;">
+            ${isAdmin ? `
+              <button id="btn-modal-edit-admin" class="btn-m3-outlined" style="border-color:#0e3753; color:#0e3753; font-weight:800;">
+                ✏️ 행사 수정
+              </button>
+            ` : ''}
             <button id="btn-modal-review" class="btn-m3-outlined">후기 남기기</button>
             ${(eventObj.applyUrl && (eventObj.applyUrl.startsWith('http://') || eventObj.applyUrl.startsWith('https://'))) ? `
               <a href="${eventObj.applyUrl}" target="_blank" class="btn-m3-filled">참가 신청 바로가기</a>
@@ -81,6 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const backdrop = modalMount.querySelector("#modal-backdrop");
     const closeBtn = modalMount.querySelector("#btn-modal-close");
     const reviewBtn = modalMount.querySelector("#btn-modal-review");
+    const adminEditBtn = modalMount.querySelector("#btn-modal-edit-admin");
 
     const closeModal = () => {
       backdrop.classList.remove("open");
@@ -92,7 +104,18 @@ document.addEventListener("DOMContentLoaded", () => {
       if (e.target === backdrop) closeModal();
     });
 
+    if (adminEditBtn) {
+      adminEditBtn.addEventListener("click", () => {
+        closeModal();
+        openEventFormModal(eventObj, null, () => switchTab(activeTab));
+      });
+    }
+
     reviewBtn.addEventListener("click", () => {
+      if (!isEventPastOrToday(eventObj)) {
+        alert(`⚠️ [${eventObj.month}월 ${eventObj.day}일] 행사는 아직 진행 전입니다.\n후기 작성은 행사 진행 당일부터 가능합니다.`);
+        return;
+      }
       closeModal();
       switchTab("reviews", eventObj.id);
     });
