@@ -2,18 +2,61 @@
 
 const STORAGE_KEY = "seobu_user_session";
 const ADMIN_MODE_KEY = "seobu_admin_mode";
-const ADMIN_PASSWORDS = ["qwer1234", "seobuedu2026@gmail.com"]; // 관리자 인증 비밀번호
+const ADMIN_PW_STORAGE_KEY = "seobu_admin_password_custom_v1";
+const ADMIN_EMAIL_STORAGE_KEY = "seobu_admin_email_custom_v1";
 
-// 구글 클라이언트 ID (Google Cloud Console seobuseoro 프로젝트)
-export const GOOGLE_CLIENT_ID = "544520893088-9lj38t9e6qlp6m11q55tfh8hadvd8361.apps.googleusercontent.com";
-
-// 관리자 이메일 목록
-const ADMIN_EMAILS = [
+const DEFAULT_ADMIN_PASSWORDS = ["qwer1234", "seobuedu2026@gmail.com"];
+const DEFAULT_ADMIN_EMAILS = [
   "seobuedu2026@gmail.com",
   "admin@senedu.kr",
   "seobu@senedu.kr",
   "manager@senedu.kr"
 ];
+
+// 구글 클라이언트 ID (Google Cloud Console seobuseoro 프로젝트)
+export const GOOGLE_CLIENT_ID = "544520893088-9lj38t9e6qlp6m11q55tfh8hadvd8361.apps.googleusercontent.com";
+
+// 관리자 이메일 목록 반환
+export function getAdminEmails() {
+  const saved = localStorage.getItem(ADMIN_EMAIL_STORAGE_KEY);
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    } catch (e) {}
+  }
+  return DEFAULT_ADMIN_EMAILS;
+}
+
+// 현재 관리자 비밀번호 반환
+export function getAdminPassword() {
+  const saved = localStorage.getItem(ADMIN_PW_STORAGE_KEY);
+  return saved ? saved.trim() : "qwer1234";
+}
+
+// 주 관리자 이메일 반환
+export function getPrimaryAdminEmail() {
+  const emails = getAdminEmails();
+  return emails[0] || "seobuedu2026@gmail.com";
+}
+
+// 관리자 이메일 및 비밀번호 설정/변경
+export function updateAdminCredentials(newEmail, newPassword) {
+  if (newEmail) {
+    const cleanEmail = newEmail.trim().toLowerCase();
+    const currentEmails = getAdminEmails();
+    const filtered = currentEmails.filter(e => e.toLowerCase() !== cleanEmail);
+    const updated = [cleanEmail, ...filtered];
+    localStorage.setItem(ADMIN_EMAIL_STORAGE_KEY, JSON.stringify(updated));
+    localStorage.setItem("seobu_admin_custom_email", cleanEmail);
+  }
+
+  if (newPassword && newPassword.trim()) {
+    localStorage.setItem(ADMIN_PW_STORAGE_KEY, newPassword.trim());
+  }
+
+  window.dispatchEvent(new CustomEvent("auth-state-changed", { detail: { user: GoogleAuthService.getCurrentUser() } }));
+}
 
 // JWT 토큰 파싱 헬퍼 함수
 function parseJwt(token) {
@@ -53,7 +96,7 @@ export const GoogleAuthService = {
     }
     // 관리자 모드 활성화 시 가상 관리자 세션
     if (this.isAdminModeActive()) {
-      const customEmail = localStorage.getItem("seobu_admin_custom_email") || "seobuedu2026@gmail.com";
+      const customEmail = localStorage.getItem("seobu_admin_custom_email") || getPrimaryAdminEmail();
       return {
         email: customEmail,
         name: "관리자",
@@ -73,7 +116,8 @@ export const GoogleAuthService = {
     if (!user) return this.isAdminModeActive();
     if (this.isAdminModeActive()) return true;
     if (user.role && user.role.includes("관리자")) return true;
-    if (ADMIN_EMAILS.includes(user.email.toLowerCase())) return true;
+    const adminEmails = getAdminEmails();
+    if (adminEmails.includes(user.email.toLowerCase())) return true;
     return false;
   },
 
@@ -93,8 +137,11 @@ export const GoogleAuthService = {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPw = password.trim();
 
-    const isEmailValid = ADMIN_EMAILS.includes(cleanEmail);
-    const isPwValid = ADMIN_PASSWORDS.includes(cleanPw);
+    const allowedEmails = getAdminEmails();
+    const currentPw = getAdminPassword();
+
+    const isEmailValid = allowedEmails.includes(cleanEmail);
+    const isPwValid = (cleanPw === currentPw) || DEFAULT_ADMIN_PASSWORDS.includes(cleanPw);
 
     if (!isEmailValid) {
       return { success: false, message: "등록되지 않은 관리자 이메일입니다." };
@@ -111,7 +158,7 @@ export const GoogleAuthService = {
 
   // 관리자 단일 코드 인증 (호환성 지원)
   verifyAdminCode(code) {
-    return this.verifyAdminCredentials("seobuedu2026@gmail.com", code).success;
+    return this.verifyAdminCredentials(getPrimaryAdminEmail(), code).success;
   },
 
   // 관리자 모드 해제
