@@ -106,22 +106,23 @@ export function renderReviews(container, preselectedEventId = null) {
       <div class="review-layout">
         <!-- 후기 작성 영역 (@senedu.kr 전용 로그인) -->
         <div class="review-form-card">
-          <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 16px; color: #0e3753; display: flex; align-items: center; justify-content: space-between;">
-            <span>✍️ 참여 후기 등록</span>
-            ${user ? `<button id="btn-review-logout" class="footer-link-btn" style="font-size: 12px; font-weight: 600; color: #64748b;">[로그아웃]</button>` : ''}
-          </h3>
+          <div style="position: relative; margin-bottom: 18px; text-align: center;">
+            <h3 style="font-size: 19px; font-weight: 900; color: #0e3753; margin: 0; text-align: center;">
+              참여 후기 등록
+            </h3>
+            ${user ? `<button id="btn-review-logout" class="footer-link-btn" style="position: absolute; right: 0; top: 2px; font-size: 12px; font-weight: 600; color: #64748b;">[로그아웃]</button>` : ''}
+          </div>
 
           ${!user ? `
             <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 24px 18px; text-align: center;">
-              <div style="font-size: 32px; margin-bottom: 12px;">🔒</div>
-              <p style="font-size: 14px; font-weight: 700; color: #0e3753; margin-bottom: 6px; line-height: 1.5;">
-                후기 작성은 로그인(센스쿨 구글 계정 <span style="color: #0284c7;">@senedu.kr</span>) 후 가능합니다.
+              <p style="font-size: 15px; font-weight: 800; color: #0e3753; margin-bottom: 6px; line-height: 1.5;">
+                후기 작성은 로그인 후 가능합니다.
               </p>
-              <p style="font-size: 12.5px; color: #64748b; margin-bottom: 18px;">
-                (일반 구글 계정은 제한됩니다)
+              <p style="font-size: 13.5px; color: #0284c7; font-weight: 700; margin-bottom: 20px;">
+                (센스쿨 구글 계정 @senedu.kr)
               </p>
 
-              <!-- 커스텀 로그인 버튼 (Google G 모양 제거) -->
+              <!-- 센스쿨 구글 계정 전용 단일 로그인 버튼 -->
               <button id="btn-custom-google-login" class="btn-m3-filled" style="width: 100%; padding: 12px 18px; font-size: 14.5px; font-weight: 800; border-radius: var(--shape-pill); justify-content: center; box-shadow: 0 4px 12px rgba(14, 55, 83, 0.2);">
                 로그인 (센스쿨 구글 계정)
               </button>
@@ -237,23 +238,19 @@ export function renderReviews(container, preselectedEventId = null) {
             </div>
           ` : displayedReviews.map(rev => `
             <div class="review-feed-card ${rev.status === 'pending' ? 'is-pending' : ''}" data-review-id="${rev.id}">
-              <!-- 상단 바: 작성자 정보 + 상태 배지 + 별점 & 공감 버튼 -->
+              <!-- 상단 바: 작성자 정보 + 연수 종류 태그 + 별점 & 공감 버튼 -->
               <div class="review-card-top-row">
                 <div class="review-user-info-group">
-                  <div class="review-user-avatar">
-                    ${rev.userName ? rev.userName[0] : '교'}
+                  <div class="review-user-name">
+                    <span class="user-display-name">${rev.userName}</span>
+                    ${rev.isSenedu ? `<span class="review-senedu-badge">@senedu.kr</span>` : ''}
+                    <span class="review-event-tag">🎯 ${rev.eventTitle}</span>
+                    ${isAdmin ? (rev.status === 'pending' 
+                      ? `<span class="badge-review-status pending">⏳ 승인 대기 (미노출)</span>` 
+                      : `<span class="badge-review-status approved">✅ 승인 완료</span>`) 
+                      : ''}
                   </div>
-                  <div>
-                    <div class="review-user-name">
-                      ${rev.userName}
-                      ${rev.isSenedu ? `<span class="review-senedu-badge">@senedu.kr</span>` : ''}
-                      ${isAdmin ? (rev.status === 'pending' 
-                        ? `<span class="badge-review-status pending">⏳ 승인 대기 (미노출)</span>` 
-                        : `<span class="badge-review-status approved">✅ 승인 완료</span>`) 
-                        : ''}
-                    </div>
-                    <div class="review-date-text">${rev.createdAt} ${rev.userEmail && isAdmin ? `· ${rev.userEmail}` : ''}</div>
-                  </div>
+                  <div class="review-date-text">${rev.createdAt} ${rev.userEmail && isAdmin ? `· ${rev.userEmail}` : ''}</div>
                 </div>
 
                 <div class="review-top-actions-group">
@@ -264,10 +261,6 @@ export function renderReviews(container, preselectedEventId = null) {
                     ❤️ <span>공감</span> <strong>${rev.likes || 0}</strong>
                   </button>
                 </div>
-              </div>
-
-              <div class="review-event-tag">
-                🎯 ${rev.eventTitle}
               </div>
 
               <p class="review-content-body">${rev.content}</p>
@@ -296,7 +289,7 @@ export function renderReviews(container, preselectedEventId = null) {
     </div>
   `;
 
-  // 미로그인 상태일 때 커스텀 로그인 버튼 바인딩
+  // 미로그인 상태일 때 구글 로그인 버튼 바인딩
   if (!user) {
     const btnLogin = container.querySelector("#btn-custom-google-login");
     if (btnLogin) {

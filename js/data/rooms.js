@@ -1,5 +1,5 @@
-// 8개 수업나눔방 및 패들렛 링크 데이터셋
-export const PADLET_ROOMS = [
+// 8개 수업나눔방 및 패들렛 링크 초기 데이터셋
+export const INITIAL_PADLET_ROOMS = [
   {
     id: "room-korean",
     icon: "📖",
@@ -73,3 +73,78 @@ export const PADLET_ROOMS = [
     badge: "링크 준비중"
   }
 ];
+
+export const PADLET_ROOMS = INITIAL_PADLET_ROOMS;
+
+const ROOMS_STORAGE_KEY = "seobu_padlet_rooms_custom_v1";
+
+// 현재 수업나눔방 목록 조회
+export function getPadletRooms() {
+  const saved = localStorage.getItem(ROOMS_STORAGE_KEY);
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    } catch (e) {
+      console.warn("Failed to parse padlet rooms from localStorage:", e);
+    }
+  }
+  return INITIAL_PADLET_ROOMS;
+}
+
+// 수업나눔방 전체 목록 저장
+export function savePadletRooms(rooms) {
+  if (!Array.isArray(rooms)) return;
+  localStorage.setItem(ROOMS_STORAGE_KEY, JSON.stringify(rooms));
+  window.dispatchEvent(new CustomEvent("rooms-updated", { detail: { rooms } }));
+}
+
+// 단일 수업나눔방 수정
+export function updatePadletRoom(updatedRoom) {
+  if (!updatedRoom || !updatedRoom.id) return false;
+  const current = getPadletRooms();
+  const idx = current.findIndex(r => r.id === updatedRoom.id);
+  if (idx !== -1) {
+    current[idx] = { ...current[idx], ...updatedRoom };
+    savePadletRooms(current);
+    return true;
+  }
+  return false;
+}
+
+// 새 수업나눔방 추가
+export function addPadletRoom(newRoom) {
+  if (!newRoom) return false;
+  const current = getPadletRooms();
+  const roomWithId = {
+    id: newRoom.id || `room-${Date.now()}`,
+    icon: newRoom.icon || "📚",
+    iconBg: newRoom.iconBg || "#f0fdf4",
+    title: newRoom.title || "새 수업나눔방",
+    desc: newRoom.desc || "수업 나눔 자료를 공유합니다.",
+    padletUrl: newRoom.padletUrl || "https://padlet.com",
+    badge: newRoom.badge || "링크 준비중"
+  };
+  const updated = [...current, roomWithId];
+  savePadletRooms(updated);
+  return roomWithId;
+}
+
+// 수업나눔방 삭제
+export function deletePadletRoom(roomId) {
+  if (!roomId) return false;
+  const current = getPadletRooms();
+  const updated = current.filter(r => r.id !== roomId);
+  savePadletRooms(updated);
+  return true;
+}
+
+// 초기 기본값 복원
+export function resetPadletRooms() {
+  localStorage.removeItem(ROOMS_STORAGE_KEY);
+  window.dispatchEvent(new CustomEvent("rooms-updated", { detail: { rooms: INITIAL_PADLET_ROOMS } }));
+  return INITIAL_PADLET_ROOMS;
+}
+

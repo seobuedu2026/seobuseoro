@@ -124,7 +124,7 @@
     width: 100% !important;
     min-width: 0 !important;
     padding: 9px 1px !important;
-    font-size: clamp(11.5px, 3.4vw, 13.5px) !important;
+    font-size: clamp(12.5px, 3.5vw, 14.5px) !important;
     font-weight: 800 !important;
     letter-spacing: -0.8px !important;
     border-radius: 12px !important;
@@ -160,7 +160,7 @@
     width: 100% !important;
     min-width: 0 !important;
     padding: 8px 1px !important;
-    font-size: clamp(11.5px, 3.4vw, 13px) !important;
+    font-size: clamp(12.5px, 3.5vw, 14px) !important;
     font-weight: 800 !important;
     letter-spacing: -0.6px !important;
     border-radius: 10px !important;
@@ -188,7 +188,7 @@
     width: 100% !important;
     min-width: 0 !important;
     padding: 8px 1px !important;
-    font-size: clamp(11.5px, 3.4vw, 13px) !important;
+    font-size: clamp(12.5px, 3.5vw, 14px) !important;
     justify-content: center !important;
     text-align: center !important;
     white-space: nowrap !important;
@@ -204,7 +204,7 @@
 
   #prog-cat-filter .m3-chip {
     padding: 6px 10px !important;
-    font-size: 12px !important;
+    font-size: 13px !important;
   }
 
   /* 캘린더 모드 바 하단: 모바일에서 PDF 링크 및 총 프로그램 개수 숨김 */
@@ -225,62 +225,75 @@
     grid-template-columns: 1fr;
   }
 
-  /* 프로그램 탭 내용 글씨 2포인트 확대 (가독성 향상) */
+  /* 프로그램 탭 내용 글씨 1포인트 추가 확대 (가독성 향상) */
   .prog-title {
-    font-size: 18.5px !important; /* 기존 17px -> 18.5px (+2pt) */
+    font-size: 19.5px !important;
   }
 
   .prog-subtitle {
-    font-size: 14.5px !important; /* 기존 13px -> 14.5px (+2pt) */
+    font-size: 15.5px !important;
   }
 
   .prog-info-list {
-    font-size: 15px !important; /* 기존 13px -> 15px (+2pt) */
+    font-size: 16px !important;
     gap: 10px !important;
   }
 
   .prog-info-item {
-    font-size: 15px !important;
+    font-size: 16px !important;
     line-height: 1.55 !important;
   }
 
   .prog-info-label {
-    font-size: 14.5px !important;
+    font-size: 15.5px !important;
   }
 
   .prog-date-badge {
-    font-size: 14.5px !important;
+    font-size: 15.5px !important;
   }
 
   .prog-category-badge {
-    font-size: 13.5px !important;
+    font-size: 14.5px !important;
   }
 
   .padlet-cards-grid {
     grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .padlet-card-item {
+    padding: 22px 16px 20px 16px;
+  }
+
+  .padlet-room-title {
+    font-size: 17px !important;
+  }
+
+  .padlet-room-desc {
+    font-size: 14px !important;
   }
 
   .cal-grid-head {
-    font-size: 11px;
+    font-size: 12px;
     padding: 6px 0;
   }
 
   .cal-grid-days {
-    grid-auto-rows: minmax(76px, auto);
+    grid-auto-rows: minmax(78px, auto);
   }
 
   .cal-cell {
     padding: 3px 2px;
-    min-height: 76px;
+    min-height: 78px;
   }
 
   .cal-cell-daynum {
-    font-size: 11px;
+    font-size: 12px;
   }
 
-  /* 캘린더 행사 글씨 2포인트 확대 (기존 9.5px -> 11.5px) */
+  /* 캘린더 행사 글씨 가독성 향상 */
   .cal-event-pill {
-    font-size: 11.5px !important;
+    font-size: 12.5px !important;
     padding: 4px 3px !important;
     line-height: 1.35 !important;
   }
@@ -295,7 +308,7 @@
   }
 
   .legend-badge {
-    font-size: 11.5px;
+    font-size: 12.5px;
     padding: 4px 10px;
   }
 
@@ -315,19 +328,19 @@
 /* 초소형 모바일 화면 (380px 이하) 추가 미세 조정 */
 @media (max-width: 380px) {
   .nav-tab-item {
-    font-size: 11.5px !important;
+    font-size: 12px !important;
     padding: 7px 0 !important;
     letter-spacing: -1px !important;
   }
 
   #month-chips-row .m3-chip {
-    font-size: 11.5px !important;
+    font-size: 12px !important;
     padding: 7px 0 !important;
     letter-spacing: -0.8px !important;
   }
 
   .calendar-view-mode-bar .btn-m3-outlined {
     padding: 5px 8px !important;
-    font-size: 11px !important;
+    font-size: 12px !important;
   }
 }

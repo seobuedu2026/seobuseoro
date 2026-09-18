@@ -3,18 +3,12 @@
 const STORAGE_KEY = "seobu_user_session";
 const ADMIN_MODE_KEY = "seobu_admin_mode";
 const ADMIN_PW_STORAGE_KEY = "seobu_admin_password_custom_v1";
-const ADMIN_EMAIL_STORAGE_KEY = "seobu_admin_email_custom_v1";
+const ADMIN_EMAIL_STORAGE_KEY = "seobu_admin_email_custom_v2"; // v2로 승격하여 기존 예시 ID 잔여물 완전 격리
 const ADMIN_PASSWORDS_MAP_KEY = "seobu_admin_passwords_map_v1";
 
 const DEFAULT_ADMIN_PASSWORDS = ["qwer1234", "seobuedu2026@gmail.com"];
-const DEFAULT_ADMIN_EMAILS = [
-  "seobuedu2026@gmail.com",
-  "gogh9@gmail.com",
-  "gogh9@senedu.kr",
-  "admin@senedu.kr",
-  "seobu@senedu.kr",
-  "manager@senedu.kr"
-];
+// 오직 실 서비스용 기본 관리자 1개만 유지 (예시 더미 ID 전부 삭제)
+const DEFAULT_ADMIN_EMAILS = ["seobuedu2026@gmail.com"];
 
 // 구글 클라이언트 ID (Google Cloud Console seobuseoro 프로젝트)
 export const GOOGLE_CLIENT_ID = "544520893088-9lj38t9e6qlp6m11q55tfh8hadvd8361.apps.googleusercontent.com";
@@ -61,23 +55,38 @@ export function setAdminPasswordForEmail(email, newPassword) {
   return { success: true };
 }
 
-// 관리자 이메일 목록 반환 (기본 목록과 항상 병합)
+// 더미/예시 아이디 목록 (삭제 대상 블랙리스트)
+const DUMMY_EXAMPLE_EMAILS = [
+  "admin@senedu.kr",
+  "seobu@senedu.kr",
+  "manager@senedu.kr",
+  "gogh9@gmail.com",
+  "gogh9@senedu.kr"
+];
+
+// 관리자 이메일 목록 반환 (저장된 목록 그대로 반환, 삭제된 항목이 되살아나지 않음)
 export function getAdminEmails() {
-  const emails = [...DEFAULT_ADMIN_EMAILS];
   const saved = localStorage.getItem(ADMIN_EMAIL_STORAGE_KEY);
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed)) {
-        parsed.forEach(e => {
-          if (e && !emails.map(x => x.toLowerCase()).includes(e.toLowerCase().trim())) {
-            emails.push(e.trim());
-          }
-        });
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        // 더미 예시 이메일 필터링 및 고유화
+        const cleanList = parsed
+          .map(e => (typeof e === 'string' ? e.trim() : ''))
+          .filter(e => e && !DUMMY_EXAMPLE_EMAILS.includes(e.toLowerCase()));
+
+        if (cleanList.length > 0) {
+          return cleanList;
+        }
       }
     } catch (e) {}
   }
-  return emails;
+
+  // 저장된 내역이 없거나 초기화된 경우 기본 관리자만 저장 후 반환
+  const initial = [...DEFAULT_ADMIN_EMAILS];
+  localStorage.setItem(ADMIN_EMAIL_STORAGE_KEY, JSON.stringify(initial));
+  return initial;
 }
 
 // 새 관리자 이메일 및 초기 비밀번호 등록/추가
@@ -108,7 +117,7 @@ export function addAdminEmail(email, initialPassword = "") {
   return { success: true, emails: updated };
 }
 
-// 관리자 이메일 삭제
+// 관리자 이메일 영구 삭제
 export function removeAdminEmail(email) {
   if (!email) return { success: false, message: "삭제할 이메일이 지정되지 않았습니다." };
   const cleanEmail = email.trim().toLowerCase();
@@ -118,10 +127,10 @@ export function removeAdminEmail(email) {
     return { success: false, message: "최소 1개의 관리자 ID가 유지되어야 합니다." };
   }
 
-  const updated = currentEmails.filter(e => e.toLowerCase() !== cleanEmail);
+  const updated = currentEmails.filter(e => e.trim().toLowerCase() !== cleanEmail);
   localStorage.setItem(ADMIN_EMAIL_STORAGE_KEY, JSON.stringify(updated));
   
-  // 비밀번호 맵에서도 제거
+  // 비밀번호 맵에서도 완전히 제거
   const map = getAdminPasswordMap();
   if (map[cleanEmail]) {
     delete map[cleanEmail];
@@ -143,7 +152,7 @@ export function setPrimaryAdminEmail(email) {
   if (!email) return;
   const cleanEmail = email.trim().toLowerCase();
   const currentEmails = getAdminEmails();
-  const filtered = currentEmails.filter(e => e.toLowerCase() !== cleanEmail);
+  const filtered = currentEmails.filter(e => e.trim().toLowerCase() !== cleanEmail);
   const updated = [cleanEmail, ...filtered];
   localStorage.setItem(ADMIN_EMAIL_STORAGE_KEY, JSON.stringify(updated));
   localStorage.setItem("seobu_admin_custom_email", cleanEmail);
@@ -168,7 +177,7 @@ export function updateAdminCredentials(newEmail, newPassword) {
   if (newEmail) {
     const cleanEmail = newEmail.trim().toLowerCase();
     const currentEmails = getAdminEmails();
-    const filtered = currentEmails.filter(e => e.toLowerCase() !== cleanEmail);
+    const filtered = currentEmails.filter(e => e.trim().toLowerCase() !== cleanEmail);
     const updated = [cleanEmail, ...filtered];
     localStorage.setItem(ADMIN_EMAIL_STORAGE_KEY, JSON.stringify(updated));
     localStorage.setItem("seobu_admin_custom_email", cleanEmail);
@@ -305,7 +314,8 @@ export const GoogleAuthService = {
       return null;
     }
 
-    const isAdmin = ADMIN_EMAILS.includes(cleanEmail) || this.isAdminModeActive();
+    const adminList = getAdminEmails().map(e => e.toLowerCase());
+    const isAdmin = adminList.includes(cleanEmail) || this.isAdminModeActive();
     const user = {
       email: cleanEmail,
       name: name.trim() || cleanEmail.split("@")[0] + " 선생님",
@@ -501,6 +511,11 @@ export function checkOAuthRedirectResult() {
     }
   }
 }
+
+// 레거시 v1 저장소 잔여물 자동 정리
+try {
+  localStorage.removeItem("seobu_admin_email_custom_v1");
+} catch (e) {}
 
 // 스크립트 로드 시 즉시 URL OAuth 콜백 검사
 checkOAuthRedirectResult();

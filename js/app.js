@@ -71,12 +71,10 @@ document.addEventListener("DOMContentLoaded", () => {
             ${eventObj.description}
           </div>
 
-          <div style="display:flex; gap:10px; justify-content:flex-end; align-items:center;">
-            ${isAdmin ? `
-              <button id="btn-modal-edit-admin" class="btn-m3-outlined" style="border-color:#0e3753; color:#0e3753; font-weight:800;">
-                ✏️ 행사 수정
-              </button>
-            ` : ''}
+          <div style="display:flex; gap:10px; justify-content:flex-end; align-items:center; flex-wrap:wrap;">
+            <button id="btn-modal-edit" class="btn-m3-outlined" style="border-color:#0e3753; color:#0e3753; font-weight:800;">
+              ✏️ 행사 수정
+            </button>
             <button id="btn-modal-review" class="btn-m3-outlined">후기 남기기</button>
             ${(eventObj.applyUrl && (eventObj.applyUrl.startsWith('http://') || eventObj.applyUrl.startsWith('https://'))) ? `
               <a href="${eventObj.applyUrl}" target="_blank" class="btn-m3-filled">참가 신청 바로가기</a>
@@ -92,7 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const backdrop = modalMount.querySelector("#modal-backdrop");
     const closeBtn = modalMount.querySelector("#btn-modal-close");
     const reviewBtn = modalMount.querySelector("#btn-modal-review");
-    const adminEditBtn = modalMount.querySelector("#btn-modal-edit-admin");
+    const editBtn = modalMount.querySelector("#btn-modal-edit");
 
     const closeModal = () => {
       backdrop.classList.remove("open");
@@ -129,8 +127,8 @@ document.addEventListener("DOMContentLoaded", () => {
       isMouseDownOnBackdrop = false;
     });
 
-    if (adminEditBtn) {
-      adminEditBtn.addEventListener("click", (e) => {
+    if (editBtn) {
+      editBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         modalMount.innerHTML = "";
         openEventFormModal(eventObj, null, () => switchTab(activeTab));
@@ -164,7 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (tabName === "calendar") {
       renderCalendar(tabContentMount, showEventModal);
     } else if (tabName === "programs") {
-      renderPrograms(tabContentMount);
+      renderPrograms(tabContentMount, showEventModal);
     } else if (tabName === "reviews") {
       renderReviews(tabContentMount, extraData);
     } else if (tabName === "padlet") {
@@ -188,14 +186,19 @@ document.addEventListener("DOMContentLoaded", () => {
   // 인증 상태 변경 리스너
   window.addEventListener("auth-state-changed", () => {
     renderFooter(footerMount);
-    if (activeTab === "reviews") {
-      renderReviews(tabContentMount);
-    }
+    switchTab(activeTab);
   });
 
   // 행사 데이터 갱신 리스너 (엑셀 업로드/초기화 시)
   window.addEventListener("events-updated", () => {
     switchTab(activeTab);
+  });
+
+  // 수업나눔방 데이터 갱신 리스너
+  window.addEventListener("rooms-updated", () => {
+    if (activeTab === "padlet") {
+      renderPadletRooms(tabContentMount);
+    }
   });
 
   // 초기 화면 렌더링 (첫 화면: 캘린더)

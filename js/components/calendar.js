@@ -2,6 +2,7 @@ import { getEvents, getMonthThemes, getActiveMonths, getHolidayName, saveEvents 
 import { GoogleAuthService } from "../auth/googleAuth.js";
 import { openEventFormModal } from "./eventFormModal.js";
 import { openMonthManagerModal, openMonthThemeEditModal } from "./monthManagerModal.js";
+import { openAdminExcelModal } from "./adminExcelModal.js";
 
 let currentMonth = "all"; // 'all' (3개월 포스터 모드) | 1 ~ 12
 
@@ -34,14 +35,13 @@ export function renderCalendar(container, onSelectEventModal) {
           <button class="m3-chip ${currentMonth === 'all' ? 'active' : ''}" data-month="all">
             <span>✨ 3개월</span><span class="chip-text-extra"> 모아보기</span>
           </button>
-          ${isAdmin ? `
-            <button id="btn-admin-manage-months" class="m3-chip admin-chip-add" style="background: #0e3753; color: #ffffff; border-color: #0e3753; font-weight: 800;" title="관리자: 캘린더 월 추가/관리">
-              <span>➕ 월 추가</span>
-            </button>
-          ` : ''}
         </div>
 
         <div class="calendar-utility-row">
+          <button id="btn-excel-import" class="btn-m3-outlined btn-pdf-download" title="행사 엑셀 파일(.xlsx) 업로드 등록">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+            <span>엑셀 파일 등록</span>
+          </button>
           <a href="assets/docs/seobu_growth_calendar_print.pdf" download="2026학년도_서부서로_수업성장캘린더.pdf" target="_blank" class="btn-m3-outlined btn-pdf-download">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             <span>PDF 파일 저장</span>
@@ -67,7 +67,7 @@ export function renderCalendar(container, onSelectEventModal) {
   `;
 
   const contentMount = container.querySelector("#calendar-content-mount");
-  renderCalendarCards(contentMount, onSelectEventModal, isAdmin, container);
+  renderCalendarCards(contentMount, onSelectEventModal, true, container);
 
   // 칩 클릭 이벤트
   container.querySelectorAll("#month-chips-row .m3-chip[data-month]").forEach(chip => {
@@ -78,28 +78,24 @@ export function renderCalendar(container, onSelectEventModal) {
     });
   });
 
-  // 관리자 월 추가/관리 버튼
-  if (isAdmin) {
-    const btnMonthMgr = container.querySelector("#btn-admin-manage-months");
-    if (btnMonthMgr) {
-      btnMonthMgr.addEventListener("click", () => {
-        openMonthManagerModal(() => {
-          renderCalendar(container, onSelectEventModal);
-        });
-      });
-    }
-
-    // 각 월별 문구 수정 버튼 이벤트
-    container.querySelectorAll(".btn-admin-edit-month-theme").forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const monthVal = parseInt(btn.dataset.month, 10);
-        openMonthThemeEditModal(monthVal, () => {
-          renderCalendar(container, onSelectEventModal);
-        });
-      });
+  // 엑셀 등록 버튼 이벤트
+  const btnExcel = container.querySelector("#btn-excel-import");
+  if (btnExcel) {
+    btnExcel.addEventListener("click", () => {
+      openAdminExcelModal();
     });
   }
+
+  // 각 월별 문구 수정 버튼 이벤트
+  container.querySelectorAll(".btn-edit-month-theme").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const monthVal = parseInt(btn.dataset.month, 10);
+      openMonthThemeEditModal(monthVal, () => {
+        renderCalendar(container, onSelectEventModal);
+      });
+    });
+  });
 }
 
 function renderCalendarCards(mount, onSelectEventModal, isAdmin, mainContainer) {
@@ -340,11 +336,9 @@ function generateMonthCardHTML(month, isFocusView = false, isAdmin = false) {
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
           <span style="font-size:13px; font-weight:800; color:#475569;">${monthEvents.length}개 프로그램</span>
-          ${isAdmin ? `
-            <button class="btn-admin-edit-month-theme btn-m3-outlined" data-month="${month}" title="이 월의 소제목 및 강조 안내 문구 수정" style="padding: 2px 8px; font-size: 11px; border-radius: 6px; font-weight: 800; border-color: #0e3753; color: #0e3753; background: #ffffff;">
-              ✏️ 문구 수정
-            </button>
-          ` : ''}
+          <button class="btn-edit-month-theme btn-m3-outlined" data-month="${month}" title="이 월의 소제목 및 강조 안내 문구 수정" style="padding: 2px 8px; font-size: 11px; border-radius: 6px; font-weight: 800; border-color: #0e3753; color: #0e3753; background: #ffffff;">
+            ✏️ 문구 수정
+          </button>
         </div>
       </div>
 

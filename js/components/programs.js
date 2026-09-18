@@ -5,7 +5,7 @@ import { openEventFormModal } from "./eventFormModal.js";
 let selectedCategory = "all";
 let selectedMonth = "all";
 
-export function renderPrograms(container) {
+export function renderPrograms(container, onSelectEventModal) {
   const user = GoogleAuthService.getCurrentUser();
   const isAdmin = !!(user && user.isAdmin);
   const allEvents = getEvents();
@@ -46,19 +46,16 @@ export function renderPrograms(container) {
           프로그램 한눈에 보기
         </h2>
         <p style="font-size: 15px; color: #64748b; margin-top: 6px;">
-          월과 유형으로 찾아보고, 카드를 누르면 아래로 확장되어 상세 안내를 확인할 수 있습니다.
+          월과 유형으로 찾아보고, 카드를 누르면 상세 팝업 안내를 확인할 수 있습니다.
         </p>
       </div>
 
-      <!-- 관리자 모드: 새 프로그램 추가 버튼 -->
-      ${isAdmin ? `
-        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
-          <button id="btn-admin-add-program" class="btn-m3-filled" style="padding: 10px 24px; font-size: 14.5px; font-weight: 800; border-radius: var(--shape-pill); box-shadow: 0 4px 14px rgba(14, 55, 83, 0.25); background: #0e3753; display: inline-flex; align-items: center; gap: 6px;">
-            <span>➕ 새 프로그램(행사) 추가</span>
-            <span style="font-size: 11px; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 9999px;">관리자</span>
-          </button>
-        </div>
-      ` : ''}
+      <!-- 새 프로그램 추가 버튼 -->
+      <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+        <button id="btn-add-program" class="btn-m3-filled" style="padding: 10px 24px; font-size: 14.5px; font-weight: 800; border-radius: var(--shape-pill); box-shadow: 0 4px 14px rgba(14, 55, 83, 0.25); background: #0e3753; display: inline-flex; align-items: center; gap: 6px;">
+          <span>➕ 새 프로그램 추가</span>
+        </button>
+      </div>
 
       <!-- 월 & 카테고리 필터 칩 바 (중앙 정렬) -->
       <div style="display: flex; justify-content: center; margin-bottom: 24px; width: 100%;">
@@ -97,27 +94,28 @@ export function renderPrograms(container) {
           const evTime = ev.time || '14:00 ~ 17:00';
           const evLoc = ev.location || '서부교육지원청';
           const evTarget = ev.target || '관내 교원';
-          const evDesc = ev.description || '';
+          const evApplyMethod = (ev.applyUrl && (ev.applyUrl.startsWith('http://') || ev.applyUrl.startsWith('https://'))) 
+            ? (ev.applyMethod || '온라인 링크') 
+            : '추후안내';
+
           return `
-          <div class="program-card" data-card-id="${ev.id}">
+          <div class="program-card clickable-program-card" data-card-id="${ev.id}" style="cursor: pointer;">
             <div class="prog-card-top">
               <span class="prog-category-badge ${catClass}">${catLabel}</span>
               <div style="display: flex; align-items: center; gap: 8px;">
-                <span class="prog-date-badge">${ev.month}월 ${ev.day}일</span>
-                ${isAdmin ? `
-                  <button class="btn-admin-edit-prog btn-m3-outlined" data-event-id="${ev.id}" title="프로그램 수정" style="padding: 2px 8px; font-size: 11px; border-radius: 6px; font-weight: 800; border-color: #0e3753; color: #0e3753;" onclick="event.stopPropagation();">
-                    ✏️ 수정
-                  </button>
-                ` : ''}
+                <span class="prog-date-badge">2026년 ${ev.month}월 ${ev.day}일</span>
+                <button class="btn-edit-prog btn-m3-outlined" data-event-id="${ev.id}" title="프로그램 수정" style="padding: 2px 8px; font-size: 11px; border-radius: 6px; font-weight: 800; border-color: #0e3753; color: #0e3753; background: #ffffff;" onclick="event.stopPropagation();">
+                  ✏️ 수정
+                </button>
               </div>
             </div>
             
             <h3 class="prog-title">${ev.title || '프로그램'}</h3>
             ${ev.subtitle ? `<div class="prog-subtitle">${ev.subtitle}</div>` : ''}
 
-            <!-- 아코디언 확장 영역 -->
-            <div class="prog-accordion-content">
-              <div class="prog-info-list">
+            <!-- 캘린더 스타일과 동일한 정보 박스 -->
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-top: 12px; margin-bottom: 12px;">
+              <div class="prog-info-list" style="margin-bottom: 0;">
                 <div class="prog-info-item">
                   <span class="prog-info-label">일시</span>
                   <span>2026년 ${ev.month}월 ${ev.day}일 ${evTime}</span>
@@ -130,32 +128,33 @@ export function renderPrograms(container) {
                   <span class="prog-info-label">대상</span>
                   <span>${evTarget}</span>
                 </div>
-                ${evDesc ? `
-                  <div class="prog-info-item" style="margin-top:6px; line-height:1.5;">
-                    <span>${evDesc}</span>
-                  </div>
-                ` : ''}
+                <div class="prog-info-item">
+                  <span class="prog-info-label">신청방법</span>
+                  <span style="font-weight: 700;">${evApplyMethod}</span>
+                </div>
               </div>
+            </div>
 
-              <div class="prog-action-buttons">
-                ${ev.applyUrl && (ev.applyUrl.startsWith('http://') || ev.applyUrl.startsWith('https://')) ? `
-                  <a href="${ev.applyUrl}" target="_blank" class="btn-m3-filled" onclick="event.stopPropagation();">
-                    참가 신청 바로가기
-                  </a>
-                ` : `
-                  <button class="btn-m3-outlined" disabled style="opacity:0.75; cursor:default; background:#f8fafc; font-weight:700;" onclick="event.stopPropagation();">
-                    신청: 추후안내
-                  </button>
-                `}
-                <button class="btn-m3-outlined btn-review-shortcut" data-event-id="${ev.id}" onclick="event.stopPropagation();">
-                  후기 작성
-                </button>
-                ${isAdmin ? `
-                  <button class="btn-m3-outlined btn-admin-edit-prog" data-event-id="${ev.id}" style="border-color: #0e3753; color: #0e3753; font-weight: 800;" onclick="event.stopPropagation();">
-                    ✏️ 프로그램 수정
-                  </button>
-                ` : ''}
+            ${ev.description ? `
+              <div style="font-size: 13.5px; color: #475569; line-height: 1.5; margin-bottom: 14px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                ${ev.description}
               </div>
+            ` : ''}
+
+            <!-- 캘린더와 동일한 하단 버튼 액션 바 (우측 정렬) -->
+            <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center; margin-top: auto; padding-top: 8px;">
+              <button class="btn-m3-outlined btn-review-shortcut" data-event-id="${ev.id}" onclick="event.stopPropagation();">
+                후기 남기기
+              </button>
+              ${ev.applyUrl && (ev.applyUrl.startsWith('http://') || ev.applyUrl.startsWith('https://')) ? `
+                <a href="${ev.applyUrl}" target="_blank" class="btn-m3-filled" onclick="event.stopPropagation();">
+                  참가 신청 바로가기
+                </a>
+              ` : `
+                <button class="btn-m3-outlined" disabled style="opacity: 0.75; cursor: default; background: #f8fafc; font-weight: 700;" onclick="event.stopPropagation();">
+                  신청: 추후안내
+                </button>
+              `}
             </div>
           </div>
         `;
@@ -164,34 +163,32 @@ export function renderPrograms(container) {
     </div>
   `;
 
-  // 관리자 새 프로그램 추가 버튼
-  if (isAdmin) {
-    const btnAdd = container.querySelector("#btn-admin-add-program");
-    if (btnAdd) {
-      btnAdd.addEventListener("click", () => {
-        openEventFormModal(null, null, () => renderPrograms(container));
-      });
-    }
-
-    // 관리자 프로그램 수정 버튼들
-    container.querySelectorAll(".btn-admin-edit-prog").forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const eventId = btn.dataset.eventId;
-        const currentList = getEvents();
-        const targetEv = currentList.find(ev => ev.id === eventId);
-        if (targetEv) {
-          openEventFormModal(targetEv, null, () => renderPrograms(container));
-        }
-      });
+  // 새 프로그램 추가 버튼 이벤트 바인딩
+  const btnAddProg = container.querySelector("#btn-add-program");
+  if (btnAddProg) {
+    btnAddProg.addEventListener("click", () => {
+      openEventFormModal(null, null, () => renderPrograms(container, onSelectEventModal));
     });
   }
+
+  // 프로그램 수정 버튼들
+  container.querySelectorAll(".btn-edit-prog").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const eventId = btn.dataset.eventId;
+      const currentList = getEvents();
+      const targetEv = currentList.find(ev => ev.id === eventId);
+      if (targetEv) {
+        openEventFormModal(targetEv, null, () => renderPrograms(container, onSelectEventModal));
+      }
+    });
+  });
 
   // 월 필터 이벤트
   container.querySelectorAll("#prog-month-filter .m3-chip").forEach(chip => {
     chip.addEventListener("click", () => {
       selectedMonth = chip.dataset.month;
-      renderPrograms(container);
+      renderPrograms(container, onSelectEventModal);
     });
   });
 
@@ -199,24 +196,26 @@ export function renderPrograms(container) {
   container.querySelectorAll("#prog-cat-filter .m3-chip").forEach(chip => {
     chip.addEventListener("click", () => {
       selectedCategory = chip.dataset.cat;
-      renderPrograms(container);
+      renderPrograms(container, onSelectEventModal);
     });
   });
 
-  // 카드 클릭 시 아코디언 토글
-  container.querySelectorAll(".program-card").forEach(card => {
+  // 카드 전체 클릭 시 캘린더 탭과 동일한 팝업 모달 오픈
+  container.querySelectorAll(".clickable-program-card").forEach(card => {
     card.addEventListener("click", () => {
-      const isAlreadyExpanded = card.classList.contains("expanded");
-      container.querySelectorAll(".program-card").forEach(c => c.classList.remove("expanded"));
-      if (!isAlreadyExpanded) {
-        card.classList.add("expanded");
+      const eventId = card.dataset.cardId;
+      const allEvents = getEvents();
+      const targetEv = allEvents.find(e => e.id === eventId);
+      if (targetEv && onSelectEventModal) {
+        onSelectEventModal(targetEv);
       }
     });
   });
 
   // 후기 바로가기 버튼
   container.querySelectorAll(".btn-review-shortcut").forEach(btn => {
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
       const eventId = btn.dataset.eventId;
       const allEvents = getEvents();
       const targetEv = allEvents.find(e => e.id === eventId);

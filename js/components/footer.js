@@ -1,5 +1,4 @@
 import { GoogleAuthService, getPrimaryAdminEmail } from "../auth/googleAuth.js";
-import { openAdminExcelModal } from "./adminExcelModal.js";
 import { openAdminAccountModal } from "./adminAccountModal.js";
 
 export function renderFooter(container) {
@@ -22,21 +21,17 @@ export function renderFooter(container) {
           <span class="footer-copy">© 2026 서울특별시서부교육지원청. All Rights Reserved.</span>
         </div>
 
-        <!-- 하단 관리자 모드 영역 (중앙 정렬) -->
-        <div class="footer-admin-row">
-          <div class="footer-admin-actions">
+        <!-- 하단 관리자 로그인 및 계정 설정 영역 (중앙 정렬) -->
+        <div class="footer-admin-row" style="margin-top: 14px; display: flex; justify-content: center;">
+          <div class="footer-admin-actions" style="display: flex; align-items: center; gap: 8px;">
             ${isAdmin ? `
-              <button id="footer-btn-admin-excel" class="btn-footer-pill admin-active" title="행사 엑셀 파일 업로드/관리">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-                ⚙️ 행사 관리 (엑셀 등록)
+              <button id="footer-btn-admin-account" class="btn-footer-pill" style="background: #0e3753; color: #ffffff; font-weight: 800; border-color: #0e3753; padding: 6px 14px; font-size: 13px; border-radius: 9999px; cursor: pointer;" title="관리자 ID 현황 조회, 추가/삭제 및 비밀번호(PW) 설정">
+                👥 관리자 계정 설정
               </button>
-              <button id="footer-btn-admin-account" class="btn-footer-pill" style="background: #0e3753; color: #ffffff; font-weight: 800; border-color: #0e3753;" title="관리자 ID 현황 조회, 추가/삭제 및 비밀번호(PW) 설정">
-                👥 관리자 ID 현황/설정
-              </button>
-              <button id="footer-btn-logout" class="footer-link-btn" style="margin-left: 6px;">[관리자 로그아웃]</button>
+              <button id="footer-btn-logout" class="footer-link-btn" style="margin-left: 6px; font-size: 12.5px; color: #64748b; background: none; border: none; cursor: pointer;">[관리자 로그아웃]</button>
             ` : `
-              <button id="footer-btn-admin-verify" class="btn-footer-pill admin-badge" title="관리자 로그인">
-                🔐 관리자 모드
+              <button id="footer-btn-admin-verify" class="btn-footer-pill admin-badge" style="padding: 6px 14px; font-size: 13px; border-radius: 9999px; cursor: pointer; background: #ffffff; border: 1.5px solid #cbd5e1; color: #475569; font-weight: 700;" title="관리자 로그인">
+                🔐 관리자 로그인
               </button>
             `}
           </div>
@@ -48,13 +43,13 @@ export function renderFooter(container) {
   // 이벤트 리스너 바인딩
   const btnLogout = container.querySelector("#footer-btn-logout");
   const btnAdminVerify = container.querySelector("#footer-btn-admin-verify");
-  const btnAdminExcel = container.querySelector("#footer-btn-admin-excel");
   const btnAdminAccount = container.querySelector("#footer-btn-admin-account");
 
   if (btnLogout) {
     btnLogout.addEventListener("click", () => {
       GoogleAuthService.logout();
       renderFooter(container);
+      window.dispatchEvent(new CustomEvent("auth-state-changed"));
     });
   }
 
@@ -62,13 +57,8 @@ export function renderFooter(container) {
     btnAdminVerify.addEventListener("click", () => {
       openAdminAuthModal(() => {
         renderFooter(container);
+        window.dispatchEvent(new CustomEvent("auth-state-changed"));
       });
-    });
-  }
-
-  if (btnAdminExcel) {
-    btnAdminExcel.addEventListener("click", () => {
-      openAdminExcelModal();
     });
   }
 
@@ -76,6 +66,7 @@ export function renderFooter(container) {
     btnAdminAccount.addEventListener("click", () => {
       openAdminAccountModal(() => {
         renderFooter(container);
+        window.dispatchEvent(new CustomEvent("auth-state-changed"));
       });
     });
   }
@@ -102,13 +93,13 @@ export function openAdminAuthModal(onSuccess) {
 
         <form id="admin-auth-form">
           <div class="form-group" style="margin-bottom: 14px;">
-            <label for="admin-email-input" style="font-weight: 800; font-size: 13px; color: #0e3753;">관리자 이메일</label>
-            <input type="email" id="admin-email-input" class="m3-input" placeholder="seobuedu2026@gmail.com" value="${defaultEmail}" required style="padding:11px 12px; font-size:14.5px;" />
+            <label for="admin-email-input" style="font-weight: 800; font-size: 14px; color: #0e3753;">관리자 이메일</label>
+            <input type="email" id="admin-email-input" class="m3-input" placeholder="관리자 이메일을 입력하세요" value="" autofocus required autocomplete="off" style="padding:11px 12px; font-size:15px;" />
           </div>
 
           <div class="form-group" style="margin-bottom: 20px;">
-            <label for="admin-pw-input" style="font-weight: 800; font-size: 13px; color: #0e3753;">비밀번호 (PW)</label>
-            <input type="password" id="admin-pw-input" class="m3-input" placeholder="비밀번호를 입력하세요" autofocus required style="padding:11px 12px; font-size:14.5px;" />
+            <label for="admin-pw-input" style="font-weight: 800; font-size: 14px; color: #0e3753;">비밀번호 (PW)</label>
+            <input type="password" id="admin-pw-input" class="m3-input" placeholder="비밀번호를 입력하세요" required autocomplete="current-password" style="padding:11px 12px; font-size:15px;" />
           </div>
 
           <div style="display: flex; gap: 10px; justify-content: flex-end;">
