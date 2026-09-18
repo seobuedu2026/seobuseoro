@@ -116,12 +116,14 @@
     margin-bottom: 14px !important;
     overflow-x: visible !important;
     width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .nav-tab-item {
     width: 100% !important;
-    padding: 8px 1px !important;
-    font-size: 13px !important;
+    min-width: 0 !important;
+    padding: 9px 1px !important;
+    font-size: clamp(11.5px, 3.4vw, 13.5px) !important;
     font-weight: 800 !important;
     letter-spacing: -0.8px !important;
     border-radius: 12px !important;
@@ -130,12 +132,14 @@
     text-align: center !important;
     white-space: nowrap !important;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04) !important;
+    box-sizing: border-box !important;
   }
 
   /* 3. 캘린더 선택 버튼(월 필터 칩)도 한 줄에 4개 배열 */
   .calendar-view-mode-bar {
     margin-bottom: 14px !important;
     gap: 8px !important;
+    width: 100% !important;
   }
 
   #month-chips-row {
@@ -144,12 +148,14 @@
     gap: 4px !important;
     width: 100% !important;
     margin-bottom: 6px !important;
+    box-sizing: border-box !important;
   }
 
   #month-chips-row .m3-chip {
     width: 100% !important;
+    min-width: 0 !important;
     padding: 8px 1px !important;
-    font-size: 12.5px !important;
+    font-size: clamp(11.5px, 3.4vw, 13px) !important;
     font-weight: 800 !important;
     letter-spacing: -0.6px !important;
     border-radius: 10px !important;
@@ -157,11 +163,30 @@
     text-align: center !important;
     white-space: nowrap !important;
     gap: 0 !important;
+    box-sizing: border-box !important;
   }
 
   /* 모바일에서는 불필요하게 긴 부가 텍스트 숨김 (🌿 9월, 🌸 10월, 🍁 11월, ✨ 3개월) */
   .chip-text-extra {
     display: none !important;
+  }
+
+  /* 프로그램 탭의 월별 필터 칩도 모바일에서 4개 1줄로 배열 */
+  #prog-month-filter {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 4px !important;
+    width: 100% !important;
+  }
+
+  #prog-month-filter .m3-chip {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 8px 1px !important;
+    font-size: clamp(11.5px, 3.4vw, 13px) !important;
+    justify-content: center !important;
+    text-align: center !important;
+    white-space: nowrap !important;
   }
 
   /* 캘린더 모드 바 하단: PDF 파일 저장 및 카운트 가로 정렬 */
