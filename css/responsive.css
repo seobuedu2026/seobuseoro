@@ -237,6 +237,37 @@
     grid-template-columns: 1fr;
   }
 
+  /* 프로그램 탭 내용 글씨 2포인트 확대 (가독성 향상) */
+  .prog-title {
+    font-size: 18.5px !important; /* 기존 17px -> 18.5px (+2pt) */
+  }
+
+  .prog-subtitle {
+    font-size: 14.5px !important; /* 기존 13px -> 14.5px (+2pt) */
+  }
+
+  .prog-info-list {
+    font-size: 15px !important; /* 기존 13px -> 15px (+2pt) */
+    gap: 10px !important;
+  }
+
+  .prog-info-item {
+    font-size: 15px !important;
+    line-height: 1.55 !important;
+  }
+
+  .prog-info-label {
+    font-size: 14.5px !important;
+  }
+
+  .prog-date-badge {
+    font-size: 14.5px !important;
+  }
+
+  .prog-category-badge {
+    font-size: 13.5px !important;
+  }
+
   .padlet-cards-grid {
     grid-template-columns: 1fr;
   }
@@ -247,21 +278,23 @@
   }
 
   .cal-grid-days {
-    grid-auto-rows: minmax(72px, auto);
+    grid-auto-rows: minmax(76px, auto);
   }
 
   .cal-cell {
     padding: 3px 2px;
-    min-height: 72px;
+    min-height: 76px;
   }
 
   .cal-cell-daynum {
-    font-size: 10px;
+    font-size: 11px;
   }
 
+  /* 캘린더 행사 글씨 2포인트 확대 (기존 9.5px -> 11.5px) */
   .cal-event-pill {
-    font-size: 9.5px;
-    padding: 3px 2px;
+    font-size: 11.5px !important;
+    padding: 4px 3px !important;
+    line-height: 1.35 !important;
   }
 
   .cal-event-pill .pill-sub {
