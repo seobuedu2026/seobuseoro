@@ -1,0 +1,158 @@
+/* ==========================================================================
+   Responsive Breakpoints & Full-Width Adaptive Optimization
+   ========================================================================== */
+
+/* 초대형 모니터 (FHD, QHD 이상) */
+@media (min-width: 1600px) {
+  .single-month-card.focus-month-view .cal-grid-days {
+    grid-auto-rows: minmax(145px, auto);
+  }
+  .single-month-card.focus-month-view .cal-cell {
+    min-height: 145px;
+  }
+  .poster-three-months-grid .cal-grid-days {
+    grid-auto-rows: minmax(96px, auto);
+  }
+}
+
+/* 일반 데스크톱 및 랩탑 (1200px ~ 1599px) */
+@media (max-width: 1400px) {
+  .container {
+    padding: 0 24px 50px 24px;
+  }
+  
+  .poster-three-months-grid {
+    gap: 16px;
+  }
+}
+
+/* 태블릿 가로 및 소형 노트북 (992px ~ 1199px) */
+@media (max-width: 1199px) {
+  .poster-three-months-grid {
+    grid-template-columns: 1fr; /* 태블릿에서는 3개 월을 세로로 꽉 차게 나열 */
+    gap: 32px;
+  }
+
+  .program-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .padlet-cards-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .review-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .review-form-card {
+    position: static;
+  }
+}
+
+/* 태블릿 세로 및 대형 스마트폰 (768px ~ 991px) */
+@media (max-width: 991px) {
+  .container {
+    padding: 0 16px 40px 16px;
+  }
+
+  .hero-header {
+    padding: 24px 16px 20px 16px;
+  }
+
+  .title-subu, .title-growth {
+    font-size: 34px;
+    letter-spacing: -1px;
+  }
+
+  .main-slogan-text {
+    font-size: 15px;
+  }
+
+  .padlet-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .single-month-card.focus-month-view .cal-grid-days {
+    grid-auto-rows: minmax(105px, auto);
+  }
+  .single-month-card.focus-month-view .cal-cell {
+    min-height: 105px;
+  }
+}
+
+/* 모바일 화면 (767px 이하) */
+@media (max-width: 767px) {
+  .header-top-row {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .title-subu, .title-growth {
+    font-size: 26px;
+  }
+
+  .title-sprout-icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .main-slogan-text {
+    font-size: 13.5px;
+  }
+
+  .handwriting-badge {
+    font-size: 12px;
+    padding: 5px 12px;
+  }
+
+  .nav-tab-item {
+    padding: 9px 18px;
+    font-size: 14px;
+  }
+
+  .program-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .padlet-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cal-grid-head {
+    font-size: 11px;
+    padding: 6px 0;
+  }
+
+  .cal-grid-days {
+    grid-auto-rows: minmax(70px, auto);
+  }
+
+  .cal-cell {
+    padding: 3px 2px;
+    min-height: 70px;
+  }
+
+  .cal-cell-daynum {
+    font-size: 10px;
+  }
+
+  .cal-event-pill {
+    font-size: 9px;
+    padding: 3px 2px;
+  }
+
+  .cal-event-pill .pill-sub {
+    display: none; /* 모바일에서는 제목만 간결하게 */
+  }
+
+  .brochure-legend-container {
+    padding: 14px;
+  }
+
+  .legend-badge {
+    font-size: 12px;
+    padding: 4px 12px;
+  }
+}

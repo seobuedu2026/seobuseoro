@@ -1,0 +1,167 @@
+/* Base Styles & Typography */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-main);
+  background: linear-gradient(180deg, #f0fdf4 0%, #f8fafc 40%, #f0fdfa 100%);
+  color: #1e293b;
+  line-height: 1.5;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  outline: none;
+}
+
+/* 화면 너비에 꽉 차게 반응형 컨테이너 */
+.container {
+  width: 100%;
+  max-width: 1680px;
+  margin: 0 auto;
+  padding: 0 32px 60px 32px;
+  flex-grow: 1;
+}
+
+/* ==========================================================================
+   Hero Header (PDF 인쇄물 연계 디자인)
+   ========================================================================== */
+.hero-header {
+  position: relative;
+  width: 100%;
+  background: radial-gradient(circle at 50% 30%, #ffffff 0%, #f4fbf7 60%, #e6f7f2 100%);
+  padding: 24px 32px 18px 32px;
+  border-bottom: 2px solid #e2f1ec;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.hero-header-inner {
+  width: 100%;
+  max-width: 1680px;
+  margin: 0 auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+}
+
+/* 상단 뱃지 & 로그인 */
+.header-top-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.semester-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, #00b4d8 0%, #009688 100%);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 800;
+  padding: 6px 20px;
+  border-radius: var(--shape-pill);
+  box-shadow: 0 4px 12px rgba(0, 150, 136, 0.2);
+  letter-spacing: -0.3px;
+}
+
+.header-login-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: var(--shape-pill);
+  border: 1.5px solid #008080;
+  background-color: #ffffff;
+  color: #008080;
+  font-size: 13px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.header-login-btn:hover {
+  background-color: #f0fdfa;
+}
+
+/* 메인 타이틀 영역 */
+.main-title-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 4px 0;
+}
+
+.header-official-logo-img {
+  width: 100%;
+  max-width: 960px;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 14px rgba(0, 128, 128, 0.10));
+  transition: transform 0.2s ease;
+  user-select: none;
+}
+
+.header-official-logo-img:hover {
+  transform: scale(1.008);
+}
+
+/* 손글씨 감성 뱃지 */
+.handwriting-badge {
+  background: #ffffff;
+  border: 1.5px dashed #f472b6;
+  border-radius: 16px;
+  padding: 7px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #db2777;
+  box-shadow: 0 2px 8px rgba(219, 39, 119, 0.08);
+}
+
+/* 하단 교육청 공식 푸터 */
+.site-footer {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  color: #64748b;
+  font-size: 13px;
+  width: 100%;
+}
+
+.footer-org-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0e3753;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

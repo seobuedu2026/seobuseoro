@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026학년도 2학기 서부서로 수업성장 캘린더 | 서울특별시서부교육지원청</title>
+  <meta name="description" content="혼자가 아닌 함께 하는 서부, 서부가 서로에게 길(路)이 되어 줍니다. 2026학년도 2학기 서부서로 수업성장 캘린더, 프로그램 안내, 교원 후기 및 수업나눔방">
+  <meta property="og:title" content="2026학년도 2학기 서부서로 수업성장 캘린더">
+  <meta property="og:description" content="시작은 촘촘하게, 기본은 탄탄하게, 성장은 다양하게. 서부 수업성장 캘린더">
+  <meta property="og:type" content="website">
+
+  <!-- Fonts (Pretendard, Roboto, Gaegu for handwriting slogan) -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+  <!-- SheetJS (Excel Parser) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- Style Sheets -->
+  <link rel="stylesheet" href="css/m3-tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <!-- 상단 헤더 마운트 영역 -->
+  <div id="header-mount"></div>
+
+  <!-- 메인 컨테이너 -->
+  <main class="container">
+    <!-- 네비게이션 4대 탭 바 -->
+    <nav class="nav-tab-bar" aria-label="메인 탭 메뉴">
+      <button class="nav-tab-item active" data-tab="calendar" id="tab-btn-calendar">
+        📅 캘린더
+      </button>
+      <button class="nav-tab-item" data-tab="programs" id="tab-btn-programs">
+        📋 프로그램
+      </button>
+      <button class="nav-tab-item" data-tab="reviews" id="tab-btn-reviews">
+        💬 참여후기
+      </button>
+      <button class="nav-tab-item" data-tab="padlet" id="tab-btn-padlet">
+        📚 수업나눔방
+      </button>
+    </nav>
+
+    <!-- 탭별 컨텐츠 마운트 영역 -->
+    <section id="tab-content-mount" aria-live="polite"></section>
+  </main>
+
+  <!-- M3 모달 다이얼로그 마운트 영역 -->
+  <div id="modal-mount"></div>
+
+  <!-- 메인 스크립트 진입점 -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
