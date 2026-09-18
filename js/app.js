@@ -187,6 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 인증 상태 변경 리스너
   window.addEventListener("auth-state-changed", () => {
+    renderHeader(headerMount);
     renderFooter(footerMount);
     switchTab(activeTab);
   });
