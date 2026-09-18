@@ -1,4 +1,4 @@
-import { getEvents, MONTH_THEMES, getActiveMonths, getHolidayName } from "../data/events.js";
+import { getEvents, MONTH_THEMES, getActiveMonths, getHolidayName, saveEvents } from "../data/events.js";
 import { GoogleAuthService } from "../auth/googleAuth.js";
 import { openEventFormModal } from "./eventFormModal.js";
 import { openMonthManagerModal } from "./monthManagerModal.js";
@@ -145,10 +145,33 @@ function renderCalendarCards(mount, onSelectEventModal, isAdmin, mainContainer) 
     });
   }
 
-  // 행사 칩 클릭 이벤트 바인딩
+  // 행사 칩 드래그 앤 드롭 & 클릭 이벤트 바인딩
+  let draggedEventId = null;
+  let isDragging = false;
+
   mount.querySelectorAll(".cal-event-pill").forEach(pill => {
+    pill.setAttribute("draggable", "true");
+
+    pill.addEventListener("dragstart", (e) => {
+      isDragging = true;
+      draggedEventId = pill.dataset.eventId;
+      pill.classList.add("is-dragging");
+      e.dataTransfer.setData("text/plain", draggedEventId);
+      e.dataTransfer.effectAllowed = "move";
+    });
+
+    pill.addEventListener("dragend", () => {
+      pill.classList.remove("is-dragging");
+      mount.querySelectorAll(".cal-cell.drag-over-cell").forEach(c => c.classList.remove("drag-over-cell"));
+      setTimeout(() => {
+        isDragging = false;
+        draggedEventId = null;
+      }, 60);
+    });
+
     pill.addEventListener("click", (e) => {
       e.stopPropagation();
+      if (isDragging) return;
       const eventId = pill.dataset.eventId;
       const allEvents = getEvents();
       const eventObj = allEvents.find(ev => ev.id === eventId);
@@ -160,6 +183,55 @@ function renderCalendarCards(mount, onSelectEventModal, isAdmin, mainContainer) 
           });
         } else if (onSelectEventModal) {
           onSelectEventModal(eventObj);
+        }
+      }
+    });
+  });
+
+  // 날짜 셀 드롭존 이벤트 바인딩
+  mount.querySelectorAll(".cal-cell:not(.empty)").forEach(cell => {
+    cell.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      if (!cell.classList.contains("drag-over-cell")) {
+        cell.classList.add("drag-over-cell");
+      }
+    });
+
+    cell.addEventListener("dragleave", (e) => {
+      if (!cell.contains(e.relatedTarget)) {
+        cell.classList.remove("drag-over-cell");
+      }
+    });
+
+    cell.addEventListener("drop", (e) => {
+      e.preventDefault();
+      cell.classList.remove("drag-over-cell");
+      const eventId = e.dataTransfer.getData("text/plain") || draggedEventId;
+      if (!eventId) return;
+
+      const targetMonth = parseInt(cell.dataset.month, 10);
+      const targetDayRaw = cell.dataset.day;
+      if (!targetMonth || !targetDayRaw) return;
+
+      const targetDay = isNaN(Number(targetDayRaw)) ? targetDayRaw : parseInt(targetDayRaw, 10);
+
+      const allEvents = getEvents();
+      const targetEvent = allEvents.find(ev => ev.id === eventId);
+
+      if (targetEvent) {
+        const isSameDate = targetEvent.month === targetMonth && String(targetEvent.day) === String(targetDay);
+        if (!isSameDate) {
+          targetEvent.month = targetMonth;
+          targetEvent.day = targetDay;
+          if (typeof targetDay === "number") {
+            targetEvent.dateStr = `${targetEvent.year || 2026}-${String(targetMonth).padStart(2, "0")}-${String(targetDay).padStart(2, "0")}`;
+          } else {
+            targetEvent.dateStr = `${targetEvent.year || 2026}-12-02`;
+          }
+
+          saveEvents(allEvents);
+          renderCalendar(mainContainer, onSelectEventModal);
         }
       }
     });

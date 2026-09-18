@@ -30,6 +30,13 @@ export function renderPrograms(container) {
     const matchCat = selectedCategory === "all" || ev.category === selectedCategory;
     const matchMonth = selectedMonth === "all" || String(ev.month) === selectedMonth;
     return matchCat && matchMonth;
+  }).sort((a, b) => {
+    const monthA = parseInt(a.month, 10) || 0;
+    const monthB = parseInt(b.month, 10) || 0;
+    if (monthA !== monthB) return monthA - monthB;
+    const dayA = typeof a.day === "number" ? a.day : parseInt(String(a.day).replace(/\D/g, '') || '99', 10);
+    const dayB = typeof b.day === "number" ? b.day : parseInt(String(b.day).replace(/\D/g, '') || '99', 10);
+    return dayA - dayB;
   });
 
   container.innerHTML = `

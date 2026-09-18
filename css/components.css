@@ -370,7 +370,8 @@
   font-weight: 700;
   padding: 5px 6px;
   border-radius: 6px;
-  cursor: pointer;
+  cursor: grab;
+  user-select: none;
   text-align: center;
   transition: all 0.15s ease;
   word-break: keep-all;
@@ -384,6 +385,24 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
   filter: brightness(0.96);
+}
+
+.cal-event-pill:active {
+  cursor: grabbing;
+}
+
+.cal-event-pill.is-dragging {
+  opacity: 0.35;
+  transform: scale(0.94);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+}
+
+.cal-cell.drag-over-cell {
+  background-color: #ecfeff !important;
+  outline: 2px dashed #008080 !important;
+  outline-offset: -2px;
+  box-shadow: inset 0 0 12px rgba(0, 128, 128, 0.15) !important;
+  transition: all 0.12s ease;
 }
 
 .cal-event-pill .pill-sub {
