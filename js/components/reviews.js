@@ -111,18 +111,20 @@ export function renderReviews(container, preselectedEventId = null) {
           </div>
 
           ${!user ? `
-            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 24px 18px; text-align: center;">
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px 18px; text-align: center;">
               <p style="font-size: 15px; font-weight: 800; color: #0e3753; margin-bottom: 6px; line-height: 1.5;">
                 후기 작성은 로그인 후 가능합니다.
               </p>
-              <p style="font-size: 13.5px; color: #0284c7; font-weight: 700; margin-bottom: 20px;">
+              <p style="font-size: 13.5px; color: #0284c7; font-weight: 700; margin-bottom: 16px;">
                 (센스쿨 구글 계정 @senedu.kr)
               </p>
 
-              <!-- 센스쿨 구글 계정 전용 단일 로그인 버튼 -->
-              <button id="btn-custom-google-login" class="btn-m3-filled" style="width: 100%; padding: 12px 18px; font-size: 14.5px; font-weight: 800; border-radius: var(--shape-pill); justify-content: center; box-shadow: 0 4px 12px rgba(14, 55, 83, 0.2);">
-                로그인 (센스쿨 구글 계정)
-              </button>
+              <!-- 센스쿨 구글 계정 로그인 버튼 (컴팩트 사이즈) -->
+              <div style="display: flex; justify-content: center;">
+                <button id="btn-custom-google-login" class="btn-m3-filled" style="padding: 7px 24px; font-size: 13.5px; font-weight: 800; border-radius: var(--shape-pill); justify-content: center; box-shadow: 0 2px 8px rgba(14, 55, 83, 0.15);">
+                  로그인
+                </button>
+              </div>
             </div>
           ` : `
             <form id="review-submit-form">
