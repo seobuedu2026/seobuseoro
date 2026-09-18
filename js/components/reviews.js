@@ -243,8 +243,10 @@ export function renderReviews(container, preselectedEventId = null) {
               <div class="review-card-top-row">
                 <div class="review-user-name">
                   <span class="review-event-tag">🎯 ${rev.eventTitle}</span>
-                  <span class="user-display-name">${cleanName}</span>
-                  <span class="review-date-text">${rev.createdAt}</span>
+                  <span class="review-author-date-wrap" style="display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
+                    <span class="user-display-name">${cleanName}</span>
+                    <span class="review-date-text">${rev.createdAt}</span>
+                  </span>
                   ${isAdmin ? (rev.status === 'pending' 
                     ? `<span class="badge-review-status pending">⏳ 승인 대기 (미노출)</span>` 
                     : `<span class="badge-review-status approved">✅ 승인 완료</span>`) 
