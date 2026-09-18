@@ -16,21 +16,21 @@ export function renderFooter(container) {
           <p class="footer-notice-text">※ 세부 일정 및 장소는 학교 공문 및 신청 링크를 통해 확인하시기 바랍니다.</p>
         </div>
 
-        <!-- 저작권 표시 (중앙 정렬) -->
-        <div class="footer-copyright-center">
-          <span class="footer-copy">© 2026 서울특별시서부교육지원청. All Rights Reserved.</span>
-        </div>
-
-        <!-- 하단 관리자 로그인 및 계정 설정 영역 (중앙 정렬) -->
-        <div class="footer-admin-row" style="margin-top: 14px; display: flex; justify-content: center;">
-          <div class="footer-admin-actions" style="display: flex; align-items: center; gap: 8px;">
+        <!-- 하단 영역 (좌측: 저작권, 우측: 관리자 계정 설정 및 로그인/로그아웃) -->
+        <div class="footer-bottom-row">
+          <div class="footer-copy">
+            © 2026 서울특별시서부교육지원청. All Rights Reserved.
+          </div>
+          <div class="footer-admin-actions">
             ${isAdmin ? `
-              <button id="footer-btn-admin-account" class="btn-footer-pill" style="background: #0e3753; color: #ffffff; font-weight: 800; border-color: #0e3753; padding: 6px 14px; font-size: 13px; border-radius: 9999px; cursor: pointer;" title="관리자 ID 현황 조회, 추가/삭제 및 비밀번호(PW) 설정">
+              <button id="footer-btn-admin-account" class="btn-footer-admin-action" title="관리자 ID 현황 조회, 추가/삭제 및 비밀번호(PW) 설정">
                 👥 관리자 계정 설정
               </button>
-              <button id="footer-btn-logout" class="footer-link-btn" style="margin-left: 6px; font-size: 12.5px; color: #64748b; background: none; border: none; cursor: pointer;">[관리자 로그아웃]</button>
+              <button id="footer-btn-logout" class="btn-footer-logout" title="관리자 모드 로그아웃">
+                로그아웃
+              </button>
             ` : `
-              <button id="footer-btn-admin-verify" class="btn-footer-pill admin-badge" style="padding: 6px 14px; font-size: 13px; border-radius: 9999px; cursor: pointer; background: #ffffff; border: 1.5px solid #cbd5e1; color: #475569; font-weight: 700;" title="관리자 로그인">
+              <button id="footer-btn-admin-verify" class="btn-footer-admin-action" title="관리자 로그인">
                 🔐 관리자 로그인
               </button>
             `}
