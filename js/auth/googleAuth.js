@@ -6,8 +6,6 @@ const ADMIN_PW_STORAGE_KEY = "seobu_admin_password_custom_v1";
 const ADMIN_EMAIL_STORAGE_KEY = "seobu_admin_email_custom_v2"; // v2로 승격하여 기존 예시 ID 잔여물 완전 격리
 const ADMIN_PASSWORDS_MAP_KEY = "seobu_admin_passwords_map_v1";
 
-const DEFAULT_ADMIN_PASSWORDS = ["qwer1234", "seobuedu2026@gmail.com"];
-// 오직 실 서비스용 기본 관리자 1개만 유지 (예시 더미 ID 전부 삭제)
 const DEFAULT_ADMIN_EMAILS = ["seobuedu2026@gmail.com"];
 
 // 구글 클라이언트 ID (Google Cloud Console seobuseoro 프로젝트)
@@ -26,18 +24,15 @@ export function getAdminPasswordMap() {
   return {};
 }
 
-// 특정 관리자 이메일의 비밀번호 반환 (미설정 시 공통 관리자 비밀번호 반환)
+// 특정 관리자 이메일의 비밀번호 반환
 export function getAdminPasswordForEmail(email) {
-  if (!email) return getAdminPassword();
+  if (!email) return "";
   const cleanEmail = email.trim().toLowerCase();
   const map = getAdminPasswordMap();
-  if (map[cleanEmail] && map[cleanEmail].trim()) {
-    return map[cleanEmail].trim();
-  }
-  return getAdminPassword();
+  return map[cleanEmail] || "";
 }
 
-// 특정 관리자 이메일의 비밀번호 설정
+// 특정 관리자 이메일의 비밀번호 설정/변경
 export function setAdminPasswordForEmail(email, newPassword) {
   if (!email || !newPassword || !newPassword.trim()) {
     return { success: false, message: "이메일과 새 비밀번호를 모두 입력해주세요." };
@@ -90,14 +85,17 @@ export function getAdminEmails() {
 }
 
 // 새 관리자 이메일 및 초기 비밀번호 등록/추가
-export function addAdminEmail(email, initialPassword = "") {
+export function addAdminEmail(email, initialPassword) {
   if (!email || !email.trim()) return { success: false, message: "이메일 주소를 입력해주세요." };
+  if (!initialPassword || initialPassword.trim().length < 4) {
+    return { success: false, message: "비밀번호는 최소 4자 이상으로 설정해주세요." };
+  }
   const cleanEmail = email.trim().toLowerCase();
   
   // 간단한 이메일 형식 검증
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(cleanEmail)) {
-    return { success: false, message: "올바른 이메일 형식을 입력해주세요. (예: user@senedu.kr)" };
+    return { success: false, message: "올바른 이메일 형식을 입력해주세요. (예: teacher@senedu.kr)" };
   }
 
   const currentEmails = getAdminEmails();
@@ -108,10 +106,8 @@ export function addAdminEmail(email, initialPassword = "") {
   const updated = [...currentEmails, cleanEmail];
   localStorage.setItem(ADMIN_EMAIL_STORAGE_KEY, JSON.stringify(updated));
 
-  // 비밀번호가 지정된 경우 개별 비밀번호 저장
-  if (initialPassword && initialPassword.trim()) {
-    setAdminPasswordForEmail(cleanEmail, initialPassword.trim());
-  }
+  // 비밀번호 저장
+  setAdminPasswordForEmail(cleanEmail, initialPassword.trim());
 
   window.dispatchEvent(new CustomEvent("auth-state-changed", { detail: { user: GoogleAuthService.getCurrentUser() } }));
   return { success: true, emails: updated };
@@ -163,7 +159,7 @@ export function setPrimaryAdminEmail(email) {
 // 현재 공통 관리자 비밀번호 반환
 export function getAdminPassword() {
   const saved = localStorage.getItem(ADMIN_PW_STORAGE_KEY);
-  return saved ? saved.trim() : "qwer1234";
+  return saved ? saved.trim() : "";
 }
 
 // 주 관리자 이메일 반환
@@ -269,20 +265,24 @@ export const GoogleAuthService = {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPw = password.trim();
 
-    const allowedEmails = getAdminEmails();
-    const specificPw = getAdminPasswordForEmail(cleanEmail);
-    const globalPw = getAdminPassword();
+    const allowedEmails = getAdminEmails().map(e => e.toLowerCase());
+    const isEmailValid = allowedEmails.includes(cleanEmail);
 
-    const isPwValid = (cleanPw === specificPw) || (cleanPw === globalPw) || DEFAULT_ADMIN_PASSWORDS.includes(cleanPw);
-    const isEmailValid = allowedEmails.map(e => e.toLowerCase()).includes(cleanEmail);
-
-    if (!isPwValid) {
-      return { success: false, message: "관리자 비밀번호(PW)가 일치하지 않습니다." };
+    if (!isEmailValid) {
+      return { success: false, message: "등록되지 않은 관리자 이메일입니다." };
     }
 
-    // 관리자 비밀번호가 일치하면 해당 이메일을 관리자 목록에 자동 등록 및 허용
-    if (!isEmailValid) {
-      addAdminEmail(cleanEmail);
+    const map = getAdminPasswordMap();
+    const specificPw = map[cleanEmail];
+
+    // 해당 관리자 계정에 비밀번호가 설정되어 있는 경우 일치 여부 확인
+    if (specificPw) {
+      if (cleanPw !== specificPw) {
+        return { success: false, message: "관리자 비밀번호(PW)가 일치하지 않습니다." };
+      }
+    } else {
+      // 최초 로그인 시 입력한 비밀번호를 해당 ID의 비밀번호로 저장
+      setAdminPasswordForEmail(cleanEmail, cleanPw);
     }
 
     localStorage.setItem(ADMIN_MODE_KEY, "true");
