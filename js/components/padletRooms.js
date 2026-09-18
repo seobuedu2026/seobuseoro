@@ -35,7 +35,7 @@ export function renderPadletRooms(container) {
               <div class="padlet-icon-box" style="background-color: ${room.iconBg || '#f0fdf4'};">
                 <span class="padlet-icon-emoji">${room.icon || '📚'}</span>
               </div>
-              <span class="padlet-status-badge">${room.badge || '링크 바로가기'}</span>
+              ${(room.badge && room.badge !== '링크 준비중') ? `<span class="padlet-status-badge">${room.badge}</span>` : ''}
               <h3 class="padlet-room-title">${room.title}</h3>
               <p class="padlet-room-desc">${room.desc}</p>
             </a>

@@ -47,8 +47,8 @@ export function openRoomEditModal(roomObj, onSaved) {
               <input type="text" id="room-icon-input" class="m3-input" value="${room.icon || '📚'}" placeholder="예: 📖, 🎨, 🤖" style="padding: 10px 12px; font-size: 15px; text-align: center;" />
             </div>
             <div class="form-group" style="margin-bottom: 0;">
-              <label style="font-weight: 800; font-size: 14px; color: #0e3753;">상태 뱃지 문구</label>
-              <input type="text" id="room-badge-input" class="m3-input" value="${room.badge || '링크 바로가기'}" placeholder="예: 링크 바로가기, 링크 준비중" style="padding: 10px 12px; font-size: 14px;" />
+              <label style="font-weight: 800; font-size: 14px; color: #0e3753;">상태 뱃지 문구 (선택)</label>
+              <input type="text" id="room-badge-input" class="m3-input" value="${(room.badge && room.badge !== '링크 준비중') ? room.badge : ''}" placeholder="미입력 시 뱃지 미표시" style="padding: 10px 12px; font-size: 14px;" />
             </div>
           </div>
 
@@ -112,7 +112,7 @@ export function openRoomEditModal(roomObj, onSaved) {
     const title = mount.querySelector("#room-title-input").value.trim();
     const padletUrl = mount.querySelector("#room-url-input").value.trim();
     const icon = mount.querySelector("#room-icon-input").value.trim() || "📚";
-    const badge = mount.querySelector("#room-badge-input").value.trim() || "링크 바로가기";
+    const badge = mount.querySelector("#room-badge-input").value.trim();
     const desc = mount.querySelector("#room-desc-input").value.trim();
 
     if (!title) {
