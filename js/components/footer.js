@@ -48,8 +48,7 @@ export function renderFooter(container) {
   if (btnLogout) {
     btnLogout.addEventListener("click", () => {
       GoogleAuthService.logout();
-      renderFooter(container);
-      window.dispatchEvent(new CustomEvent("auth-state-changed"));
+      alert("✅ 관리자 로그아웃 되었습니다.");
     });
   }
 

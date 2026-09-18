@@ -251,11 +251,6 @@ export const GoogleAuthService = {
 
   // 관리자 모드 활성화 여부
   isAdminModeActive() {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get("admin") === "true" || urlParams.get("seobu_admin_mode") === "true") {
-      localStorage.setItem(ADMIN_MODE_KEY, "true");
-      return true;
-    }
     return localStorage.getItem(ADMIN_MODE_KEY) === "true";
   },
 
@@ -298,9 +293,7 @@ export const GoogleAuthService = {
 
   // 관리자 모드 해제
   disableAdminMode() {
-    localStorage.removeItem(ADMIN_MODE_KEY);
-    localStorage.removeItem("seobu_admin_custom_email");
-    window.dispatchEvent(new CustomEvent("auth-state-changed", { detail: { user: this.getCurrentUser() } }));
+    this.logout();
   },
 
   // @senedu.kr 전용 로그인 처리 (구글 OAuth 또는 직접 검증)
@@ -464,11 +457,34 @@ export const GoogleAuthService = {
   logout() {
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(ADMIN_MODE_KEY);
+    localStorage.removeItem("seobu_admin_custom_email");
+
+    // URL에서 ?admin=true 또는 ?seobu_admin_mode=true 파라미터가 남아있다면 제거
+    if (window.history && window.history.replaceState) {
+      try {
+        const url = new URL(window.location.href);
+        let changed = false;
+        if (url.searchParams.has("admin")) {
+          url.searchParams.delete("admin");
+          changed = true;
+        }
+        if (url.searchParams.has("seobu_admin_mode")) {
+          url.searchParams.delete("seobu_admin_mode");
+          changed = true;
+        }
+        if (changed) {
+          const newUrl = url.pathname + (url.search ? url.search : "") + (url.hash ? url.hash : "");
+          window.history.replaceState(null, "", newUrl);
+        }
+      } catch (e) {}
+    }
+
     if (typeof window.google !== "undefined" && window.google.accounts && window.google.accounts.id) {
       try {
         window.google.accounts.id.disableAutoSelect();
       } catch (e) {}
     }
+
     window.dispatchEvent(new CustomEvent("auth-state-changed", { detail: { user: null } }));
   }
 };
