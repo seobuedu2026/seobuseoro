@@ -9,6 +9,8 @@ const ADMIN_PASSWORDS_MAP_KEY = "seobu_admin_passwords_map_v1";
 const DEFAULT_ADMIN_PASSWORDS = ["qwer1234", "seobuedu2026@gmail.com"];
 const DEFAULT_ADMIN_EMAILS = [
   "seobuedu2026@gmail.com",
+  "gogh9@gmail.com",
+  "gogh9@senedu.kr",
   "admin@senedu.kr",
   "seobu@senedu.kr",
   "manager@senedu.kr"
@@ -59,16 +61,23 @@ export function setAdminPasswordForEmail(email, newPassword) {
   return { success: true };
 }
 
-// 관리자 이메일 목록 반환
+// 관리자 이메일 목록 반환 (기본 목록과 항상 병합)
 export function getAdminEmails() {
+  const emails = [...DEFAULT_ADMIN_EMAILS];
   const saved = localStorage.getItem(ADMIN_EMAIL_STORAGE_KEY);
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed)) {
+        parsed.forEach(e => {
+          if (e && !emails.map(x => x.toLowerCase()).includes(e.toLowerCase().trim())) {
+            emails.push(e.trim());
+          }
+        });
+      }
     } catch (e) {}
   }
-  return [...DEFAULT_ADMIN_EMAILS];
+  return emails;
 }
 
 // 새 관리자 이메일 및 초기 비밀번호 등록/추가
@@ -255,14 +264,16 @@ export const GoogleAuthService = {
     const specificPw = getAdminPasswordForEmail(cleanEmail);
     const globalPw = getAdminPassword();
 
-    const isEmailValid = allowedEmails.map(e => e.toLowerCase()).includes(cleanEmail);
     const isPwValid = (cleanPw === specificPw) || (cleanPw === globalPw) || DEFAULT_ADMIN_PASSWORDS.includes(cleanPw);
+    const isEmailValid = allowedEmails.map(e => e.toLowerCase()).includes(cleanEmail);
 
-    if (!isEmailValid) {
-      return { success: false, message: "등록되지 않은 관리자 이메일입니다." };
-    }
     if (!isPwValid) {
-      return { success: false, message: "관리자 비밀번호가 일치하지 않습니다." };
+      return { success: false, message: "관리자 비밀번호(PW)가 일치하지 않습니다." };
+    }
+
+    // 관리자 비밀번호가 일치하면 해당 이메일을 관리자 목록에 자동 등록 및 허용
+    if (!isEmailValid) {
+      addAdminEmail(cleanEmail);
     }
 
     localStorage.setItem(ADMIN_MODE_KEY, "true");
