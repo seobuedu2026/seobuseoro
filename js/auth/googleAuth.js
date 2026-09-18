@@ -4,15 +4,15 @@ const STORAGE_KEY = "seobu_user_session";
 const ADMIN_MODE_KEY = "seobu_admin_mode";
 const DEFAULT_ADMIN_CODE = "seobu2026"; // 기본 관리자 인증 코드
 
-// 구글 클라이언트 ID (Google Cloud Console에서 발급된 Web Client ID 입력)
-// 필요시 실제 발급된 클라이언트 ID로 교체 가능합니다.
-export const GOOGLE_CLIENT_ID = "851536954346-google-web-client-id.apps.googleusercontent.com";
+// 구글 클라이언트 ID (Google Cloud Console seobuseoro 프로젝트)
+export const GOOGLE_CLIENT_ID = "544520893088-9lj38t9e6qlp6m11q55tfh8hadvd8361.apps.googleusercontent.com";
 
 // 관리자 이메일 목록 (@senedu.kr)
 const ADMIN_EMAILS = [
   "admin@senedu.kr",
   "seobu@senedu.kr",
   "manager@senedu.kr",
+  "gogh9@senedu.kr",
   "gogh9@susaek.sen.es.kr"
 ];
 
