@@ -141,36 +141,36 @@ export function renderReviews(container, preselectedEventId = null) {
         <div class="review-feed-list" id="review-feed-container">
           ${reviews.map(rev => `
             <div class="review-feed-card" data-review-id="${rev.id}">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                  <div style="width: 32px; height: 32px; border-radius: 50%; background: #008080; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">
+              <!-- 상단 바: 작성자 정보 + 별점 & 공감 버튼 -->
+              <div class="review-card-top-row">
+                <div class="review-user-info-group">
+                  <div class="review-user-avatar">
                     ${rev.userName[0]}
                   </div>
                   <div>
-                    <div style="font-size: 14px; font-weight: 800; color: #1e293b;">
+                    <div class="review-user-name">
                       ${rev.userName}
-                      ${rev.isSenedu ? `<span style="font-size: 11px; color: #008080; margin-left: 4px;">@senedu.kr</span>` : ''}
+                      ${rev.isSenedu ? `<span class="review-senedu-badge">@senedu.kr</span>` : ''}
                     </div>
-                    <div style="font-size: 11px; color: #94a3b8;">${rev.createdAt}</div>
+                    <div class="review-date-text">${rev.createdAt}</div>
                   </div>
                 </div>
 
-                <div style="color: #f59e0b; font-size: 16px; letter-spacing: 1px;">
-                  ${'★'.repeat(rev.rating)}${'☆'.repeat(5 - rev.rating)}
+                <div class="review-top-actions-group">
+                  <div class="review-star-rating">
+                    ${'★'.repeat(rev.rating)}${'☆'.repeat(5 - rev.rating)}
+                  </div>
+                  <button class="btn-like-pill btn-like" data-review-id="${rev.id}" title="공감하기">
+                    ❤️ <span>공감</span> <strong>${rev.likes || 0}</strong>
+                  </button>
                 </div>
               </div>
 
-              <div style="display: inline-block; font-size: 12px; font-weight: 800; background: #f1f5f9; color: #334155; padding: 4px 10px; border-radius: 9999px; margin-bottom: 10px;">
+              <div class="review-event-tag">
                 🎯 ${rev.eventTitle}
               </div>
 
-              <p style="font-size: 14px; color: #334155; line-height: 1.6;">${rev.content}</p>
-
-              <div style="margin-top: 14px; display: flex; justify-content: flex-end;">
-                <button class="btn-m3-outlined btn-like" data-review-id="${rev.id}" style="padding: 4px 12px; font-size: 12px;">
-                  ❤️ 공감 <span>${rev.likes || 0}</span>
-                </button>
-              </div>
+              <p class="review-content-body">${rev.content}</p>
             </div>
           `).join("")}
         </div>
