@@ -131,23 +131,33 @@ button {
   margin: 0;
 }
 
-.footer-admin-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 16px;
-  border-top: 1px dashed #cbd5e1;
-  flex-wrap: wrap;
-  gap: 12px;
+.footer-copyright-center {
+  width: 100%;
+  text-align: center;
+  margin: 4px 0 2px 0;
 }
 
 .footer-copy {
-  font-size: 12px;
-  color: #94a3b8;
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+  text-align: center;
+}
+
+.footer-admin-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px dashed #cbd5e1;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
 }
 
 .footer-admin-actions {
   display: flex;
+  justify-content: center;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;

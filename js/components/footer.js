@@ -16,33 +16,21 @@ export function renderFooter(container) {
           <p class="footer-notice-text">※ 세부 일정 및 장소는 학교 공문 및 신청 링크를 통해 확인하시기 바랍니다.</p>
         </div>
 
-        <!-- 하단 관리자 및 인증 유틸리티 바 -->
-        <div class="footer-admin-row">
-          <div class="footer-admin-left">
-            <span class="footer-copy">© 2026 서울특별시서부교육지원청. All Rights Reserved.</span>
-          </div>
+        <!-- 저작권 표시 (중앙 정렬) -->
+        <div class="footer-copyright-center">
+          <span class="footer-copy">© 2026 서울특별시서부교육지원청. All Rights Reserved.</span>
+        </div>
 
+        <!-- 하단 관리자 모드 영역 (중앙 정렬) -->
+        <div class="footer-admin-row">
           <div class="footer-admin-actions">
             ${isAdmin ? `
               <button id="footer-btn-admin-excel" class="btn-footer-pill admin-active">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
                 ⚙️ 행사 관리 (엑셀 등록)
               </button>
-            ` : ''}
-
-            ${user ? `
-              <div class="footer-user-tag">
-                <span>
-                  <strong>${user.name}</strong> 
-                  ${user.isAdmin ? '<span style="color:#008080; font-weight:800;">[관리자]</span>' : (user.isSenedu ? '<span style="color:#0284c7;">(@senedu)</span>' : '')}
-                </span>
-                <button id="footer-btn-logout" class="footer-link-btn">로그아웃</button>
-              </div>
+              <button id="footer-btn-logout" class="footer-link-btn" style="margin-left: 6px;">[관리자 로그아웃]</button>
             ` : `
-              <button id="footer-btn-login" class="btn-footer-pill">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.761H12.545z"/></svg>
-                Google 로그인
-              </button>
               <button id="footer-btn-admin-verify" class="btn-footer-pill admin-badge" title="관리자 인증">
                 🔐 관리자 모드
               </button>
@@ -54,18 +42,9 @@ export function renderFooter(container) {
   `;
 
   // 이벤트 리스너 바인딩
-  const btnLogin = container.querySelector("#footer-btn-login");
   const btnLogout = container.querySelector("#footer-btn-logout");
   const btnAdminVerify = container.querySelector("#footer-btn-admin-verify");
   const btnAdminExcel = container.querySelector("#footer-btn-admin-excel");
-
-  if (btnLogin) {
-    btnLogin.addEventListener("click", () => {
-      GoogleAuthService.showLoginPrompt(() => {
-        renderFooter(container);
-      });
-    });
-  }
 
   if (btnLogout) {
     btnLogout.addEventListener("click", () => {
