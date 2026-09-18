@@ -85,18 +85,19 @@ export function renderReviews(container, preselectedEventId = null) {
           </h3>
 
           ${!user ? `
-            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px 18px; text-align: center;">
-              <div style="font-size: 32px; margin-bottom: 10px;">🔒</div>
-              <h4 style="font-size: 15px; font-weight: 800; color: #0e3753; margin-bottom: 6px;">
-                서울시교육청 구글 계정 로그인
-              </h4>
-              <p style="font-size: 13px; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
-                후기 작성은 <strong style="color: #0284c7;">@senedu.kr</strong> 전용 계정으로만 가능합니다.<br>
-                (일반 구글/타 도메인 계정은 제한됩니다)
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 24px 18px; text-align: center;">
+              <div style="font-size: 32px; margin-bottom: 12px;">🔒</div>
+              <p style="font-size: 14px; font-weight: 700; color: #0e3753; margin-bottom: 6px; line-height: 1.5;">
+                후기 작성은 로그인(센스쿨 구글 계정 <span style="color: #0284c7;">@senedu.kr</span>) 후 가능합니다.
+              </p>
+              <p style="font-size: 12.5px; color: #64748b; margin-bottom: 18px;">
+                (일반 구글 계정은 제한됩니다)
               </p>
 
-              <!-- Google Identity Services 버튼 렌더링 컨테이너 -->
-              <div id="google-signin-btn-container" style="display: flex; justify-content: center; margin-top: 8px; min-height: 44px;"></div>
+              <!-- 커스텀 로그인 버튼 (Google G 모양 제거) -->
+              <button id="btn-custom-google-login" class="btn-m3-filled" style="width: 100%; padding: 12px 18px; font-size: 14.5px; font-weight: 800; border-radius: var(--shape-pill); justify-content: center; box-shadow: 0 4px 12px rgba(14, 55, 83, 0.2);">
+                로그인 (센스쿨 구글 계정)
+              </button>
             </div>
           ` : `
             <form id="review-submit-form">
@@ -187,14 +188,16 @@ export function renderReviews(container, preselectedEventId = null) {
     </div>
   `;
 
-  // 미로그인 상태일 때 Google 버튼 바인딩
+  // 미로그인 상태일 때 커스텀 로그인 버튼 바인딩
   if (!user) {
-    // Google Identity Services 렌더링 시도
-    setTimeout(() => {
-      GoogleAuthService.renderGoogleButton("google-signin-btn-container", () => {
-        renderReviews(container, preselectedEventId);
+    const btnLogin = container.querySelector("#btn-custom-google-login");
+    if (btnLogin) {
+      btnLogin.addEventListener("click", () => {
+        GoogleAuthService.triggerGoogleLogin(() => {
+          renderReviews(container, preselectedEventId);
+        });
       });
-    }, 100);
+    }
   } else {
     // 로그아웃 버튼
     const btnLogout = container.querySelector("#btn-review-logout");

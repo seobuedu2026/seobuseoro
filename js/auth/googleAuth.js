@@ -112,7 +112,7 @@ export const GoogleAuthService = {
 
     // 엄격한 @senedu.kr 도메인 제한
     if (!cleanEmail.endsWith("@senedu.kr")) {
-      alert(`⚠️ 로그인 실패: 서울시교육청 계정(@senedu.kr)만 사용 가능합니다.\n(입력된 계정: ${cleanEmail})\n일반 Gmail이나 타 도메인 계정은 제한됩니다.`);
+      alert(`⚠️ 일반 구글 계정은 제한됩니다.\n\n센스쿨 구글 계정(@senedu.kr)으로 로그인해 주세요.\n(선택된 계정: ${cleanEmail})`);
       return null;
     }
 
@@ -133,6 +133,71 @@ export const GoogleAuthService = {
     return user;
   },
 
+  // 커스텀 버튼 클릭 시 구글 OAuth 팝업 실행 (G 로고 없는 커스텀 UI)
+  triggerGoogleLogin(onSuccess, onFailure) {
+    if (typeof window.google !== "undefined" && window.google.accounts && window.google.accounts.oauth2) {
+      try {
+        const client = window.google.accounts.oauth2.initTokenClient({
+          client_id: GOOGLE_CLIENT_ID,
+          scope: "email profile openid",
+          hint: "senedu.kr",
+          callback: async (tokenResponse) => {
+            if (tokenResponse.error) {
+              console.error("Google OAuth token error:", tokenResponse);
+              return;
+            }
+            if (tokenResponse.access_token) {
+              try {
+                const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+                  headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+                });
+                const data = await res.json();
+                const email = (data.email || "").toLowerCase().trim();
+
+                if (!email.endsWith("@senedu.kr")) {
+                  alert(`⚠️ 일반 구글 계정은 제한됩니다.\n\n센스쿨 구글 계정(@senedu.kr)으로 로그인해 주세요.\n(로그인 시도 계정: ${email})`);
+                  if (onFailure) onFailure("도메인 불일치");
+                  return;
+                }
+
+                const user = this.login(email, data.name || data.given_name || "서부 교사", data.picture || "");
+                if (user && onSuccess) {
+                  onSuccess(user);
+                }
+              } catch (err) {
+                console.error("사용자 정보 조회 실패:", err);
+                alert("구글 사용자 정보를 불러오지 못했습니다.");
+              }
+            }
+          }
+        });
+
+        client.requestAccessToken({ prompt: "select_account", hd: "senedu.kr" });
+        return;
+      } catch (e) {
+        console.warn("OAuth2 initTokenClient 오류, ID 토큰 방식으로 대체 시도:", e);
+      }
+    }
+
+    // Google Identity ID 토큰 방식 fallback
+    if (typeof window.google !== "undefined" && window.google.accounts && window.google.accounts.id) {
+      try {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          hosted_domain: "senedu.kr",
+          callback: (resp) => {
+            this.handleGoogleCredential(resp, onSuccess, onFailure);
+          }
+        });
+        window.google.accounts.id.prompt();
+        return;
+      } catch (e) {}
+    }
+
+    // 만약 라이브러리가 로드되지 않은 환경인 경우
+    this.showLoginPrompt(onSuccess);
+  },
+
   // Google Identity Services JWT 콜백 처리
   handleGoogleCredential(response, onSuccess, onFailure) {
     if (!response || !response.credential) {
@@ -151,7 +216,7 @@ export const GoogleAuthService = {
     const isSeneduDomain = email.endsWith("@senedu.kr") || payload.hd === "senedu.kr";
 
     if (!isSeneduDomain) {
-      alert(`⚠️ 로그인 불가 안내\n\n본 시스템은 서울특별시교육청(@senedu.kr) 전용입니다.\n선택하신 계정(${email})은 일반 구글 계정이므로 로그인이 제한됩니다.\n\n@senedu.kr 구글 계정으로 다시 로그인해 주세요.`);
+      alert(`⚠️ 일반 구글 계정은 제한됩니다.\n\n센스쿨 구글 계정(@senedu.kr)으로 로그인해 주세요.\n(로그인 시도 계정: ${email})`);
       if (onFailure) onFailure("도메인 불일치");
       return;
     }
@@ -161,44 +226,6 @@ export const GoogleAuthService = {
     if (user && onSuccess) {
       onSuccess(user);
     }
-  },
-
-  // Google Identity Services 초기화 및 버튼 마운트
-  renderGoogleButton(containerId, onSuccess) {
-    if (typeof window.google === "undefined" || !window.google.accounts || !window.google.accounts.id) {
-      return false;
-    }
-
-    try {
-      window.google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        hosted_domain: "senedu.kr", // 구글 로그인 창에서 senedu.kr 도메인 기본 유도
-        callback: (resp) => {
-          this.handleGoogleCredential(resp, onSuccess);
-        },
-        auto_select: false,
-        cancel_on_tap_outside: true
-      });
-
-      const container = document.getElementById(containerId);
-      if (container) {
-        container.innerHTML = "";
-        window.google.accounts.id.renderButton(container, {
-          theme: "outline",
-          size: "large",
-          type: "standard",
-          text: "signin_with",
-          shape: "pill",
-          logo_alignment: "left",
-          width: 260,
-          locale: "ko"
-        });
-        return true;
-      }
-    } catch (e) {
-      console.warn("Google Sign-In 렌더링 주의:", e);
-    }
-    return false;
   },
 
   // 로그아웃 처리
@@ -216,13 +243,13 @@ export const GoogleAuthService = {
   // 직접 로그인 모달/프롬프트 (도메인 엄격 검증)
   showLoginPrompt(callback) {
     const userEmail = prompt(
-      "📌 서울시교육청(@senedu.kr) 이메일을 입력하세요:\n(예: teacher@senedu.kr)\n* @senedu.kr 계정만 로그인 가능합니다.",
+      "📌 센스쿨 구글 계정(@senedu.kr)을 입력하세요:\n(예: teacher@senedu.kr)\n* 일반 구글 계정은 제한됩니다.",
       "teacher@senedu.kr"
     );
     if (userEmail && userEmail.trim()) {
       const email = userEmail.trim().toLowerCase();
       if (!email.endsWith("@senedu.kr")) {
-        alert(`❌ 로그인 실패: 서울시교육청 계정(@senedu.kr)만 사용 가능합니다.\n(입력된 계정: ${email})`);
+        alert(`⚠️ 일반 구글 계정은 제한됩니다.\n\n센스쿨 구글 계정(@senedu.kr)으로 로그인해 주세요.\n(입력된 계정: ${email})`);
         return;
       }
       const defaultName = email.split("@")[0] + " 선생님";
