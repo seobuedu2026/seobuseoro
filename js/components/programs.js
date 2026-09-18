@@ -1,4 +1,4 @@
-import { getEvents, isEventPastOrToday } from "../data/events.js";
+import { getEvents, isEventPastOrToday, getActiveMonths } from "../data/events.js";
 import { GoogleAuthService } from "../auth/googleAuth.js";
 import { openEventFormModal } from "./eventFormModal.js";
 
