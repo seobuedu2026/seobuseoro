@@ -9,17 +9,15 @@ export function renderPadletRooms(container) {
 
   container.innerHTML = `
     <div class="padlet-view-wrapper">
-      <!-- 상단 타이틀 헤더 (가운데 정렬 및 추가 버튼) -->
+      <!-- 상단 타이틀 헤더 (한줄 정리) -->
       <div class="padlet-header-box">
-        <h2 class="padlet-main-title">
-          수업나눔방(자료실)
-        </h2>
-        <p class="padlet-sub-title">
-          교과군별 패들렛에서 선생님들의 수업 사례를 자유롭게 나눠보세요.
-        </p>
+        <div class="tab-header-single-line" style="margin-bottom: 0;">
+          <h2 class="padlet-main-title">수업나눔방(자료실)</h2>
+          <p class="padlet-sub-title">교과군별 패들렛에서 선생님들의 수업 사례를 자유롭게 나눠보세요.</p>
+        </div>
 
         ${isAdmin ? `
-          <div style="display: flex; justify-content: center; gap: 8px; margin-top: 16px;">
+          <div style="display: flex; justify-content: center; gap: 8px; margin-top: 14px;">
             <button id="btn-add-new-room" class="btn-m3-pill-action">
               <span>➕ 새 수업나눔방 추가</span>
             </button>

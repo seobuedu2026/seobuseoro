@@ -1006,20 +1006,36 @@
 
 .padlet-header-box {
   text-align: center;
-  margin-bottom: 28px;
+  margin-bottom: 22px;
 }
 
-.padlet-main-title {
-  font-size: 34px;
+.tab-header-single-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.padlet-main-title,
+.tab-header-title {
+  font-size: 26px;
   font-weight: 900;
   color: #0e3753;
   letter-spacing: -0.5px;
+  margin: 0;
+  display: inline-block;
 }
 
-.padlet-sub-title {
-  font-size: 16px;
+.padlet-sub-title,
+.tab-header-desc {
+  font-size: 14.5px;
   color: #64748b;
-  margin-top: 6px;
+  margin: 0;
+  font-weight: 600;
+  display: inline-block;
 }
 
 .padlet-cards-grid {

@@ -41,13 +41,9 @@ export function renderPrograms(container, onSelectEventModal) {
 
   container.innerHTML = `
     <div class="programs-view-wrapper">
-      <div style="margin-bottom: 24px; text-align: center;">
-        <h2 style="font-size: 32px; font-weight: 900; color: #0e3753; letter-spacing: -0.5px;">
-          프로그램 한눈에 보기
-        </h2>
-        <p style="font-size: 15px; color: #64748b; margin-top: 6px;">
-          월과 유형으로 찾아보고, 카드를 누르면 상세 내용을 펼쳐보거나 접을 수 있습니다.
-        </p>
+      <div class="tab-header-single-line" style="margin-bottom: 22px;">
+        <h2 class="tab-header-title">프로그램 한눈에 보기</h2>
+        <p class="tab-header-desc">월과 유형으로 찾아보고, 카드를 누르면 상세 내용을 펼쳐보거나 접을 수 있습니다.</p>
       </div>
 
       <!-- 새 프로그램 추가 버튼 (관리자 전용) -->
