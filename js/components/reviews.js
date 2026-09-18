@@ -301,7 +301,7 @@ export function renderReviews(container, preselectedEventId = null) {
     const btnLogin = container.querySelector("#btn-custom-google-login");
     if (btnLogin) {
       btnLogin.addEventListener("click", () => {
-        GoogleAuthService.openTeacherLoginModal(() => {
+        GoogleAuthService.triggerGoogleLogin((user) => {
           renderReviews(container, preselectedEventId);
         });
       });

@@ -311,9 +311,70 @@ export const GoogleAuthService = {
     return user;
   },
 
-  // 커스텀 버튼 클릭 시 구글 OAuth 팝업 실행 (G 로고 없는 커스텀 UI)
-  // 커스텀 버튼 클릭 시 구글 OAuth 팝업 실행 (G 로고 없는 커스텀 UI)
+  // 구글 OAuth 직접 리다이렉트 (모바일 Safari, 팝업 차단 환경 100% 호환)
+  redirectToGoogleOAuth() {
+    const origin = window.location.origin;
+    const pathname = window.location.pathname.endsWith("/") ? window.location.pathname : window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/") + 1);
+    const redirectUri = `${origin}${pathname}`;
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(GOOGLE_CLIENT_ID)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token%20id_token&scope=email%20profile%20openid&hd=senedu.kr&prompt=select_account&nonce=${Date.now()}`;
+    window.location.href = authUrl;
+  },
+
+  // 액세스 토큰으로 사용자 프로필 조회 및 로그인
+  async fetchUserInfoAndLogin(accessToken, onSuccess, onFailure) {
+    if (!accessToken) {
+      if (onFailure) onFailure("인증 토큰이 없습니다.");
+      return;
+    }
+
+    let userInfo = null;
+    // 1. Googleapis userinfo 엔드포인트
+    try {
+      const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      if (res.ok) {
+        userInfo = await res.json();
+      }
+    } catch (e) {
+      console.warn("userinfo fetch 1 failed:", e);
+    }
+
+    // 2. OpenID Connect fallback
+    if (!userInfo || !userInfo.email) {
+      try {
+        const res2 = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        if (res2.ok) {
+          userInfo = await res2.json();
+        }
+      } catch (e) {
+        console.warn("userinfo fetch 2 failed:", e);
+      }
+    }
+
+    if (userInfo && userInfo.email) {
+      const email = (userInfo.email || "").toLowerCase().trim();
+      if (!email.endsWith("@senedu.kr")) {
+        alert(`⚠️ 일반 구글 계정은 제한됩니다.\n\n센스쿨 구글 계정(@senedu.kr)으로 로그인해 주세요.\n(선택된 계정: ${email})`);
+        if (onFailure) onFailure("도메인 불일치");
+        return;
+      }
+
+      const user = this.login(email, userInfo.name || userInfo.given_name || "서부 교사", userInfo.picture || "");
+      if (user && onSuccess) {
+        onSuccess(user);
+      }
+      return user;
+    }
+
+    if (onFailure) onFailure("사용자 정보를 불러올 수 없습니다.");
+  },
+
+  // 커스텀 버튼 클릭 시 구글 OAuth 로그인 실행
   triggerGoogleLogin(onSuccess, onFailure) {
+    // 모바일/PC 브라우저 Google Identity Services OAuth 토큰 클라이언트
     if (typeof window.google !== "undefined" && window.google.accounts && window.google.accounts.oauth2) {
       try {
         const client = window.google.accounts.oauth2.initTokenClient({
@@ -322,54 +383,16 @@ export const GoogleAuthService = {
           hint: "senedu.kr",
           callback: async (tokenResponse) => {
             if (tokenResponse.error) {
-              console.warn("Google OAuth token error:", tokenResponse);
+              console.warn("Google OAuth popup error:", tokenResponse.error);
+              if (tokenResponse.error === "popup_closed_by_user" || tokenResponse.error === "access_denied") {
+                return;
+              }
+              // 팝업 차단 또는 모바일 오류 시 리다이렉트 로그인으로 자동 전환
+              this.redirectToGoogleOAuth();
               return;
             }
             if (tokenResponse.access_token) {
-              let userInfo = null;
-              // 1. Googleapis userinfo 엔드포인트 시도
-              try {
-                const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-                  headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
-                });
-                if (res.ok) {
-                  userInfo = await res.json();
-                }
-              } catch (e) {
-                console.warn("userinfo fetch 1 failed:", e);
-              }
-
-              // 2. OpenID connect userinfo fallback 시도
-              if (!userInfo || !userInfo.email) {
-                try {
-                  const res2 = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
-                    headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
-                  });
-                  if (res2.ok) {
-                    userInfo = await res2.json();
-                  }
-                } catch (e) {
-                  console.warn("userinfo fetch 2 failed:", e);
-                }
-              }
-
-              if (userInfo && userInfo.email) {
-                const email = (userInfo.email || "").toLowerCase().trim();
-                if (!email.endsWith("@senedu.kr")) {
-                  alert(`⚠️ 일반 구글 계정은 제한됩니다.\n\n센스쿨 구글 계정(@senedu.kr)으로 로그인해 주세요.\n(선택된 계정: ${email})`);
-                  if (onFailure) onFailure("도메인 불일치");
-                  return;
-                }
-
-                const user = this.login(email, userInfo.name || userInfo.given_name || "서부 교사", userInfo.picture || "");
-                if (user && onSuccess) {
-                  onSuccess(user);
-                }
-                return;
-              }
-
-              // 모바일 브라우저 CORS 차단 등으로 사용자 정보 조회가 제한된 경우 간편 로그인 모달 연결
-              this.openTeacherLoginModal(onSuccess);
+              await this.fetchUserInfoAndLogin(tokenResponse.access_token, onSuccess, onFailure);
             }
           }
         });
@@ -377,27 +400,14 @@ export const GoogleAuthService = {
         client.requestAccessToken({ prompt: "select_account", hd: "senedu.kr" });
         return;
       } catch (e) {
-        console.warn("OAuth2 initTokenClient 오류, ID 토큰 방식으로 대체 시도:", e);
+        console.warn("OAuth2 initTokenClient 오류, 리다이렉트 로그인으로 진행:", e);
+        this.redirectToGoogleOAuth();
+        return;
       }
     }
 
-    // Google Identity ID 토큰 방식 fallback
-    if (typeof window.google !== "undefined" && window.google.accounts && window.google.accounts.id) {
-      try {
-        window.google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID,
-          hosted_domain: "senedu.kr",
-          callback: (resp) => {
-            this.handleGoogleCredential(resp, onSuccess, onFailure);
-          }
-        });
-        window.google.accounts.id.prompt();
-        return;
-      } catch (e) {}
-    }
-
-    // 모달 로그인
-    this.openTeacherLoginModal(onSuccess);
+    // Google 라이브러리가 지연 로딩되거나 모바일 팝업이 차단된 경우 구글 직접 리다이렉트
+    this.redirectToGoogleOAuth();
   },
 
   // Google Identity Services JWT 콜백 처리
@@ -409,7 +419,7 @@ export const GoogleAuthService = {
 
     const payload = parseJwt(response.credential);
     if (!payload || !payload.email) {
-      this.openTeacherLoginModal(onSuccess);
+      if (onFailure) onFailure("토큰 파싱 실패");
       return;
     }
 
@@ -439,138 +449,47 @@ export const GoogleAuthService = {
       } catch (e) {}
     }
     window.dispatchEvent(new CustomEvent("auth-state-changed", { detail: { user: null } }));
-  },
-
-  // 센스쿨(@senedu.kr) 교원 전용 로그인 모달 (모바일 100% 호환 & 구글 원클릭 지원)
-  openTeacherLoginModal(onSuccess) {
-    const mount = document.getElementById("modal-mount");
-    if (!mount) return;
-
-    mount.innerHTML = `
-      <div class="m3-modal-backdrop open" id="teacher-login-backdrop">
-        <div class="m3-modal-dialog" style="max-width: 440px;">
-          <div class="modal-header">
-            <h3 style="font-size: 18px; font-weight: 900; color: #0e3753; display: flex; align-items: center; gap: 8px;">
-              <span>🔐 센스쿨 교원 로그인</span>
-              <span style="font-size: 11px; font-weight: 800; background: #0284c7; color: #ffffff; padding: 2px 8px; border-radius: 9999px;">
-                @senedu.kr
-              </span>
-            </h3>
-            <button class="modal-close-btn" id="btn-close-teacher-modal" aria-label="닫기">✕</button>
-          </div>
-
-          <p style="font-size: 13.5px; color: #64748b; margin-bottom: 18px; line-height: 1.5;">
-            참여후기 및 수업나눔을 위해 센스쿨 구글 계정(<strong style="color: #0284c7;">@senedu.kr</strong>)으로 로그인해 주세요.
-          </p>
-
-          <!-- 옵션 1: 구글 원클릭 로그인 버튼 -->
-          <div style="margin-bottom: 18px;">
-            <button type="button" id="btn-modal-gsi-oauth" class="btn-m3-filled" style="width: 100%; padding: 12px; font-size: 14.5px; font-weight: 800; border-radius: var(--shape-pill); background: #0e3753; justify-content: center; box-shadow: 0 4px 12px rgba(14, 55, 83, 0.2); display: flex; align-items: center; gap: 8px;">
-              <span>🚀 구글 계정으로 로그인</span>
-            </button>
-          </div>
-
-          <!-- 구분선 -->
-          <div style="display: flex; align-items: center; margin-bottom: 18px; gap: 10px;">
-            <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
-            <span style="font-size: 12px; color: #94a3b8; font-weight: 700;">또는 센스쿨 이메일 직접 입력</span>
-            <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
-          </div>
-
-          <!-- 옵션 2: 모바일 최적화 센스쿨 이메일 직접 입력 폼 -->
-          <form id="teacher-direct-login-form">
-            <div class="form-group" style="margin-bottom: 12px;">
-              <label for="teacher-name-input" style="font-weight: 800; font-size: 13px; color: #0e3753;">
-                교원 성함 / 닉네임 *
-              </label>
-              <input type="text" id="teacher-name-input" class="m3-input" placeholder="예: 홍길동" required style="padding: 10px 12px; font-size: 14px;" />
-            </div>
-
-            <div class="form-group" style="margin-bottom: 20px;">
-              <label for="teacher-email-prefix" style="font-weight: 800; font-size: 13px; color: #0e3753;">
-                센스쿨 이메일 아이디 *
-              </label>
-              <div style="display: flex; align-items: center; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 10px; overflow: hidden;">
-                <input type="text" id="teacher-email-prefix" placeholder="아이디 입력 (예: gogh9)" required style="flex: 1; border: none; padding: 10px 12px; font-size: 14.5px; outline: none;" />
-                <span style="padding: 10px 12px; background: #f1f5f9; color: #0284c7; font-weight: 800; font-size: 13.5px; border-left: 1px solid #cbd5e1; white-space: nowrap;">
-                  @senedu.kr
-                </span>
-              </div>
-              <span style="font-size: 11.5px; color: #64748b; margin-top: 4px; display: block;">
-                * @senedu.kr 앞의 아이디만 입력하셔도 됩니다.
-              </span>
-            </div>
-
-            <div style="display: flex; gap: 8px; justify-content: flex-end;">
-              <button type="button" id="btn-cancel-teacher-login" class="btn-m3-outlined">취소</button>
-              <button type="submit" class="btn-m3-filled" style="background: #008080; border-color: #008080;">
-                ✍️ 센스쿨 인증 및 로그인
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    `;
-
-    const backdrop = mount.querySelector("#teacher-login-backdrop");
-    const closeBtn = mount.querySelector("#btn-close-teacher-modal");
-    const cancelBtn = mount.querySelector("#btn-cancel-teacher-login");
-    const btnGoogleOAuth = mount.querySelector("#btn-modal-gsi-oauth");
-    const form = mount.querySelector("#teacher-direct-login-form");
-    const nameInput = mount.querySelector("#teacher-name-input");
-    const emailPrefixInput = mount.querySelector("#teacher-email-prefix");
-
-    const closeModal = () => {
-      backdrop.classList.remove("open");
-      setTimeout(() => {
-        if (mount.querySelector("#teacher-login-backdrop") === backdrop) {
-          mount.innerHTML = "";
-        }
-      }, 200);
-    };
-
-    closeBtn.addEventListener("click", (e) => { e.stopPropagation(); closeModal(); });
-    cancelBtn.addEventListener("click", (e) => { e.stopPropagation(); closeModal(); });
-
-    let isMouseDown = false;
-    backdrop.addEventListener("mousedown", (e) => {
-      isMouseDown = (e.target === backdrop);
-    });
-    backdrop.addEventListener("mouseup", (e) => {
-      if (isMouseDown && e.target === backdrop) {
-        closeModal();
-      }
-      isMouseDown = false;
-    });
-
-    // 구글 원클릭 버튼 클릭
-    btnGoogleOAuth.addEventListener("click", () => {
-      closeModal();
-      this.triggerGoogleLogin((user) => {
-        if (onSuccess) onSuccess(user);
-      });
-    });
-
-    // 센스쿨 이메일 직접 입력 제출
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const rawName = nameInput.value.trim();
-      let rawPrefix = emailPrefixInput.value.trim().toLowerCase();
-
-      if (!rawName || !rawPrefix) return;
-
-      // 사용자가 전체 이메일을 다 친 경우 처리
-      if (rawPrefix.includes("@")) {
-        rawPrefix = rawPrefix.split("@")[0];
-      }
-
-      const fullEmail = `${rawPrefix}@senedu.kr`;
-      const user = this.login(fullEmail, rawName);
-
-      if (user) {
-        closeModal();
-        if (onSuccess) onSuccess(user);
-      }
-    });
   }
 };
+
+// URL Hash에서 OAuth 리다이렉트 토큰 자동 감지 및 로그인 처리
+export function checkOAuthRedirectResult() {
+  const hash = window.location.hash;
+  if (hash && (hash.includes("access_token=") || hash.includes("id_token="))) {
+    try {
+      const cleanHash = hash.startsWith("#") ? hash.substring(1) : hash;
+      const params = new URLSearchParams(cleanHash);
+      const accessToken = params.get("access_token");
+      const idToken = params.get("id_token");
+
+      // 주소창 hash 정리
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState(null, "", window.location.pathname + window.location.search);
+      }
+
+      if (idToken) {
+        const payload = parseJwt(idToken);
+        if (payload && payload.email) {
+          const email = payload.email.toLowerCase().trim();
+          if (email.endsWith("@senedu.kr") || payload.hd === "senedu.kr") {
+            const name = payload.name || payload.given_name || email.split("@")[0] + " 선생님";
+            GoogleAuthService.login(email, name, payload.picture || "");
+            return;
+          } else {
+            alert(`⚠️ 일반 구글 계정은 제한됩니다.\n\n센스쿨 구글 계정(@senedu.kr)으로 로그인해 주세요.\n(로그인 시도 계정: ${email})`);
+            return;
+          }
+        }
+      }
+
+      if (accessToken) {
+        GoogleAuthService.fetchUserInfoAndLogin(accessToken);
+      }
+    } catch (e) {
+      console.warn("OAuth redirect parse error:", e);
+    }
+  }
+}
+
+// 스크립트 로드 시 즉시 URL OAuth 콜백 검사
+checkOAuthRedirectResult();
