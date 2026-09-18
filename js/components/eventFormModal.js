@@ -1,4 +1,4 @@
-import { getEvents, saveEvents } from "../data/events.js";
+import { getEvents, saveEvents, getActiveMonths } from "../data/events.js";
 
 const CATEGORY_META = {
   workshop: { label: "연수·워크숍", cls: "cat-workshop" },
@@ -20,7 +20,8 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
   const mount = document.getElementById("modal-mount");
   if (!mount) return;
 
-  const currentMonth = eventObj ? eventObj.month : (defaultDate?.month || 9);
+  const activeMonths = getActiveMonths();
+  const currentMonth = eventObj ? eventObj.month : (defaultDate?.month || activeMonths[0] || 9);
   const currentDay = eventObj ? eventObj.day : (defaultDate?.day || 1);
   const currentCat = eventObj ? (eventObj.category || "workshop") : "workshop";
 
@@ -54,9 +55,9 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
             <div class="form-group">
               <label for="ef-month" style="font-weight: 800; font-size: 13px; color: #0e3753;">월 *</label>
               <select id="ef-month" class="m3-select" required>
-                <option value="9" ${currentMonth == 9 ? 'selected' : ''}>9월</option>
-                <option value="10" ${currentMonth == 10 ? 'selected' : ''}>10월</option>
-                <option value="11" ${currentMonth == 11 ? 'selected' : ''}>11월</option>
+                ${activeMonths.map(m => `
+                  <option value="${m}" ${currentMonth == m ? 'selected' : ''}>${m}월</option>
+                `).join("")}
               </select>
             </div>
 

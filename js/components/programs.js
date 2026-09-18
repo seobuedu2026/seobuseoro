@@ -86,10 +86,17 @@ export function renderPrograms(container) {
           <div style="grid-column: 1 / -1; text-align: center; padding: 60px; color: #94a3b8; background: #fff; border-radius: 18px; border: 1px dashed #cbd5e1;">
             해당 조건의 프로그램이 없습니다.
           </div>
-        ` : filteredEvents.map(ev => `
+        ` : filteredEvents.map(ev => {
+          const catClass = ev.categoryClass || 'cat-workshop';
+          const catLabel = ev.categoryLabel || '연수·워크숍';
+          const evTime = ev.time || '14:00 ~ 17:00';
+          const evLoc = ev.location || '서부교육지원청';
+          const evTarget = ev.target || '관내 교원';
+          const evDesc = ev.description || '';
+          return `
           <div class="program-card" data-card-id="${ev.id}">
             <div class="prog-card-top">
-              <span class="prog-category-badge ${ev.categoryClass}">${ev.categoryLabel}</span>
+              <span class="prog-category-badge ${catClass}">${catLabel}</span>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span class="prog-date-badge">${ev.month}월 ${ev.day}일</span>
                 ${isAdmin ? `
@@ -100,7 +107,7 @@ export function renderPrograms(container) {
               </div>
             </div>
             
-            <h3 class="prog-title">${ev.title}</h3>
+            <h3 class="prog-title">${ev.title || '프로그램'}</h3>
             ${ev.subtitle ? `<div class="prog-subtitle">${ev.subtitle}</div>` : ''}
 
             <!-- 아코디언 확장 영역 -->
@@ -108,19 +115,21 @@ export function renderPrograms(container) {
               <div class="prog-info-list">
                 <div class="prog-info-item">
                   <span class="prog-info-label">일시</span>
-                  <span>2026년 ${ev.month}월 ${ev.day}일 ${ev.time}</span>
+                  <span>2026년 ${ev.month}월 ${ev.day}일 ${evTime}</span>
                 </div>
                 <div class="prog-info-item">
                   <span class="prog-info-label">장소</span>
-                  <span>${ev.location}</span>
+                  <span>${evLoc}</span>
                 </div>
                 <div class="prog-info-item">
                   <span class="prog-info-label">대상</span>
-                  <span>${ev.target}</span>
+                  <span>${evTarget}</span>
                 </div>
-                <div class="prog-info-item" style="margin-top:6px; line-height:1.5;">
-                  <span>${ev.description}</span>
-                </div>
+                ${evDesc ? `
+                  <div class="prog-info-item" style="margin-top:6px; line-height:1.5;">
+                    <span>${evDesc}</span>
+                  </div>
+                ` : ''}
               </div>
 
               <div class="prog-action-buttons">
@@ -144,7 +153,8 @@ export function renderPrograms(container) {
               </div>
             </div>
           </div>
-        `).join("")}
+        `;
+        }).join("")}
       </div>
     </div>
   `;
