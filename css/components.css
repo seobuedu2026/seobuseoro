@@ -95,6 +95,14 @@
    ========================================================================== */
 .calendar-view-wrapper {
   width: 100%;
+  transition: max-width 0.25s ease;
+}
+
+/* 1개월만 볼 때 상단 타이틀 이미지 너비(980px)에 맞춤 */
+.calendar-view-wrapper.is-single-month-view {
+  max-width: 980px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .calendar-view-mode-bar {
@@ -132,8 +140,10 @@
   width: 100%;
 }
 
-/* 단일 월 집중 모드일 때 (화면 전체 꽉 차는 풀 뷰) */
+/* 단일 월 집중 모드일 때 (상단 타이틀 이미지와 동일한 980px 너비) */
 .single-month-card.focus-month-view {
+  max-width: 980px;
+  margin: 0 auto;
   box-shadow: 0 8px 30px rgba(14, 55, 83, 0.08);
 }
 

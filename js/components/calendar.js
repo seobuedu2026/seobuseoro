@@ -3,8 +3,10 @@ import { getEvents, MONTH_THEMES } from "../data/events.js";
 let currentMonth = "all"; // 'all' (3개월 포스터 모드) | 9 | 10 | 11
 
 export function renderCalendar(container, onSelectEventModal) {
+  const isSingleMonth = currentMonth !== "all";
+
   container.innerHTML = `
-    <div class="calendar-view-wrapper">
+    <div class="calendar-view-wrapper ${isSingleMonth ? 'is-single-month-view' : 'is-poster-view'}">
       <!-- 상단 월 및 뷰 모드 전환 바 -->
       <div class="calendar-view-mode-bar">
         <div class="filter-chips-row" id="month-chips-row" style="margin-bottom:0;">
