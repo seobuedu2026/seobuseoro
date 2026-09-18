@@ -207,23 +207,11 @@
     font-size: 12px !important;
   }
 
-  /* 캘린더 모드 바 하단: 모바일에서 PDF 링크 숨김 및 카운트 중앙 정렬 */
-  .btn-pdf-download {
-    display: none !important;
-  }
-
+  /* 캘린더 모드 바 하단: 모바일에서 PDF 링크 및 총 프로그램 개수 숨김 */
+  .btn-pdf-download,
+  .calendar-program-count,
   .calendar-utility-row {
-    position: static !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    width: 100% !important;
-    margin-top: 2px !important;
-  }
-
-  .calendar-view-mode-bar .btn-m3-outlined {
-    padding: 6px 12px !important;
-    font-size: 12px !important;
+    display: none !important;
   }
 
   /* 3개월 모아보기 모바일 세로 1열 나열 */
