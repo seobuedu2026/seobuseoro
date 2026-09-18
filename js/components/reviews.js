@@ -77,35 +77,54 @@ export function renderReviews(container, preselectedEventId = null) {
       </div>
 
       <div class="review-layout">
-        <!-- 후기 작성 영역 (구글 / @senedu.kr 로그인) -->
+        <!-- 후기 작성 영역 (@senedu.kr 전용 로그인) -->
         <div class="review-form-card">
-          <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 16px; color: #0e3753;">
-            ✍️ 참여 후기 등록
+          <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 16px; color: #0e3753; display: flex; align-items: center; justify-content: space-between;">
+            <span>✍️ 참여 후기 등록</span>
+            ${user ? `<button id="btn-review-logout" class="footer-link-btn" style="font-size: 12px; font-weight: 600; color: #64748b;">[로그아웃]</button>` : ''}
           </h3>
 
           ${!user ? `
-            <div style="background-color: #f1f5f9; border-radius: 14px; padding: 20px; text-align: center;">
-              <p style="font-size: 14px; color: #475569; margin-bottom: 14px; line-height: 1.5;">
-                후기 작성은 <strong>Google 계정</strong> 또는 <strong>@senedu.kr</strong> 교육청 계정 로그인이 필요합니다.
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px 18px; text-align: center;">
+              <div style="font-size: 32px; margin-bottom: 10px;">🔒</div>
+              <h4 style="font-size: 15px; font-weight: 800; color: #0e3753; margin-bottom: 6px;">
+                서울시교육청 구글 계정 로그인
+              </h4>
+              <p style="font-size: 13px; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
+                후기 작성은 <strong style="color: #0284c7;">@senedu.kr</strong> 전용 계정으로만 가능합니다.<br>
+                (일반 구글/타 도메인 계정은 제한됩니다)
               </p>
-              <button id="btn-review-login" class="btn-m3-filled" style="width: 100%;">
-                Google 로그인하기
+
+              <!-- Google Identity Services 버튼 렌더링 컨테이너 -->
+              <div id="google-signin-btn-container" style="display: flex; justify-content: center; margin-bottom: 12px; min-height: 40px;"></div>
+
+              <div style="display: flex; align-items: center; gap: 8px; margin: 12px 0;">
+                <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
+                <span style="font-size: 11px; color: #94a3b8; font-weight: 600;">또는</span>
+                <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
+              </div>
+
+              <button id="btn-direct-senedu-login" class="btn-footer-pill" style="width: 100%; justify-content: center; padding: 9px 12px; font-size: 12.5px; color: #0e3753;">
+                📧 @senedu.kr 이메일 직접 인증
               </button>
             </div>
           ` : `
             <form id="review-submit-form">
               <div class="form-group">
-                <label>작성자</label>
-                <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: #1e293b;">
-                  <span>${user.name}</span>
-                  <span style="font-size: 11px; font-weight: 800; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 9999px;">
-                    ${user.isSenedu ? '@senedu.kr 인증교원' : 'Google 계정'}
-                  </span>
+                <label style="font-weight: 800; font-size: 13px; color: #0e3753;">작성 교원</label>
+                <div style="display: flex; align-items: center; justify-content: space-between; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 8px 12px; border-radius: 10px;">
+                  <div style="display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 700; color: #166534;">
+                    <span>👤 ${user.name}</span>
+                    <span style="font-size: 11px; font-weight: 800; background: #0284c7; color: #ffffff; padding: 2px 8px; border-radius: 9999px;">
+                      @senedu.kr 인증
+                    </span>
+                  </div>
+                  <span style="font-size: 11px; color: #15803d; font-weight: 600;">${user.email}</span>
                 </div>
               </div>
 
               <div class="form-group">
-                <label for="review-event-select">참여한 행사 선택 *</label>
+                <label for="review-event-select" style="font-weight: 800; font-size: 13px; color: #0e3753;">참여한 행사 선택 *</label>
                 <select id="review-event-select" class="m3-select" required>
                   <option value="">행사를 선택하세요</option>
                   ${getEvents().map(ev => `
@@ -117,20 +136,20 @@ export function renderReviews(container, preselectedEventId = null) {
               </div>
 
               <div class="form-group">
-                <label>만족도 별점</label>
+                <label style="font-weight: 800; font-size: 13px; color: #0e3753;">만족도 별점</label>
                 <div class="star-rating-select" id="star-rating-box">
                   ${[1, 2, 3, 4, 5].map(star => `
-                    <span class="star-item" data-val="${star}" style="color: ${star <= selectedRating ? '#f59e0b' : '#cbd5e1'};">★</span>
+                    <span class="star-item" data-val="${star}" style="color: ${star <= selectedRating ? '#f59e0b' : '#cbd5e1'}; font-size: 22px; cursor: pointer;">★</span>
                   `).join("")}
                 </div>
               </div>
 
               <div class="form-group">
-                <label for="review-text-input">소감 및 수업 적용 나눔 *</label>
+                <label for="review-text-input" style="font-weight: 800; font-size: 13px; color: #0e3753;">소감 및 수업 적용 나눔 *</label>
                 <textarea id="review-text-input" class="m3-textarea" rows="4" placeholder="연수/행사에서 얻은 인사이트나 교실 실천 계획을 자유롭게 적어주세요." required></textarea>
               </div>
 
-              <button type="submit" class="btn-m3-filled" style="width: 100%; padding: 12px; font-size: 14px;">
+              <button type="submit" class="btn-m3-filled" style="width: 100%; padding: 12px; font-size: 14px; font-weight: 800;">
                 후기 등록하기
               </button>
             </form>
@@ -145,7 +164,7 @@ export function renderReviews(container, preselectedEventId = null) {
               <div class="review-card-top-row">
                 <div class="review-user-info-group">
                   <div class="review-user-avatar">
-                    ${rev.userName[0]}
+                    ${rev.userName ? rev.userName[0] : '교'}
                   </div>
                   <div>
                     <div class="review-user-name">
@@ -178,67 +197,86 @@ export function renderReviews(container, preselectedEventId = null) {
     </div>
   `;
 
-  // 로그인 버튼
-  const btnLogin = container.querySelector("#btn-review-login");
-  if (btnLogin) {
-    btnLogin.addEventListener("click", () => {
-      GoogleAuthService.showLoginPrompt(() => {
+  // 미로그인 상태일 때 Google 버튼 및 직접 인증 바인딩
+  if (!user) {
+    // Google Identity Services 렌더링 시도
+    setTimeout(() => {
+      GoogleAuthService.renderGoogleButton("google-signin-btn-container", () => {
         renderReviews(container, preselectedEventId);
       });
-    });
-  }
+    }, 100);
 
-  // 별점 클릭
-  const stars = container.querySelectorAll(".star-item");
-  stars.forEach(s => {
-    s.addEventListener("click", () => {
-      selectedRating = parseInt(s.dataset.val, 10);
-      stars.forEach(st => {
-        const val = parseInt(st.dataset.val, 10);
-        st.style.color = val <= selectedRating ? "#f59e0b" : "#cbd5e1";
+    const btnDirectLogin = container.querySelector("#btn-direct-senedu-login");
+    if (btnDirectLogin) {
+      btnDirectLogin.addEventListener("click", () => {
+        GoogleAuthService.showLoginPrompt(() => {
+          renderReviews(container, preselectedEventId);
+        });
+      });
+    }
+  } else {
+    // 로그아웃 버튼
+    const btnLogout = container.querySelector("#btn-review-logout");
+    if (btnLogout) {
+      btnLogout.addEventListener("click", () => {
+        GoogleAuthService.logout();
+        renderReviews(container, preselectedEventId);
+      });
+    }
+
+    // 별점 클릭
+    const stars = container.querySelectorAll(".star-item");
+    stars.forEach(s => {
+      s.addEventListener("click", () => {
+        selectedRating = parseInt(s.dataset.val, 10);
+        stars.forEach(st => {
+          const val = parseInt(st.dataset.val, 10);
+          st.style.color = val <= selectedRating ? "#f59e0b" : "#cbd5e1";
+        });
       });
     });
-  });
 
-  // 후기 등록 폼
-  const form = container.querySelector("#review-submit-form");
-  if (form) {
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const select = container.querySelector("#review-event-select");
-      const text = container.querySelector("#review-text-input");
-      const eventId = select.value;
-      const content = text.value.trim();
+    // 후기 등록 폼
+    const form = container.querySelector("#review-submit-form");
+    if (form) {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const select = container.querySelector("#review-event-select");
+        const text = container.querySelector("#review-text-input");
+        const eventId = select.value;
+        const content = text.value.trim();
 
-      if (!eventId || !content) return;
+        if (!eventId || !content) return;
 
-      const allEvents = getEvents();
-      const eventObj = allEvents.find(ev => ev.id === eventId);
-      const now = new Date();
-      const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        const allEvents = getEvents();
+        const eventObj = allEvents.find(ev => ev.id === eventId);
+        const now = new Date();
+        const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
-      let maskedName = user.name;
-      if (user.name.length >= 2) {
-        maskedName = user.name[0] + "*" + (user.name.length > 2 ? user.name.slice(2) : "");
-      }
+        let maskedName = user.name;
+        if (user.name.length >= 2 && !user.name.includes("*")) {
+          maskedName = user.name[0] + "*" + (user.name.length > 2 ? user.name.slice(2) : "");
+        }
 
-      const newReview = {
-        id: "rev-" + Date.now(),
-        eventId: eventId,
-        eventTitle: `${eventObj.title} ${eventObj.subtitle ? `(${eventObj.subtitle})` : ''}`,
-        userName: maskedName + (user.isSenedu ? " 교사" : ""),
-        userEmail: user.email,
-        isSenedu: user.isSenedu,
-        rating: selectedRating,
-        content: content,
-        likes: 0,
-        createdAt: timeStr
-      };
+        const newReview = {
+          id: "rev-" + Date.now(),
+          eventId: eventId,
+          eventTitle: eventObj ? `${eventObj.title} ${eventObj.subtitle ? `(${eventObj.subtitle})` : ''}` : "서부 교육 프로그램",
+          userName: maskedName + (user.name.includes("교사") || user.name.includes("선생님") ? "" : " 교사"),
+          userEmail: user.email,
+          isSenedu: true,
+          rating: selectedRating,
+          content: content,
+          likes: 0,
+          createdAt: timeStr
+        };
 
-      const updated = [newReview, ...reviews];
-      saveReviews(updated);
-      renderReviews(container, null);
-    });
+        const updated = [newReview, ...reviews];
+        saveReviews(updated);
+        alert("✅ 참여 후기가 성공적으로 등록되었습니다!");
+        renderReviews(container, null);
+      });
+    }
   }
 
   // 공감 클릭
