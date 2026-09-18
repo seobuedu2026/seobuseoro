@@ -157,15 +157,6 @@ export function renderReviews(container, preselectedEventId = null) {
               </div>
 
               <div class="form-group">
-                <label style="font-weight: 800; font-size: 13px; color: #0e3753;">만족도 별점</label>
-                <div class="star-rating-select" id="star-rating-box">
-                  ${[1, 2, 3, 4, 5].map(star => `
-                    <span class="star-item" data-val="${star}" style="color: ${star <= selectedRating ? '#f59e0b' : '#cbd5e1'}; font-size: 22px; cursor: pointer;">★</span>
-                  `).join("")}
-                </div>
-              </div>
-
-              <div class="form-group">
                 <label for="review-text-input" style="font-weight: 800; font-size: 13px; color: #0e3753;">소감 및 수업 적용 나눔 *</label>
                 <textarea id="review-text-input" class="m3-textarea" rows="4" placeholder="연수/행사에서 얻은 인사이트나 교실 실천 계획을 자유롭게 적어주세요." required></textarea>
               </div>
@@ -239,20 +230,15 @@ export function renderReviews(container, preselectedEventId = null) {
             const cleanName = (rev.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim();
             return `
             <div class="review-feed-card ${rev.status === 'pending' ? 'is-pending' : ''}" data-review-id="${rev.id}">
-              <!-- 상단 바: 연수 종류 태그(먼저) + 작성자 이름 + 작성일시 | 별점 & 공감 버튼 -->
+              <!-- 상단 바: 연수 종류 태그 + 작성자 이름 + 작성일시 | 공감 버튼 -->
               <div class="review-card-top-row">
                 <div class="review-user-name">
                   <span class="review-event-tag">🎯 ${rev.eventTitle}</span>
-                  <span class="review-author-date-wrap" style="display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
-                    <span class="user-display-name">${cleanName}</span>
-                    <span class="review-date-text">${rev.createdAt}</span>
-                  </span>
+                  <span class="user-display-name">${cleanName}</span>
+                  <span class="review-date-text">${rev.createdAt}</span>
                 </div>
 
                 <div class="review-top-actions-group">
-                  <div class="review-star-rating">
-                    ${'★'.repeat(rev.rating)}${'☆'.repeat(5 - rev.rating)}
-                  </div>
                   <button class="btn-like-pill btn-like" data-review-id="${rev.id}" title="공감하기">
                     ❤️ <span>공감</span> <strong>${rev.likes || 0}</strong>
                   </button>
@@ -308,18 +294,6 @@ export function renderReviews(container, preselectedEventId = null) {
         renderReviews(container, preselectedEventId);
       });
     }
-
-    // 별점 클릭
-    const stars = container.querySelectorAll(".star-item");
-    stars.forEach(s => {
-      s.addEventListener("click", () => {
-        selectedRating = parseInt(s.dataset.val, 10);
-        stars.forEach(st => {
-          const val = parseInt(st.dataset.val, 10);
-          st.style.color = val <= selectedRating ? "#f59e0b" : "#cbd5e1";
-        });
-      });
-    });
 
     // 후기 등록 폼
     const form = container.querySelector("#review-submit-form");
