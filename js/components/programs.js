@@ -1,4 +1,4 @@
-import { getEvents, isEventPastOrToday, getActiveMonths } from "../data/events.js";
+import { getEvents, isEventPastOrToday, getActiveMonths, getCategories } from "../data/events.js";
 import { GoogleAuthService } from "../auth/googleAuth.js";
 import { openEventFormModal } from "./eventFormModal.js";
 
@@ -12,12 +12,7 @@ export function renderPrograms(container, onSelectEventModal) {
 
   const categories = [
     { key: "all", label: "전체" },
-    { key: "workshop", label: "연수·워크숍", cls: "cat-workshop" },
-    { key: "lecture", label: "특강", cls: "cat-lecture" },
-    { key: "festival", label: "성과공유·보고·한마당", cls: "cat-festival" },
-    { key: "mentoring", label: "멘토링", cls: "cat-mentoring" },
-    { key: "sharing", label: "수업나눔 교육콘서트", cls: "cat-sharing" },
-    { key: "sudabox", label: "수다박스", cls: "cat-sudabox" }
+    ...getCategories()
   ];
 
   const activeMonths = getActiveMonths();

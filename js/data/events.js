@@ -744,24 +744,86 @@ export function saveActiveMonths(months) {
 }
 
 // ============================================================================
+// 카테고리(유형/범례) 관리
+// ============================================================================
+export const DEFAULT_CATEGORIES = [
+  { key: "workshop", label: "연수·워크숍", cls: "cat-workshop" },
+  { key: "lecture", label: "특강", cls: "cat-lecture" },
+  { key: "festival", label: "성과공유·보고·한마당", cls: "cat-festival" },
+  { key: "mentoring", label: "멘토링", cls: "cat-mentoring" },
+  { key: "sharing", label: "수업나눔 교육콘서트", cls: "cat-sharing" },
+  { key: "sudabox", label: "수다박스", cls: "cat-sudabox" }
+];
+
+const CATEGORIES_KEY = "seobu_categories_v2";
+
+export function getCategories() {
+  const saved = localStorage.getItem(CATEGORIES_KEY);
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        // 기본 6대 카테고리 구조와 병합하여 cls 및 key 보장
+        return DEFAULT_CATEGORIES.map(def => {
+          const match = parsed.find(p => p.key === def.key);
+          return {
+            ...def,
+            label: match && match.label ? match.label.trim() : def.label
+          };
+        });
+      }
+    } catch (e) {
+      console.error("Failed to parse categories", e);
+    }
+  }
+  return DEFAULT_CATEGORIES;
+}
+
+export function saveCategories(categoriesList) {
+  localStorage.setItem(CATEGORIES_KEY, JSON.stringify(categoriesList));
+  window.dispatchEvent(new CustomEvent("categories-updated", { detail: { categories: categoriesList } }));
+}
+
+export function resetCategoriesToDefault() {
+  localStorage.removeItem(CATEGORIES_KEY);
+  window.dispatchEvent(new CustomEvent("categories-updated", { detail: { categories: DEFAULT_CATEGORIES } }));
+}
+
+// ============================================================================
 // 동적 이벤트 데이터 관리 (LocalStorage 연동 & 엑셀 파서)
 // ============================================================================
 const CUSTOM_EVENTS_KEY = "seobu_custom_events_v4";
 
 // 현재 활성화된 모든 행사 목록 반환
 export function getEvents() {
+  const cats = getCategories();
+  const catMap = {};
+  cats.forEach(c => { catMap[c.key] = c; });
+
+  let rawList = DEFAULT_EVENTS_DATA;
   const custom = localStorage.getItem(CUSTOM_EVENTS_KEY);
   if (custom) {
     try {
       const parsed = JSON.parse(custom);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
+        rawList = parsed;
       }
     } catch (e) {
       console.error("Failed to parse custom events", e);
     }
   }
-  return DEFAULT_EVENTS_DATA;
+
+  return rawList.map(ev => {
+    const cat = catMap[ev.category];
+    if (cat) {
+      return {
+        ...ev,
+        categoryLabel: cat.label,
+        categoryClass: cat.cls
+      };
+    }
+    return ev;
+  });
 }
 
 // 이벤트 목록 저장

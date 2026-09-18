@@ -1,13 +1,4 @@
-import { getEvents, saveEvents, getActiveMonths } from "../data/events.js";
-
-const CATEGORY_META = {
-  workshop: { label: "연수·워크숍", cls: "cat-workshop" },
-  lecture: { label: "특강", cls: "cat-lecture" },
-  festival: { label: "성과공유·보고·한마당", cls: "cat-festival" },
-  mentoring: { label: "멘토링", cls: "cat-mentoring" },
-  sharing: { label: "수업나눔 교육콘서트", cls: "cat-sharing" },
-  sudabox: { label: "수다박스", cls: "cat-sudabox" }
-};
+import { getEvents, saveEvents, getActiveMonths, getCategories } from "../data/events.js";
 
 /**
  * 새 행사 추가 또는 기존 행사 수정 모달 열기
@@ -23,61 +14,59 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
   const activeMonths = getActiveMonths();
   const currentMonth = eventObj ? eventObj.month : (defaultDate?.month || activeMonths[0] || 9);
   const currentDay = eventObj ? eventObj.day : (defaultDate?.day || 1);
-  const currentCat = eventObj ? (eventObj.category || "workshop") : "workshop";
+    const categories = getCategories();
+    const currentCat = eventObj ? (eventObj.category || "workshop") : "workshop";
 
-  mount.innerHTML = `
-    <div class="m3-modal-backdrop open" id="event-form-backdrop">
-      <div class="m3-modal-dialog" style="max-width: 540px; max-height: 90vh; overflow-y: auto;">
-        <div class="modal-header">
-          <h3 style="font-size: 19px; font-weight: 900; color: #0e3753; display: flex; align-items: center; gap: 8px;">
-            <span>${isEdit ? '✏️ 행사(프로그램) 수정' : '➕ 새 행사(프로그램) 추가'}</span>
-            <span style="font-size: 11px; font-weight: 800; background: #0e3753; color: #ffffff; padding: 2px 8px; border-radius: 9999px;">
-              관리자 모드
-            </span>
-          </h3>
-          <button class="modal-close-btn" id="btn-close-event-form" aria-label="닫기">✕</button>
-        </div>
-
-        <form id="event-edit-form" style="display: flex; flex-direction: column; gap: 14px; margin-top: 8px;">
-          <!-- 행사명 & 부제목 -->
-          <div class="form-group">
-            <label for="ef-title" style="font-weight: 800; font-size: 13px; color: #0e3753;">행사명 (주제) *</label>
-            <input type="text" id="ef-title" class="m3-input" placeholder="예: 과학실무사 연수" required value="${eventObj?.title || ''}" />
+    mount.innerHTML = `
+      <div class="m3-modal-backdrop open" id="event-form-backdrop">
+        <div class="m3-modal-dialog" style="max-width: 540px; max-height: 90vh; overflow-y: auto;">
+          <div class="modal-header">
+            <h3 style="font-size: 19px; font-weight: 900; color: #0e3753; display: flex; align-items: center; gap: 8px;">
+              <span>${isEdit ? '✏️ 행사(프로그램) 수정' : '➕ 새 행사(프로그램) 추가'}</span>
+              <span style="font-size: 11px; font-weight: 800; background: #0e3753; color: #ffffff; padding: 2px 8px; border-radius: 9999px;">
+                관리자 모드
+              </span>
+            </h3>
+            <button class="modal-close-btn" id="btn-close-event-form" aria-label="닫기">✕</button>
           </div>
 
-          <div class="form-group">
-            <label for="ef-subtitle" style="font-weight: 800; font-size: 13px; color: #0e3753;">상세 부제목 (선택)</label>
-            <input type="text" id="ef-subtitle" class="m3-input" placeholder="예: 실험역량 강화" value="${eventObj?.subtitle || ''}" />
-          </div>
-
-          <!-- 일정 및 구분 -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 10px;">
+          <form id="event-edit-form" style="display: flex; flex-direction: column; gap: 14px; margin-top: 8px;">
+            <!-- 행사명 & 부제목 -->
             <div class="form-group">
-              <label for="ef-month" style="font-weight: 800; font-size: 13px; color: #0e3753;">월 *</label>
-              <select id="ef-month" class="m3-select" required>
-                ${activeMonths.map(m => `
-                  <option value="${m}" ${currentMonth == m ? 'selected' : ''}>${m}월</option>
-                `).join("")}
-              </select>
+              <label for="ef-title" style="font-weight: 800; font-size: 13px; color: #0e3753;">행사명 (주제) *</label>
+              <input type="text" id="ef-title" class="m3-input" placeholder="예: 과학실무사 연수" required value="${eventObj?.title || ''}" />
             </div>
 
             <div class="form-group">
-              <label for="ef-day" style="font-weight: 800; font-size: 13px; color: #0e3753;">일자 *</label>
-              <input type="text" id="ef-day" class="m3-input" placeholder="예: 18" required value="${currentDay}" />
+              <label for="ef-subtitle" style="font-weight: 800; font-size: 13px; color: #0e3753;">상세 부제목 (선택)</label>
+              <input type="text" id="ef-subtitle" class="m3-input" placeholder="예: 실험역량 강화" value="${eventObj?.subtitle || ''}" />
             </div>
 
-            <div class="form-group">
-              <label for="ef-category" style="font-weight: 800; font-size: 13px; color: #0e3753;">구분 *</label>
-              <select id="ef-category" class="m3-select" required>
-                <option value="workshop" ${currentCat === 'workshop' ? 'selected' : ''}>연수·워크숍</option>
-                <option value="lecture" ${currentCat === 'lecture' ? 'selected' : ''}>특강</option>
-                <option value="festival" ${currentCat === 'festival' ? 'selected' : ''}>성과공유·보고</option>
-                <option value="mentoring" ${currentCat === 'mentoring' ? 'selected' : ''}>멘토링</option>
-                <option value="sharing" ${currentCat === 'sharing' ? 'selected' : ''}>수업나눔</option>
-                <option value="sudabox" ${currentCat === 'sudabox' ? 'selected' : ''}>수다박스</option>
-              </select>
+            <!-- 일정 및 구분 -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 10px;">
+              <div class="form-group">
+                <label for="ef-month" style="font-weight: 800; font-size: 13px; color: #0e3753;">월 *</label>
+                <select id="ef-month" class="m3-select" required>
+                  ${activeMonths.map(m => `
+                    <option value="${m}" ${currentMonth == m ? 'selected' : ''}>${m}월</option>
+                  `).join("")}
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="ef-day" style="font-weight: 800; font-size: 13px; color: #0e3753;">일자 *</label>
+                <input type="text" id="ef-day" class="m3-input" placeholder="예: 18" required value="${currentDay}" />
+              </div>
+
+              <div class="form-group">
+                <label for="ef-category" style="font-weight: 800; font-size: 13px; color: #0e3753;">구분 *</label>
+                <select id="ef-category" class="m3-select" required>
+                  ${categories.map(cat => `
+                    <option value="${cat.key}" ${currentCat === cat.key ? 'selected' : ''}>${cat.label}</option>
+                  `).join("")}
+                </select>
+              </div>
             </div>
-          </div>
 
           <!-- 시간 & 장소 -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -195,7 +184,8 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
     const applyUrl = document.getElementById("ef-apply-url").value.trim();
     const description = document.getElementById("ef-desc").value.trim() || `${title} 행사입니다.`;
 
-    const catInfo = CATEGORY_META[category] || CATEGORY_META.workshop;
+    const currentCats = getCategories();
+    const catInfo = currentCats.find(c => c.key === category) || currentCats[0];
 
     const allEvents = getEvents();
 

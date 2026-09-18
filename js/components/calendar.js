@@ -1,8 +1,9 @@
-import { getEvents, getMonthThemes, getActiveMonths, getHolidayName, saveEvents } from "../data/events.js";
+import { getEvents, getMonthThemes, getActiveMonths, getCategories, getHolidayName, saveEvents } from "../data/events.js";
 import { GoogleAuthService } from "../auth/googleAuth.js";
 import { openEventFormModal } from "./eventFormModal.js";
 import { openMonthManagerModal, openMonthThemeEditModal } from "./monthManagerModal.js";
 import { openAdminExcelModal } from "./adminExcelModal.js";
+import { openCategoryManagerModal } from "./categoryManagerModal.js";
 
 let currentMonth = "all"; // 'all' (3개월 포스터 모드) | 1 ~ 12
 
@@ -11,6 +12,7 @@ export function renderCalendar(container, onSelectEventModal) {
   const isAdmin = !!(user && user.isAdmin);
   const activeMonths = getActiveMonths();
   const monthThemes = getMonthThemes();
+  const categories = getCategories();
 
   // 현재 선택된 월이 활성 월 목록에 없는 경우 첫 번째 활성 월 또는 'all'로 리셋
   if (currentMonth !== "all" && !activeMonths.includes(currentMonth)) {
@@ -57,12 +59,15 @@ export function renderCalendar(container, onSelectEventModal) {
       <!-- 하단 인쇄물 공식 범례 칩 목록 -->
       <div class="brochure-legend-container">
         <div class="legend-chips-list">
-          <span class="legend-badge cat-workshop">연수·워크숍</span>
-          <span class="legend-badge cat-lecture">특강</span>
-          <span class="legend-badge cat-festival">성과공유·보고·한마당</span>
-          <span class="legend-badge cat-mentoring">멘토링</span>
-          <span class="legend-badge cat-sharing">수업나눔 교육콘서트</span>
-          <span class="legend-badge cat-sudabox">수다박스</span>
+          ${categories.map(cat => `
+            <span class="legend-badge ${cat.cls}">${cat.label}</span>
+          `).join("")}
+          ${isAdmin ? `
+            <button id="btn-edit-legend-cats" class="btn-m3-pill-action" style="padding: 4px 12px; font-size: 12.5px; border-color: #cbd5e1; background: #f8fafc; color: #0e3753;" title="프로그램 유형 범례 명칭 수정">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+              <span>유형 수정</span>
+            </button>
+          ` : ''}
         </div>
       </div>
     </div>
@@ -95,6 +100,16 @@ export function renderCalendar(container, onSelectEventModal) {
   if (btnExcel) {
     btnExcel.addEventListener("click", () => {
       openAdminExcelModal();
+    });
+  }
+
+  // 범례(유형) 수정 버튼 이벤트
+  const btnEditCats = container.querySelector("#btn-edit-legend-cats");
+  if (btnEditCats) {
+    btnEditCats.addEventListener("click", () => {
+      openCategoryManagerModal(() => {
+        renderCalendar(container, onSelectEventModal);
+      });
     });
   }
 
