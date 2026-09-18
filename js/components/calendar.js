@@ -99,6 +99,19 @@ function renderCalendarCards(container, onSelectEventModal) {
   });
 }
 
+const HOLIDAYS_2026 = {
+  9: {
+    24: "추석연휴",
+    25: "추석",
+    26: "추석연휴"
+  },
+  10: {
+    3: "개천절",
+    5: "대체공휴일",
+    9: "한글날"
+  }
+};
+
 function generateMonthCardHTML(month, isFocusView = false) {
   const theme = MONTH_THEMES[month];
   const allEvents = getEvents();
@@ -121,7 +134,9 @@ function generateMonthCardHTML(month, isFocusView = false) {
     const dayOfWeek = (firstDayOfWeek + day - 1) % 7;
     const isSun = dayOfWeek === 0;
     const isSat = dayOfWeek === 6;
-    const dayClass = isSun ? "sun" : (isSat ? "sat" : "");
+    const holidayName = (HOLIDAYS_2026[month] && HOLIDAYS_2026[month][day]) || null;
+    const isHoliday = !!holidayName || isSun;
+    const dayClass = isHoliday ? "sun holiday" : (isSat ? "sat" : "");
 
     // 해당 일자 행사들
     const dayEvents = monthEvents.filter(ev => ev.day === day);
@@ -137,6 +152,7 @@ function generateMonthCardHTML(month, isFocusView = false) {
       <div class="cal-cell ${dayClass}">
         <div class="cal-cell-daynum">
           <span>${day}</span>
+          ${holidayName ? `<span class="cal-holiday-name">${holidayName}</span>` : ''}
         </div>
         ${eventPillsHTML}
       </div>

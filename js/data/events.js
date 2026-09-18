@@ -388,10 +388,27 @@ export const DEFAULT_EVENTS_DATA = [
     time: "14:00 ~ 17:30",
     location: "서부아트홀",
     target: "관내 초·중등 교원",
-    instructor: "수업선도교사 및 연구회 대표단",
     description: "수업전성기, 생키, 연구대회 입상자 등 현장 교원들의 명품 수업 사례와 수업 개선 연구대회 우수작 나눔.",
     applyMethod: "온라인 링크",
     applyUrl: "https://senedu.kr/apply/ev1026"
+  },
+  {
+    id: "ev-1030",
+    month: 10,
+    year: 2026,
+    day: 30,
+    dateStr: "2026-10-30",
+    title: "저경력 교사",
+    subtitle: "수업성장 멘토링",
+    category: "mentoring",
+    categoryLabel: "멘토링",
+    categoryClass: "cat-mentoring",
+    time: "15:00 ~ 17:00",
+    location: "서부교육지원청 세미나실",
+    target: "관내 저경력 교사 및 희망교원",
+    description: "수업 및 생활지도의 고민을 나누고 더 나은 수업 성장을 위한 맞춤형 멘토링.",
+    applyMethod: "추후안내",
+    applyUrl: ""
   },
 
   // ================= 11월 (성과공유의 달) =================
@@ -409,7 +426,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "15:00 ~ 17:30",
     location: "온라인 메타버스 & ZOOM",
     target: "관내 초·중등 교원",
-    instructor: "디지털 선도교사단",
     description: "온오프라인 블렌디드 수업 우수 사례와 실시간 상호작용 도구를 활용한 참여형 수업 나눔.",
     applyMethod: "온라인 링크",
     applyUrl: "https://senedu.kr/apply/ev1103"
@@ -428,7 +444,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "15:30 ~ 17:30",
     location: "서부교육지원청 대강당",
     target: "초·중등 교원 및 교육전문직",
-    instructor: "홍진기 연세대 교수",
     description: "기술의 홍수 속에서 비판적 사고력과 인문학적 성찰을 기르는 교실 수업 철학.",
     applyMethod: "온라인 링크",
     applyUrl: "https://senedu.kr/apply/ev1106"
@@ -447,10 +462,27 @@ export const DEFAULT_EVENTS_DATA = [
     time: "14:00 ~ 17:30",
     location: "서부교육지원청 대회의실",
     target: "관내 초·중등 교원",
-    instructor: "생활교육 선도교사단",
     description: "따뜻한 교실 공동체 만들기, 긍정적 훈육 및 수업 몰입을 돕는 환경 구성 노하우 총집합.",
     applyMethod: "온라인 링크",
     applyUrl: "https://senedu.kr/apply/ev1110"
+  },
+  {
+    id: "ev-1116",
+    month: 11,
+    year: 2026,
+    day: 16,
+    dateStr: "2026-11-16",
+    title: "저경력 교사",
+    subtitle: "수업성장 멘토링",
+    category: "mentoring",
+    categoryLabel: "멘토링",
+    categoryClass: "cat-mentoring",
+    time: "15:00 ~ 17:00",
+    location: "서부교육지원청 세미나실",
+    target: "관내 저경력 교사 및 희망교원",
+    description: "수업 및 생활지도의 고민을 나누고 더 나은 수업 성장을 위한 맞춤형 멘토링.",
+    applyMethod: "추후안내",
+    applyUrl: ""
   },
   {
     id: "ev-1117",
@@ -466,28 +498,26 @@ export const DEFAULT_EVENTS_DATA = [
     time: "15:00 ~ 17:00",
     location: "온라인 ZOOM 회의실",
     target: "초·중등 학생부 담당 및 담임교사",
-    instructor: "학생부 현장실무지원단",
     description: "2026학년도 학생부 기재요령 주요 개정 사항 및 교과학습발달상황 서술형 작성 꿀팁.",
     applyMethod: "온라인 링크",
     applyUrl: "https://senedu.kr/apply/ev1117"
   },
   {
-    id: "ev-1122",
+    id: "ev-1123",
     month: 11,
     year: 2026,
-    day: 22,
-    dateStr: "2026-11-22",
+    day: 23,
+    dateStr: "2026-11-23",
     title: "서부서로 교-수-평 지원단",
-    subtitle: "성과공유회",
+    subtitle: "성과공유회 (11.23~11.25)",
     category: "festival",
     categoryLabel: "성과공유·보고·한마당",
     categoryClass: "cat-festival",
     time: "14:00 ~ 17:00",
     location: "서부교원연수관",
     target: "지원단 위원 및 희망 교원",
-    instructor: "초등교육지원과 장학진",
-    description: "2학기 동안 개발된 교-수-평 맞춤형 장학 자료집 배포 및 우수 지원 사례 발표.",
-    applyMethod: "공문통",
+    description: "2학기 동안 개발된 교-수-평 맞춤형 장학 자료집 배포 및 11월 23일~25일 우수 지원 사례 성과공유회.",
+    applyMethod: "추후안내",
     applyUrl: ""
   },
   {
@@ -504,9 +534,8 @@ export const DEFAULT_EVENTS_DATA = [
     time: "15:00 ~ 17:00",
     location: "서부교육지원청 세미나실",
     target: "초등 취학업무 담당 교사",
-    instructor: "초등취학관리 담당관",
     description: "2027학년도 초등학교 예비소집 및 미취학 아동 관리 매뉴얼 실무 안내.",
-    applyMethod: "공문통",
+    applyMethod: "추후안내",
     applyUrl: ""
   },
   {
@@ -523,9 +552,8 @@ export const DEFAULT_EVENTS_DATA = [
     time: "13:30 ~ 17:30",
     location: "서부아트홀 전시장",
     target: "혁신학교 교원 및 학부모",
-    instructor: "혁신학교네트워크",
     description: "서부 혁신미래학교의 학생 주도 프로젝트 및 교육과정 다양화 실천 성과 공유회.",
-    applyMethod: "공문통",
+    applyMethod: "추후안내",
     applyUrl: ""
   },
   {
@@ -542,7 +570,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "15:00 ~ 17:30",
     location: "생태환경교육센터",
     target: "관내 초·중등 교원",
-    instructor: "생태환경교육실천가",
     description: "탄소중립, 자원순환, 생물다양성을 교실에서 즉시 적용할 수 있는 10가지 체험 키트 실습.",
     applyMethod: "온라인 링크",
     applyUrl: "https://senedu.kr/apply/ev1125"
@@ -561,9 +588,8 @@ export const DEFAULT_EVENTS_DATA = [
     time: "15:00 ~ 17:30",
     location: "서부인문학도서관 강당",
     target: "독서인문교육 실천교사",
-    instructor: "인문학교육추진단",
     description: "한 학기 한 권 읽기 및 질문이 있는 서울형 독서토론 교과 연계 우수 사례 발표.",
-    applyMethod: "공문통",
+    applyMethod: "추후안내",
     applyUrl: ""
   },
   {
@@ -580,9 +606,8 @@ export const DEFAULT_EVENTS_DATA = [
     time: "15:00 ~ 17:00",
     location: "서부교육지원청 대회의실",
     target: "초등 기초학력 책임지도 담당교원",
-    instructor: "학습도움센터 장학진",
     description: "2학기 기초학력 진단-보정 시스템 운영 결과 분석 및 3단계 학습안전망 구축 평가.",
-    applyMethod: "공문통",
+    applyMethod: "추후안내",
     applyUrl: ""
   },
   {
@@ -599,7 +624,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "14:00 ~ 17:00",
     location: "서울디지털미디어센터 대강당",
     target: "초·중등 디지털 선도학교 및 전 교원",
-    instructor: "AI 디지털미래교육단",
     description: "2026 서부 에듀테크 & AI 하이터치하이테크 수업 성과 보고 및 미래형 교실 혁신 발표.",
     applyMethod: "온라인 링크",
     applyUrl: "https://senedu.kr/apply/ev1202"
@@ -622,8 +646,8 @@ export const MONTH_THEMES = {
     subtitle: "수업나눔의 달",
     themeColor: "#e91e63",
     themeBg: "#fce4ec",
-    highlightWeek: "서부서로 수업나눔 주간",
-    highlightRange: "10월 12일 ~ 10월 30일"
+    highlightWeek: "수업나눔 주간",
+    highlightRange: "10월 12일 ~ 11월 14일"
   },
   11: {
     monthNum: 11,
@@ -631,8 +655,8 @@ export const MONTH_THEMES = {
     subtitle: "성과공유의 달",
     themeColor: "#1e40af",
     themeBg: "#e0e7ff",
-    highlightWeek: "서부서로 수업나눔 주간",
-    highlightRange: "11월 2일 ~ 11월 20일"
+    highlightWeek: "수업나눔 주간",
+    highlightRange: "10월 12일 ~ 11월 14일"
   }
 };
 

@@ -95,19 +95,21 @@ export function renderPrograms(container) {
                   <span class="prog-info-label">대상</span>
                   <span>${ev.target}</span>
                 </div>
-                <div class="prog-info-item">
-                  <span class="prog-info-label">강사/진행</span>
-                  <span>${ev.instructor}</span>
-                </div>
                 <div class="prog-info-item" style="margin-top:6px; line-height:1.5;">
                   <span>${ev.description}</span>
                 </div>
               </div>
 
               <div class="prog-action-buttons">
-                <a href="${ev.applyUrl}" target="_blank" class="btn-m3-filled" onclick="event.stopPropagation();">
-                  신청 바로가기
-                </a>
+                ${ev.applyUrl && (ev.applyUrl.startsWith('http://') || ev.applyUrl.startsWith('https://')) ? `
+                  <a href="${ev.applyUrl}" target="_blank" class="btn-m3-filled" onclick="event.stopPropagation();">
+                    참가 신청 바로가기
+                  </a>
+                ` : `
+                  <button class="btn-m3-outlined" disabled style="opacity:0.75; cursor:default; background:#f8fafc; font-weight:700;" onclick="event.stopPropagation();">
+                    신청: 추후안내
+                  </button>
+                `}
                 <button class="btn-m3-outlined btn-review-shortcut" data-event-id="${ev.id}" onclick="event.stopPropagation();">
                   후기 작성
                 </button>

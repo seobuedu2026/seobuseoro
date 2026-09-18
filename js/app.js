@@ -55,21 +55,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span>${eventObj.target}</span>
               </div>
               <div class="prog-info-item">
-                <span class="prog-info-label">강사/진행</span>
-                <span>${eventObj.instructor}</span>
+                <span class="prog-info-label">신청방법</span>
+                <span style="font-weight:700;">${(eventObj.applyUrl && (eventObj.applyUrl.startsWith('http://') || eventObj.applyUrl.startsWith('https://'))) ? (eventObj.applyMethod || '온라인 링크') : '추후안내'}</span>
               </div>
-              ${eventObj.manager ? `
-                <div class="prog-info-item">
-                  <span class="prog-info-label">담당</span>
-                  <span style="color:#008080; font-weight:700;">${eventObj.manager} (서부교육지원청)</span>
-                </div>
-              ` : ''}
-              ${eventObj.applyMethod ? `
-                <div class="prog-info-item">
-                  <span class="prog-info-label">신청방법</span>
-                  <span style="font-weight:700;">${eventObj.applyMethod}</span>
-                </div>
-              ` : ''}
             </div>
           </div>
 
@@ -77,9 +65,13 @@ document.addEventListener("DOMContentLoaded", () => {
             ${eventObj.description}
           </div>
 
-          <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <div style="display:flex; gap:10px; justify-content:flex-end; align-items:center;">
             <button id="btn-modal-review" class="btn-m3-outlined">후기 남기기</button>
-            <a href="${eventObj.applyUrl}" target="_blank" class="btn-m3-filled">참가 신청 바로가기</a>
+            ${(eventObj.applyUrl && (eventObj.applyUrl.startsWith('http://') || eventObj.applyUrl.startsWith('https://'))) ? `
+              <a href="${eventObj.applyUrl}" target="_blank" class="btn-m3-filled">참가 신청 바로가기</a>
+            ` : `
+              <button class="btn-m3-outlined" disabled style="opacity:0.75; cursor:default; background:#f8fafc; font-weight:700;">신청: 추후안내</button>
+            `}
           </div>
         </div>
       </div>
