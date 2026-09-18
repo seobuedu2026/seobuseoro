@@ -97,7 +97,7 @@ export function renderReviews(container, preselectedEventId = null) {
     <div class="reviews-view-wrapper">
       <div style="margin-bottom: 28px; text-align: center;">
         <h2 style="font-size: 32px; font-weight: 900; color: #0e3753; letter-spacing: -0.5px;">
-          참여후기 및 수업나눔
+          참여후기
         </h2>
         <p style="font-size: 15px; color: #64748b; margin-top: 6px;">
           행사에 참여하신 선생님들의 생생한 후기와 교실 수업 적용 사례를 자유롭게 공유해주세요.
