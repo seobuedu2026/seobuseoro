@@ -2,6 +2,9 @@ import {
   getAdminEmails,
   getPrimaryAdminEmail,
   getAdminPassword,
+  getAdminPasswordMap,
+  getAdminPasswordForEmail,
+  setAdminPasswordForEmail,
   addAdminEmail,
   removeAdminEmail,
   setPrimaryAdminEmail,
@@ -10,7 +13,7 @@ import {
 } from "../auth/googleAuth.js";
 
 /**
- * 관리자 ID 현황 및 보안 관리 대시보드 모달
+ * 관리자 ID 현황 및 비밀번호(PW) 보안 관리 대시보드 모달
  * @param {Function} onSaved 상태 변경 시 콜백
  */
 export function openAdminAccountModal(onSaved) {
@@ -18,10 +21,13 @@ export function openAdminAccountModal(onSaved) {
   if (!mount) return;
 
   let activeTab = "list"; // "list" | "password" | "session"
+  let selectedEmailForPwEdit = null; // 인라인 PW 변경 대상 ID
 
   function render() {
     const adminEmails = getAdminEmails();
     const primaryEmail = getPrimaryAdminEmail();
+    const passwordMap = getAdminPasswordMap();
+    const globalPw = getAdminPassword();
     const currentUser = GoogleAuthService.getCurrentUser() || {
       email: primaryEmail,
       name: "관리자",
@@ -30,7 +36,7 @@ export function openAdminAccountModal(onSaved) {
 
     mount.innerHTML = `
       <div class="m3-modal-backdrop open" id="admin-account-backdrop">
-        <div class="m3-modal-dialog" style="max-width: 620px; padding: 26px;">
+        <div class="m3-modal-dialog" style="max-width: 640px; padding: 26px;">
           <!-- 모달 헤더 -->
           <div class="modal-header" style="margin-bottom: 12px; align-items: center;">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -39,13 +45,13 @@ export function openAdminAccountModal(onSaved) {
               </div>
               <div>
                 <h3 style="font-size: 19px; font-weight: 900; color: #0e3753; margin: 0; display: flex; align-items: center; gap: 8px;">
-                  관리자 ID 현황 및 관리
+                  관리자 ID 현황 및 비밀번호 관리
                   <span style="font-size: 11px; font-weight: 800; background: #0e3753; color: #ffffff; padding: 2px 8px; border-radius: 9999px;">
                     총 ${adminEmails.length}명
                   </span>
                 </h3>
                 <p style="font-size: 12.5px; color: #64748b; margin: 2px 0 0 0;">
-                  관리자 로그인 권한이 부여된 ID 목록을 확인하고 추가·삭제 및 보안을 관리합니다.
+                  관리자 ID 목록을 조회·추가·삭제하고, 각 ID별 전용 비밀번호(PW)를 설정 및 변경합니다.
                 </p>
               </div>
             </div>
@@ -56,7 +62,9 @@ export function openAdminAccountModal(onSaved) {
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 18px;">
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 14px;">
               <div style="font-size: 11.5px; color: #64748b; font-weight: 700;">등록된 관리자 ID</div>
-              <div style="font-size: 18px; font-weight: 900; color: #0e3753; margin-top: 2px;">${adminEmails.length}<span style="font-size: 13px; font-weight: 700; color: #64748b;"> 개</span></div>
+              <div style="font-size: 18px; font-weight: 900; color: #0e3753; margin-top: 2px;">
+                ${adminEmails.length}<span style="font-size: 13px; font-weight: 700; color: #64748b;"> 개</span>
+              </div>
             </div>
             <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 10px 14px;">
               <div style="font-size: 11.5px; color: #166534; font-weight: 700;">현재 접속 계정</div>
@@ -65,10 +73,9 @@ export function openAdminAccountModal(onSaved) {
               </div>
             </div>
             <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 10px 14px;">
-              <div style="font-size: 11.5px; color: #0369a1; font-weight: 700;">보안 인증 상태</div>
-              <div style="font-size: 13.5px; font-weight: 800; color: #0284c7; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
-                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #22c55e;"></span>
-                정상 활성화
+              <div style="font-size: 11.5px; color: #0369a1; font-weight: 700;">공통 기본 비밀번호</div>
+              <div style="font-size: 13.5px; font-weight: 800; color: #0284c7; margin-top: 4px;">
+                ${globalPw}
               </div>
             </div>
           </div>
@@ -76,45 +83,94 @@ export function openAdminAccountModal(onSaved) {
           <!-- 탭 메뉴 버튼 -->
           <div style="display: flex; gap: 8px; border-bottom: 2px solid #e2e8f0; margin-bottom: 18px; padding-bottom: 2px;">
             <button type="button" class="tab-btn ${activeTab === 'list' ? 'active' : ''}" id="tab-btn-list" style="padding: 8px 14px; font-size: 13.5px; font-weight: 800; border: none; background: none; cursor: pointer; color: ${activeTab === 'list' ? '#0e3753' : '#64748b'}; border-bottom: 2px solid ${activeTab === 'list' ? '#0e3753' : 'transparent'}; margin-bottom: -4px;">
-              📋 관리자 ID 목록 & 추가 (${adminEmails.length})
+              📋 관리자 ID & 비밀번호 설정 (${adminEmails.length})
             </button>
             <button type="button" class="tab-btn ${activeTab === 'password' ? 'active' : ''}" id="tab-btn-password" style="padding: 8px 14px; font-size: 13.5px; font-weight: 800; border: none; background: none; cursor: pointer; color: ${activeTab === 'password' ? '#0e3753' : '#64748b'}; border-bottom: 2px solid ${activeTab === 'password' ? '#0e3753' : 'transparent'}; margin-bottom: -4px;">
-              🔒 비밀번호(PW) 변경
+              🔒 비밀번호(PW) 일괄/개별 변경
             </button>
             <button type="button" class="tab-btn ${activeTab === 'session' ? 'active' : ''}" id="tab-btn-session" style="padding: 8px 14px; font-size: 13.5px; font-weight: 800; border: none; background: none; cursor: pointer; color: ${activeTab === 'session' ? '#0e3753' : '#64748b'}; border-bottom: 2px solid ${activeTab === 'session' ? '#0e3753' : 'transparent'}; margin-bottom: -4px;">
               ℹ️ 권한 및 세션 정보
             </button>
           </div>
 
-          <!-- 탭 1: 관리자 ID 목록 & 추가 -->
+          <!-- 탭 1: 관리자 ID 목록 & 새 ID + PW 추가 등록 -->
           <div id="tab-content-list" style="display: ${activeTab === 'list' ? 'block' : 'none'};">
-            <!-- 새 관리자 ID 등록 폼 -->
-            <form id="form-add-admin-email" style="background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 12px; padding: 14px; margin-bottom: 18px;">
-              <label for="input-new-admin-email" style="font-weight: 800; font-size: 13px; color: #0e3753; display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
-                <span>➕ 새 관리자 ID(이메일) 등록</span>
-                <span style="font-size: 11px; font-weight: normal; color: #64748b;">(@senedu.kr 또는 구글 이메일)</span>
-              </label>
-              <div style="display: flex; gap: 8px;">
-                <input type="email" id="input-new-admin-email" class="m3-input" placeholder="추가할 이메일 입력 (예: teacher@senedu.kr)" required style="flex: 1; padding: 9px 12px; font-size: 13.5px;" />
-                <button type="submit" class="btn-m3-filled" style="background: #008080; border-color: #008080; white-space: nowrap; padding: 9px 16px; font-size: 13.5px;">
-                  + ID 추가
+            <!-- 새 관리자 ID + 비밀번호 등록 폼 -->
+            <form id="form-add-admin-email" style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 16px; margin-bottom: 18px;">
+              <div style="font-weight: 900; font-size: 13.5px; color: #0e3753; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                <span>➕ 새 관리자 ID 및 비밀번호 등록</span>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 10px;">
+                <div>
+                  <label for="input-new-admin-email" style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">
+                    이메일 주소 * (@senedu.kr 또는 구글 이메일)
+                  </label>
+                  <input type="email" id="input-new-admin-email" class="m3-input" placeholder="예: teacher@senedu.kr" required style="padding: 8px 12px; font-size: 13.5px;" />
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                  <div>
+                    <label for="input-new-admin-pw" style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">
+                      접속 비밀번호 (선택)
+                    </label>
+                    <input type="password" id="input-new-admin-pw" class="m3-input" placeholder="미입력 시 기본(qwer1234)" style="padding: 8px 12px; font-size: 13.5px;" />
+                  </div>
+                  <div>
+                    <label for="input-new-admin-pw-confirm" style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">
+                      비밀번호 확인 (선택)
+                    </label>
+                    <input type="password" id="input-new-admin-pw-confirm" class="m3-input" placeholder="비밀번호 재입력" style="padding: 8px 12px; font-size: 13.5px;" />
+                  </div>
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 11.5px; color: #64748b;">
+                  * 비밀번호를 지정하지 않으면 공통 관리자 비밀번호(<strong>${globalPw}</strong>)가 적용됩니다.
+                </span>
+                <button type="submit" class="btn-m3-filled" style="background: #008080; border-color: #008080; white-space: nowrap; padding: 8px 18px; font-size: 13.5px; font-weight: 800;">
+                  ➕ 관리자 ID 및 PW 등록
                 </button>
               </div>
             </form>
 
+            <!-- 개별 PW 빠른 수정 인라인 폼 (선택 시 활성화) -->
+            ${selectedEmailForPwEdit ? `
+              <div id="box-inline-pw-edit" style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px; padding: 14px; margin-bottom: 16px; animation: fadeIn 0.2s ease;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <span style="font-weight: 900; font-size: 13px; color: #92400e; display: flex; align-items: center; gap: 6px;">
+                    🔑 [${selectedEmailForPwEdit}] 비밀번호(PW) 변경
+                  </span>
+                  <button type="button" id="btn-cancel-inline-pw" style="background: none; border: none; font-size: 14px; color: #92400e; cursor: pointer;">✕</button>
+                </div>
+                <form id="form-inline-pw-save" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                  <input type="password" id="input-inline-pw" class="m3-input" placeholder="새 비밀번호 입력 (4자 이상)" required style="flex: 1; min-width: 160px; padding: 8px 12px; font-size: 13.5px; background: #ffffff;" />
+                  <input type="password" id="input-inline-pw-confirm" class="m3-input" placeholder="새 비밀번호 확인" required style="flex: 1; min-width: 160px; padding: 8px 12px; font-size: 13.5px; background: #ffffff;" />
+                  <button type="submit" class="btn-m3-filled" style="background: #d97706; border-color: #d97706; padding: 8px 16px; font-size: 13px; font-weight: 800;">
+                    저장
+                  </button>
+                </form>
+              </div>
+            ` : ''}
+
             <!-- 관리자 ID 목록 -->
-            <div style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-              <span>등록된 관리자 ID 목록</span>
-              <span style="font-size: 11.5px; color: #64748b; font-weight: normal;">* 등록된 ID는 공통 관리자 PW로 로그인 가능합니다.</span>
+            <div style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+              <span>등록된 관리자 ID 목록 (${adminEmails.length}개)</span>
+              <span style="font-size: 11.5px; color: #64748b; font-weight: normal;">* 각 ID별 [🔑 PW 변경]으로 전용 비밀번호를 수정할 수 있습니다.</span>
             </div>
 
-            <div style="max-height: 250px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 12px; divide-y: 1px solid #e2e8f0; background: #ffffff;">
+            <div style="max-height: 240px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 12px; divide-y: 1px solid #e2e8f0; background: #ffffff;">
               ${adminEmails.map((email, idx) => {
-                const isPrimary = (email.toLowerCase() === primaryEmail.toLowerCase()) || (idx === 0);
-                const isCurrent = (email.toLowerCase() === (currentUser.email || '').toLowerCase());
+                const clean = email.toLowerCase();
+                const isPrimary = (clean === primaryEmail.toLowerCase()) || (idx === 0);
+                const isCurrent = (clean === (currentUser.email || '').toLowerCase());
+                const hasCustomPw = Boolean(passwordMap[clean] && passwordMap[clean].trim());
+                const specificPw = getAdminPasswordForEmail(clean);
+
                 return `
-                  <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid #f1f5f9; gap: 10px;">
-                    <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
+                  <div style="display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; border-bottom: 1px solid #f1f5f9; gap: 8px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1;">
                       <span style="font-size: 16px; flex-shrink: 0;">${isPrimary ? '👑' : '👤'}</span>
                       <div style="min-width: 0;">
                         <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
@@ -130,19 +186,28 @@ export function openAdminAccountModal(onSaved) {
                               관리자 ID
                             </span>
                           `}
+                          ${hasCustomPw ? `
+                            <span style="font-size: 10.5px; font-weight: 800; background: #e0f2fe; color: #0369a1; padding: 1px 7px; border-radius: 9999px;" title="개별 전용 비밀번호가 등록되어 있습니다.">
+                              🔑 개별 PW
+                            </span>
+                          ` : `
+                            <span style="font-size: 10.5px; font-weight: 700; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 1px 6px; border-radius: 9999px;" title="공통 관리자 비밀번호가 적용됩니다.">
+                              공통 PW (${globalPw})
+                            </span>
+                          `}
                           ${isCurrent ? `
                             <span style="font-size: 10.5px; font-weight: 800; background: #dcfce7; color: #15803d; padding: 1px 7px; border-radius: 9999px;">
-                              현재 접속중
+                              접속중
                             </span>
                           ` : ''}
-                        </div>
-                        <div style="font-size: 11.5px; color: #94a3b8; margin-top: 2px;">
-                          로그인 가능 • 전체 행사 및 후기 관리 권한
                         </div>
                       </div>
                     </div>
 
                     <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                      <button type="button" class="btn-quick-edit-pw btn-m3-outlined" data-email="${email}" style="padding: 4px 8px; font-size: 11.5px; border-radius: 6px; color: #0e3753; border-color: #cbd5e1; font-weight: 700;" title="이 ID의 비밀번호 변경">
+                        🔑 PW 변경
+                      </button>
                       ${!isPrimary ? `
                         <button type="button" class="btn-set-primary btn-m3-outlined" data-email="${email}" style="padding: 4px 8px; font-size: 11.5px; border-radius: 6px; color: #0284c7; border-color: #bae6fd;">
                           대표 지정
@@ -162,35 +227,80 @@ export function openAdminAccountModal(onSaved) {
             </div>
           </div>
 
-          <!-- 탭 2: 비밀번호(PW) 변경 -->
+          <!-- 탭 2: 비밀번호(PW) 일괄 및 개별 변경 -->
           <div id="tab-content-password" style="display: ${activeTab === 'password' ? 'block' : 'none'};">
-            <form id="admin-password-change-form">
-              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
-                <div class="form-group" style="margin-bottom: 14px;">
-                  <label for="pw-current-input" style="font-weight: 800; font-size: 13px; color: #0e3753;">
-                    현재 비밀번호 (PW) *
-                  </label>
-                  <input type="password" id="pw-current-input" class="m3-input" placeholder="현재 비밀번호 입력" required style="padding: 10px 12px; font-size: 14px;" />
-                </div>
+            <!-- 섹션 A: 특정 관리자 ID별 개별 비밀번호 설정 -->
+            <form id="form-specific-admin-pw" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+              <div style="font-weight: 900; font-size: 13.5px; color: #0e3753; margin-bottom: 10px;">
+                👤 특정 관리자 ID별 비밀번호(PW) 설정
+              </div>
+              
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label for="select-admin-target-email" style="font-weight: 700; font-size: 12.5px; color: #475569;">
+                  대상 관리자 ID 선택 *
+                </label>
+                <select id="select-admin-target-email" class="m3-input" style="padding: 9px 12px; font-size: 13.5px; background: #ffffff;">
+                  ${adminEmails.map(e => `
+                    <option value="${e}" ${e.toLowerCase() === (currentUser.email || '').toLowerCase() ? 'selected' : ''}>
+                      ${e} (${getAdminPasswordForEmail(e) ? '현재 PW 설정됨' : '공통 PW 적용'})
+                    </option>
+                  `).join("")}
+                </select>
+              </div>
 
-                <div class="form-group" style="margin-bottom: 14px;">
-                  <label for="pw-new-input" style="font-weight: 800; font-size: 13px; color: #0e3753;">
-                    새 비밀번호 (PW) *
-                  </label>
-                  <input type="password" id="pw-new-input" class="m3-input" placeholder="새 비밀번호 입력 (4자 이상 권장)" required style="padding: 10px 12px; font-size: 14px;" />
-                </div>
-
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
                 <div class="form-group" style="margin-bottom: 0;">
-                  <label for="pw-confirm-input" style="font-weight: 800; font-size: 13px; color: #0e3753;">
+                  <label for="input-target-new-pw" style="font-weight: 700; font-size: 12.5px; color: #475569;">
+                    새 비밀번호 *
+                  </label>
+                  <input type="password" id="input-target-new-pw" class="m3-input" placeholder="새 비밀번호 입력 (4자 이상)" required style="padding: 9px 12px; font-size: 13.5px; background: #ffffff;" />
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="input-target-confirm-pw" style="font-weight: 700; font-size: 12.5px; color: #475569;">
                     새 비밀번호 확인 *
                   </label>
-                  <input type="password" id="pw-confirm-input" class="m3-input" placeholder="새 비밀번호 다시 입력" required style="padding: 10px 12px; font-size: 14px;" />
+                  <input type="password" id="input-target-confirm-pw" class="m3-input" placeholder="새 비밀번호 다시 입력" required style="padding: 9px 12px; font-size: 13.5px; background: #ffffff;" />
                 </div>
               </div>
 
-              <div style="display: flex; justify-content: flex-end; gap: 8px;">
-                <button type="submit" class="btn-m3-filled" style="background: #0e3753; border-color: #0e3753; padding: 10px 20px; font-size: 14px; font-weight: 800;">
-                  🔒 비밀번호 변경 저장
+              <div style="display: flex; justify-content: flex-end;">
+                <button type="submit" class="btn-m3-filled" style="background: #0e3753; border-color: #0e3753; padding: 8px 18px; font-size: 13px; font-weight: 800;">
+                  💾 선택한 ID 비밀번호 변경 저장
+                </button>
+              </div>
+            </form>
+
+            <!-- 섹션 B: 공통 마스터 비밀번호 변경 -->
+            <form id="form-global-master-pw" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
+              <div style="font-weight: 900; font-size: 13.5px; color: #0e3753; margin-bottom: 10px;">
+                🌐 공통 기본 관리자 비밀번호(PW) 변경
+              </div>
+
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label for="pw-current-global-input" style="font-weight: 700; font-size: 12.5px; color: #475569;">
+                  현재 공통 비밀번호 *
+                </label>
+                <input type="password" id="pw-current-global-input" class="m3-input" placeholder="현재 비밀번호 입력" required style="padding: 9px 12px; font-size: 13.5px; background: #ffffff;" />
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="pw-new-global-input" style="font-weight: 700; font-size: 12.5px; color: #475569;">
+                    새 공통 비밀번호 *
+                  </label>
+                  <input type="password" id="pw-new-global-input" class="m3-input" placeholder="새 비밀번호 (4자 이상)" required style="padding: 9px 12px; font-size: 13.5px; background: #ffffff;" />
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="pw-confirm-global-input" style="font-weight: 700; font-size: 12.5px; color: #475569;">
+                    새 공통 비밀번호 확인 *
+                  </label>
+                  <input type="password" id="pw-confirm-global-input" class="m3-input" placeholder="새 비밀번호 다시 입력" required style="padding: 9px 12px; font-size: 13.5px; background: #ffffff;" />
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end;">
+                <button type="submit" class="btn-m3-filled" style="background: #008080; border-color: #008080; padding: 8px 18px; font-size: 13px; font-weight: 800;">
+                  🔒 공통 기본 비밀번호 변경 저장
                 </button>
               </div>
             </form>
@@ -207,7 +317,7 @@ export function openAdminAccountModal(onSaved) {
                 <li><strong>후기 원클릭 승인 & 일괄 승인:</strong> 선생님들이 작성한 참여후기를 즉시 또는 일괄 공개 승인</li>
                 <li><strong>엑셀 일괄 등록:</strong> 엑셀 서식 파일(.xlsx) 업로드로 행사 대량 등록 및 수정</li>
                 <li><strong>달력 월 관리 및 강조 주간 설정:</strong> 상단 강조 주간 텍스트 및 달력 표시 월 편집</li>
-                <li><strong>관리자 ID 및 PW 관리:</strong> 관리자 ID 추가/삭제 및 시스템 비밀번호 변경</li>
+                <li><strong>관리자 ID 및 PW 관리:</strong> 각 ID별 전용 비밀번호 부여 및 관리자 계정 추가/삭제</li>
               </ul>
             </div>
 
@@ -245,7 +355,10 @@ export function openAdminAccountModal(onSaved) {
     const tabBtnSession = mount.querySelector("#tab-btn-session");
 
     const formAdd = mount.querySelector("#form-add-admin-email");
-    const formPw = mount.querySelector("#admin-password-change-form");
+    const formSpecificPw = mount.querySelector("#form-specific-admin-pw");
+    const formGlobalPw = mount.querySelector("#form-global-master-pw");
+    const formInlinePw = mount.querySelector("#form-inline-pw-save");
+    const btnCancelInlinePw = mount.querySelector("#btn-cancel-inline-pw");
     const btnSessionLogout = mount.querySelector("#btn-session-logout");
 
     const closeModal = () => {
@@ -292,23 +405,82 @@ export function openAdminAccountModal(onSaved) {
       });
     }
 
-    // 새 관리자 ID 등록 처리
+    // 새 관리자 ID + 비밀번호 등록 처리
     if (formAdd) {
       formAdd.addEventListener("submit", (e) => {
         e.preventDefault();
-        const input = mount.querySelector("#input-new-admin-email");
-        const email = input.value.trim();
+        const inputEmail = mount.querySelector("#input-new-admin-email");
+        const inputPw = mount.querySelector("#input-new-admin-pw");
+        const inputConfirmPw = mount.querySelector("#input-new-admin-pw-confirm");
 
-        const res = addAdminEmail(email);
+        const email = inputEmail.value.trim();
+        const pw = inputPw.value.trim();
+        const confirmPw = inputConfirmPw.value.trim();
+
+        if (pw) {
+          if (pw.length < 4) {
+            alert("⚠️ 비밀번호는 최소 4자 이상으로 입력해주세요.");
+            inputPw.focus();
+            return;
+          }
+          if (pw !== confirmPw) {
+            alert("❌ 입력한 비밀번호가 서로 일치하지 않습니다.");
+            inputConfirmPw.focus();
+            return;
+          }
+        }
+
+        const res = addAdminEmail(email, pw || "");
         if (res.success) {
-          alert(`✅ 관리자 ID (${email})가 성공적으로 등록되었습니다!`);
+          alert(`✅ 관리자 ID (${email}) 및 비밀번호가 성공적으로 등록되었습니다!`);
           render();
         } else {
           alert(`⚠️ ${res.message || '관리자 ID 등록에 실패했습니다.'}`);
-          input.focus();
+          inputEmail.focus();
         }
       });
     }
+
+    // 인라인 PW 빠른 변경 폼
+    if (formInlinePw) {
+      formInlinePw.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const pw = mount.querySelector("#input-inline-pw").value.trim();
+        const confirmPw = mount.querySelector("#input-inline-pw-confirm").value.trim();
+
+        if (pw.length < 4) {
+          alert("⚠️ 새 비밀번호는 최소 4자 이상으로 입력해주세요.");
+          return;
+        }
+        if (pw !== confirmPw) {
+          alert("❌ 새 비밀번호가 일치하지 않습니다.");
+          return;
+        }
+
+        setAdminPasswordForEmail(selectedEmailForPwEdit, pw);
+        alert(`✅ [${selectedEmailForPwEdit}]의 비밀번호가 성공적으로 변경되었습니다.`);
+        selectedEmailForPwEdit = null;
+        render();
+      });
+    }
+
+    if (btnCancelInlinePw) {
+      btnCancelInlinePw.addEventListener("click", () => {
+        selectedEmailForPwEdit = null;
+        render();
+      });
+    }
+
+    // 관리자 목록에서 [PW 변경] 버튼 클릭 시 인라인 수정 폼 활성화
+    mount.querySelectorAll(".btn-quick-edit-pw").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const email = e.currentTarget.dataset.email;
+        selectedEmailForPwEdit = email;
+        render();
+        const inputInline = mount.querySelector("#input-inline-pw");
+        if (inputInline) inputInline.focus();
+      });
+    });
 
     // 대표 관리자 지정 버튼
     mount.querySelectorAll(".btn-set-primary").forEach(btn => {
@@ -329,6 +501,7 @@ export function openAdminAccountModal(onSaved) {
         if (confirm(`🗑️ [${email}] 관리자 ID를 삭제하시겠습니까?\n삭제 후에는 해당 ID로 관리자 로그인이 제한됩니다.`)) {
           const res = removeAdminEmail(email);
           if (res.success) {
+            if (selectedEmailForPwEdit === email) selectedEmailForPwEdit = null;
             alert(`✅ [${email}] 관리자 ID가 삭제되었습니다.`);
             render();
           } else {
@@ -338,37 +511,63 @@ export function openAdminAccountModal(onSaved) {
       });
     });
 
-    // 비밀번호 변경 폼
-    if (formPw) {
-      formPw.addEventListener("submit", (e) => {
+    // 탭 2: 특정 관리자 ID 비밀번호 변경 폼
+    if (formSpecificPw) {
+      formSpecificPw.addEventListener("submit", (e) => {
         e.preventDefault();
-        const curPw = mount.querySelector("#pw-current-input").value.trim();
-        const newPw = mount.querySelector("#pw-new-input").value.trim();
-        const confirmPw = mount.querySelector("#pw-confirm-input").value.trim();
+        const targetEmail = mount.querySelector("#select-admin-target-email").value;
+        const newPw = mount.querySelector("#input-target-new-pw").value.trim();
+        const confirmPw = mount.querySelector("#input-target-confirm-pw").value.trim();
+
+        if (newPw.length < 4) {
+          alert("⚠️ 새 비밀번호는 최소 4자 이상으로 입력해주세요.");
+          mount.querySelector("#input-target-new-pw").focus();
+          return;
+        }
+        if (newPw !== confirmPw) {
+          alert("❌ 새 비밀번호가 일치하지 않습니다.");
+          mount.querySelector("#input-target-confirm-pw").focus();
+          return;
+        }
+
+        setAdminPasswordForEmail(targetEmail, newPw);
+        alert(`✅ [${targetEmail}]의 비밀번호가 성공적으로 변경되었습니다!`);
+        activeTab = "list";
+        render();
+      });
+    }
+
+    // 탭 2: 공통 기본 관리자 비밀번호 변경 폼
+    if (formGlobalPw) {
+      formGlobalPw.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const curPw = mount.querySelector("#pw-current-global-input").value.trim();
+        const newPw = mount.querySelector("#pw-new-global-input").value.trim();
+        const confirmPw = mount.querySelector("#pw-confirm-global-input").value.trim();
 
         const storedPw = getAdminPassword();
         const defaultPws = ["qwer1234", "seobuedu2026@gmail.com"];
 
         if (curPw !== storedPw && !defaultPws.includes(curPw)) {
-          alert("❌ 현재 비밀번호가 일치하지 않습니다.");
-          mount.querySelector("#pw-current-input").focus();
+          alert("❌ 현재 공통 비밀번호가 일치하지 않습니다.");
+          mount.querySelector("#pw-current-global-input").focus();
           return;
         }
 
         if (newPw.length < 4) {
           alert("⚠️ 새 비밀번호는 최소 4자 이상으로 입력해주세요.");
-          mount.querySelector("#pw-new-input").focus();
+          mount.querySelector("#pw-new-global-input").focus();
           return;
         }
 
         if (newPw !== confirmPw) {
           alert("❌ 새 비밀번호와 비밀번호 확인이 일치하지 않습니다.");
-          mount.querySelector("#pw-confirm-input").focus();
+          mount.querySelector("#pw-confirm-global-input").focus();
           return;
         }
 
         updateAdminCredentials(null, newPw);
-        alert("✅ 관리자 비밀번호(PW)가 성공적으로 변경되었습니다!");
+        alert("✅ 공통 기본 관리자 비밀번호(PW)가 성공적으로 변경되었습니다!");
         activeTab = "list";
         render();
       });

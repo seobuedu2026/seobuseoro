@@ -4,6 +4,7 @@ const STORAGE_KEY = "seobu_user_session";
 const ADMIN_MODE_KEY = "seobu_admin_mode";
 const ADMIN_PW_STORAGE_KEY = "seobu_admin_password_custom_v1";
 const ADMIN_EMAIL_STORAGE_KEY = "seobu_admin_email_custom_v1";
+const ADMIN_PASSWORDS_MAP_KEY = "seobu_admin_passwords_map_v1";
 
 const DEFAULT_ADMIN_PASSWORDS = ["qwer1234", "seobuedu2026@gmail.com"];
 const DEFAULT_ADMIN_EMAILS = [
@@ -15,6 +16,48 @@ const DEFAULT_ADMIN_EMAILS = [
 
 // 구글 클라이언트 ID (Google Cloud Console seobuseoro 프로젝트)
 export const GOOGLE_CLIENT_ID = "544520893088-9lj38t9e6qlp6m11q55tfh8hadvd8361.apps.googleusercontent.com";
+
+// 관리자 계정별 비밀번호 맵 조회
+export function getAdminPasswordMap() {
+  const saved = localStorage.getItem(ADMIN_PASSWORDS_MAP_KEY);
+  if (saved) {
+    try {
+      return JSON.parse(saved) || {};
+    } catch (e) {
+      return {};
+    }
+  }
+  return {};
+}
+
+// 특정 관리자 이메일의 비밀번호 반환 (미설정 시 공통 관리자 비밀번호 반환)
+export function getAdminPasswordForEmail(email) {
+  if (!email) return getAdminPassword();
+  const cleanEmail = email.trim().toLowerCase();
+  const map = getAdminPasswordMap();
+  if (map[cleanEmail] && map[cleanEmail].trim()) {
+    return map[cleanEmail].trim();
+  }
+  return getAdminPassword();
+}
+
+// 특정 관리자 이메일의 비밀번호 설정
+export function setAdminPasswordForEmail(email, newPassword) {
+  if (!email || !newPassword || !newPassword.trim()) {
+    return { success: false, message: "이메일과 새 비밀번호를 모두 입력해주세요." };
+  }
+  const cleanEmail = email.trim().toLowerCase();
+  const cleanPw = newPassword.trim();
+  
+  if (cleanPw.length < 4) {
+    return { success: false, message: "비밀번호는 최소 4자 이상이어야 합니다." };
+  }
+
+  const map = getAdminPasswordMap();
+  map[cleanEmail] = cleanPw;
+  localStorage.setItem(ADMIN_PASSWORDS_MAP_KEY, JSON.stringify(map));
+  return { success: true };
+}
 
 // 관리자 이메일 목록 반환
 export function getAdminEmails() {
@@ -28,8 +71,8 @@ export function getAdminEmails() {
   return [...DEFAULT_ADMIN_EMAILS];
 }
 
-// 새 관리자 이메일 등록/추가
-export function addAdminEmail(email) {
+// 새 관리자 이메일 및 초기 비밀번호 등록/추가
+export function addAdminEmail(email, initialPassword = "") {
   if (!email || !email.trim()) return { success: false, message: "이메일 주소를 입력해주세요." };
   const cleanEmail = email.trim().toLowerCase();
   
@@ -46,6 +89,12 @@ export function addAdminEmail(email) {
 
   const updated = [...currentEmails, cleanEmail];
   localStorage.setItem(ADMIN_EMAIL_STORAGE_KEY, JSON.stringify(updated));
+
+  // 비밀번호가 지정된 경우 개별 비밀번호 저장
+  if (initialPassword && initialPassword.trim()) {
+    setAdminPasswordForEmail(cleanEmail, initialPassword.trim());
+  }
+
   window.dispatchEvent(new CustomEvent("auth-state-changed", { detail: { user: GoogleAuthService.getCurrentUser() } }));
   return { success: true, emails: updated };
 }
@@ -63,6 +112,13 @@ export function removeAdminEmail(email) {
   const updated = currentEmails.filter(e => e.toLowerCase() !== cleanEmail);
   localStorage.setItem(ADMIN_EMAIL_STORAGE_KEY, JSON.stringify(updated));
   
+  // 비밀번호 맵에서도 제거
+  const map = getAdminPasswordMap();
+  if (map[cleanEmail]) {
+    delete map[cleanEmail];
+    localStorage.setItem(ADMIN_PASSWORDS_MAP_KEY, JSON.stringify(map));
+  }
+
   // 현재 접속중인 관리자 이메일이 삭제된 경우 주 관리자로 변경
   const activeCustom = (localStorage.getItem("seobu_admin_custom_email") || "").toLowerCase();
   if (activeCustom === cleanEmail) {
@@ -86,7 +142,7 @@ export function setPrimaryAdminEmail(email) {
   return updated;
 }
 
-// 현재 관리자 비밀번호 반환
+// 현재 공통 관리자 비밀번호 반환
 export function getAdminPassword() {
   const saved = localStorage.getItem(ADMIN_PW_STORAGE_KEY);
   return saved ? saved.trim() : "qwer1234";
@@ -196,10 +252,11 @@ export const GoogleAuthService = {
     const cleanPw = password.trim();
 
     const allowedEmails = getAdminEmails();
-    const currentPw = getAdminPassword();
+    const specificPw = getAdminPasswordForEmail(cleanEmail);
+    const globalPw = getAdminPassword();
 
-    const isEmailValid = allowedEmails.includes(cleanEmail);
-    const isPwValid = (cleanPw === currentPw) || DEFAULT_ADMIN_PASSWORDS.includes(cleanPw);
+    const isEmailValid = allowedEmails.map(e => e.toLowerCase()).includes(cleanEmail);
+    const isPwValid = (cleanPw === specificPw) || (cleanPw === globalPw) || DEFAULT_ADMIN_PASSWORDS.includes(cleanPw);
 
     if (!isEmailValid) {
       return { success: false, message: "등록되지 않은 관리자 이메일입니다." };
