@@ -96,17 +96,7 @@ export function renderReviews(container, preselectedEventId = null) {
               </p>
 
               <!-- Google Identity Services 버튼 렌더링 컨테이너 -->
-              <div id="google-signin-btn-container" style="display: flex; justify-content: center; margin-bottom: 12px; min-height: 40px;"></div>
-
-              <div style="display: flex; align-items: center; gap: 8px; margin: 12px 0;">
-                <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
-                <span style="font-size: 11px; color: #94a3b8; font-weight: 600;">또는</span>
-                <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
-              </div>
-
-              <button id="btn-direct-senedu-login" class="btn-footer-pill" style="width: 100%; justify-content: center; padding: 9px 12px; font-size: 12.5px; color: #0e3753;">
-                📧 @senedu.kr 이메일 직접 인증
-              </button>
+              <div id="google-signin-btn-container" style="display: flex; justify-content: center; margin-top: 8px; min-height: 44px;"></div>
             </div>
           ` : `
             <form id="review-submit-form">
@@ -197,7 +187,7 @@ export function renderReviews(container, preselectedEventId = null) {
     </div>
   `;
 
-  // 미로그인 상태일 때 Google 버튼 및 직접 인증 바인딩
+  // 미로그인 상태일 때 Google 버튼 바인딩
   if (!user) {
     // Google Identity Services 렌더링 시도
     setTimeout(() => {
@@ -205,15 +195,6 @@ export function renderReviews(container, preselectedEventId = null) {
         renderReviews(container, preselectedEventId);
       });
     }, 100);
-
-    const btnDirectLogin = container.querySelector("#btn-direct-senedu-login");
-    if (btnDirectLogin) {
-      btnDirectLogin.addEventListener("click", () => {
-        GoogleAuthService.showLoginPrompt(() => {
-          renderReviews(container, preselectedEventId);
-        });
-      });
-    }
   } else {
     // 로그아웃 버튼
     const btnLogout = container.querySelector("#btn-review-logout");
