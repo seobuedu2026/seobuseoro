@@ -72,9 +72,11 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
 
           <div style="display:flex; gap:10px; justify-content:flex-end; align-items:center; flex-wrap:wrap;">
-            <button id="btn-modal-edit" class="btn-m3-outlined" style="border-color:#0e3753; color:#0e3753; font-weight:800;">
-              ✏️ 행사 수정
-            </button>
+            ${isAdmin ? `
+              <button id="btn-modal-edit" class="btn-m3-outlined" style="border-color:#0e3753; color:#0e3753; font-weight:800;">
+                ✏️ 행사 수정
+              </button>
+            ` : ''}
             <button id="btn-modal-review" class="btn-m3-outlined">후기 남기기</button>
             ${(eventObj.applyUrl && (eventObj.applyUrl.startsWith('http://') || eventObj.applyUrl.startsWith('https://'))) ? `
               <a href="${eventObj.applyUrl}" target="_blank" class="btn-m3-filled">참가 신청 바로가기</a>

@@ -50,12 +50,14 @@ export function renderPrograms(container, onSelectEventModal) {
         </p>
       </div>
 
-      <!-- 새 프로그램 추가 버튼 -->
-      <div style="display: flex; justify-content: center; margin-bottom: 20px;">
-        <button id="btn-add-program" class="btn-m3-pill-action">
-          <span>➕ 새 프로그램 추가</span>
-        </button>
-      </div>
+      <!-- 새 프로그램 추가 버튼 (관리자 전용) -->
+      ${isAdmin ? `
+        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+          <button id="btn-add-program" class="btn-m3-pill-action">
+            <span>➕ 새 프로그램 추가</span>
+          </button>
+        </div>
+      ` : ''}
 
       <!-- 월 & 카테고리 필터 칩 바 (중앙 정렬) -->
       <div style="display: flex; justify-content: center; margin-bottom: 24px; width: 100%;">
@@ -104,9 +106,11 @@ export function renderPrograms(container, onSelectEventModal) {
               <span class="prog-category-badge ${catClass}">${catLabel}</span>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span class="prog-date-badge">2026년 ${ev.month}월 ${ev.day}일</span>
-                <button class="btn-edit-prog btn-m3-outlined" data-event-id="${ev.id}" title="프로그램 수정" style="padding: 2px 8px; font-size: 11px; border-radius: 6px; font-weight: 800; border-color: #0e3753; color: #0e3753; background: #ffffff;" onclick="event.stopPropagation();">
-                  ✏️ 수정
-                </button>
+                ${isAdmin ? `
+                  <button class="btn-edit-prog btn-m3-outlined" data-event-id="${ev.id}" title="프로그램 수정" style="padding: 2px 8px; font-size: 11px; border-radius: 6px; font-weight: 800; border-color: #0e3753; color: #0e3753; background: #ffffff;" onclick="event.stopPropagation();">
+                    ✏️ 수정
+                  </button>
+                ` : ''}
               </div>
             </div>
             

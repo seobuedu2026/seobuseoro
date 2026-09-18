@@ -37,12 +37,14 @@ export function renderCalendar(container, onSelectEventModal) {
           </button>
         </div>
 
-        <div class="calendar-utility-row">
-          <button id="btn-excel-import" class="btn-m3-pill-action" title="행사 엑셀 파일(.xlsx) 업로드 등록">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-            <span>엑셀 파일 등록</span>
-          </button>
-        </div>
+        ${isAdmin ? `
+          <div class="calendar-utility-row">
+            <button id="btn-excel-import" class="btn-m3-pill-action" title="행사 엑셀 파일(.xlsx) 업로드 등록">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+              <span>엑셀 파일 등록</span>
+            </button>
+          </div>
+        ` : ''}
       </div>
 
       <!-- 캘린더 컨텐츠 마운트 영역 (화면 100% 꽉 참) -->
@@ -63,7 +65,7 @@ export function renderCalendar(container, onSelectEventModal) {
   `;
 
   const contentMount = container.querySelector("#calendar-content-mount");
-  renderCalendarCards(contentMount, onSelectEventModal, true, container);
+  renderCalendarCards(contentMount, onSelectEventModal, isAdmin, container);
 
   // 칩 클릭 이벤트
   container.querySelectorAll("#month-chips-row .m3-chip[data-month]").forEach(chip => {
@@ -332,9 +334,11 @@ function generateMonthCardHTML(month, isFocusView = false, isAdmin = false) {
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
           <span style="font-size:13px; font-weight:800; color:#475569;">${monthEvents.length}개 프로그램</span>
-          <button class="btn-edit-month-theme btn-m3-outlined" data-month="${month}" title="이 월의 소제목 및 강조 안내 문구 수정" style="padding: 2px 8px; font-size: 11px; border-radius: 6px; font-weight: 800; border-color: #0e3753; color: #0e3753; background: #ffffff;">
-            ✏️ 문구 수정
-          </button>
+          ${isAdmin ? `
+            <button class="btn-edit-month-theme btn-m3-outlined" data-month="${month}" title="이 월의 소제목 및 강조 안내 문구 수정" style="padding: 2px 8px; font-size: 11px; border-radius: 6px; font-weight: 800; border-color: #0e3753; color: #0e3753; background: #ffffff;">
+              ✏️ 문구 수정
+            </button>
+          ` : ''}
         </div>
       </div>
 

@@ -1,7 +1,10 @@
 import { getPadletRooms } from "../data/rooms.js";
 import { openRoomEditModal } from "./roomEditModal.js";
+import { GoogleAuthService } from "../auth/googleAuth.js";
 
 export function renderPadletRooms(container) {
+  const user = GoogleAuthService.getCurrentUser();
+  const isAdmin = !!(user && user.isAdmin);
   const rooms = getPadletRooms();
 
   container.innerHTML = `
@@ -15,11 +18,13 @@ export function renderPadletRooms(container) {
           교과군별 패들렛에서 선생님들의 수업 사례를 자유롭게 나눠보세요.
         </p>
 
-        <div style="display: flex; justify-content: center; gap: 8px; margin-top: 16px;">
-          <button id="btn-add-new-room" class="btn-m3-pill-action">
-            <span>➕ 새 수업나눔방 추가</span>
-          </button>
-        </div>
+        ${isAdmin ? `
+          <div style="display: flex; justify-content: center; gap: 8px; margin-top: 16px;">
+            <button id="btn-add-new-room" class="btn-m3-pill-action">
+              <span>➕ 새 수업나눔방 추가</span>
+            </button>
+          </div>
+        ` : ''}
       </div>
 
       <!-- 8개 카드 4열 x 2행 그리드 (카드 전체가 링크 버튼 및 수정 기능 포함) -->
@@ -35,9 +40,11 @@ export function renderPadletRooms(container) {
               <p class="padlet-room-desc">${room.desc}</p>
             </a>
             
-            <button class="btn-edit-padlet-room btn-m3-outlined" data-room-id="${room.id}" title="수업나눔방 정보 수정" style="position: absolute; top: 12px; right: 12px; padding: 3px 8px; font-size: 11px; border-radius: 6px; font-weight: 800; background: rgba(255,255,255,0.9); z-index: 2;">
-              ✏️ 수정
-            </button>
+            ${isAdmin ? `
+              <button class="btn-edit-padlet-room btn-m3-outlined" data-room-id="${room.id}" title="수업나눔방 정보 수정" style="position: absolute; top: 12px; right: 12px; padding: 3px 8px; font-size: 11px; border-radius: 6px; font-weight: 800; background: rgba(255,255,255,0.9); z-index: 2;">
+                ✏️ 수정
+              </button>
+            ` : ''}
           </div>
         `).join("")}
       </div>
