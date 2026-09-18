@@ -138,9 +138,13 @@
 
   /* 3. 캘린더 선택 버튼(월 필터 칩)도 한 줄에 4개 배열 */
   .calendar-view-mode-bar {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
     margin-bottom: 14px !important;
     gap: 8px !important;
     width: 100% !important;
+    min-height: auto !important;
   }
 
   #month-chips-row {
@@ -148,7 +152,7 @@
     grid-template-columns: repeat(4, 1fr) !important;
     gap: 4px !important;
     width: 100% !important;
-    margin-bottom: 6px !important;
+    margin-bottom: 4px !important;
     box-sizing: border-box !important;
   }
 
@@ -191,7 +195,8 @@
   }
 
   /* 캘린더 모드 바 하단: PDF 파일 저장 및 카운트 가로 정렬 */
-  .calendar-view-mode-bar > div:last-child {
+  .calendar-utility-row {
+    position: static !important;
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;

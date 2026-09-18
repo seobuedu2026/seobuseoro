@@ -52,7 +52,7 @@
 .filter-chips-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
   margin-bottom: 16px;
 }
@@ -60,10 +60,10 @@
 .m3-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 9px 20px;
+  gap: 5px;
+  padding: 6px 14px;
   border-radius: var(--shape-pill);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: #334155;
   background-color: #ffffff;
@@ -107,12 +107,47 @@
 
 .calendar-view-mode-bar {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
+  position: relative;
   margin-bottom: 20px;
-  flex-wrap: wrap;
-  gap: 12px;
   width: 100%;
+  min-height: 40px;
+}
+
+#month-chips-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0;
+}
+
+.calendar-utility-row {
+  position: absolute;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-pdf-download {
+  padding: 5px 12px;
+  font-size: 12px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 700;
+  color: #0e3753;
+  white-space: nowrap;
+}
+
+.calendar-program-count {
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  white-space: nowrap;
 }
 
 .calendar-content-container {

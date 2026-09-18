@@ -7,9 +7,9 @@ export function renderCalendar(container, onSelectEventModal) {
 
   container.innerHTML = `
     <div class="calendar-view-wrapper ${isSingleMonth ? 'is-single-month-view' : 'is-poster-view'}">
-      <!-- 상단 월 및 뷰 모드 전환 바 -->
+      <!-- 상단 월 및 뷰 모드 전환 바 (중앙 정렬 및 컴팩트 1줄 구성) -->
       <div class="calendar-view-mode-bar">
-        <div class="filter-chips-row" id="month-chips-row" style="margin-bottom:0;">
+        <div class="filter-chips-row" id="month-chips-row">
           <button class="m3-chip chip-month-9 ${currentMonth === 9 ? 'active' : ''}" data-month="9">
             <span>🌿 9월</span><span class="chip-text-extra"> · 수다박스의 달</span>
           </button>
@@ -24,14 +24,14 @@ export function renderCalendar(container, onSelectEventModal) {
           </button>
         </div>
 
-        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-          <a href="assets/docs/seobu_growth_calendar_print.pdf" download="2026학년도_서부서로_수업성장캘린더.pdf" target="_blank" class="btn-m3-outlined" style="padding:6px 14px; font-size:12.5px; border-radius:9999px; display:inline-flex; align-items:center; gap:6px; font-weight:800; color:#0e3753;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            PDF 파일 저장
+        <div class="calendar-utility-row">
+          <a href="assets/docs/seobu_growth_calendar_print.pdf" download="2026학년도_서부서로_수업성장캘린더.pdf" target="_blank" class="btn-m3-outlined btn-pdf-download">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>PDF 파일 저장</span>
           </a>
-          <div style="font-size:14px; font-weight:800; color:#475569;">
+          <span class="calendar-program-count">
             총 <strong>${getEvents().length}개</strong>의 성장 프로그램
-          </div>
+          </span>
         </div>
       </div>
 
