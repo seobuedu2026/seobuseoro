@@ -2,17 +2,17 @@
 
 const STORAGE_KEY = "seobu_user_session";
 const ADMIN_MODE_KEY = "seobu_admin_mode";
-const DEFAULT_ADMIN_CODE = "seobuedu2026@gmail.com"; // 관리자 인증 코드
+const ADMIN_PASSWORDS = ["qwer1234", "seobuedu2026@gmail.com"]; // 관리자 인증 비밀번호
 
 // 구글 클라이언트 ID (Google Cloud Console seobuseoro 프로젝트)
 export const GOOGLE_CLIENT_ID = "544520893088-9lj38t9e6qlp6m11q55tfh8hadvd8361.apps.googleusercontent.com";
 
-// 관리자 이메일 목록 (@senedu.kr)
+// 관리자 이메일 목록
 const ADMIN_EMAILS = [
+  "seobuedu2026@gmail.com",
   "admin@senedu.kr",
   "seobu@senedu.kr",
-  "manager@senedu.kr",
-  "seobuedu2026@gmail.com"
+  "manager@senedu.kr"
 ];
 
 // JWT 토큰 파싱 헬퍼 함수
@@ -54,13 +54,13 @@ export const GoogleAuthService = {
     // 관리자 모드 활성화 시 가상 관리자 세션
     if (this.isAdminModeActive()) {
       return {
-        email: "admin@senedu.kr",
-        name: "서부 관리자",
+        email: "seobuedu2026@gmail.com",
+        name: "관리자",
         picture: "https://api.dicebear.com/7.x/initials/svg?seed=Admin&backgroundColor=0e3753",
-        domain: "senedu.kr",
+        domain: "gmail.com",
         isSenedu: true,
         isAdmin: true,
-        role: "시스템 총괄 관리자",
+        role: "관리자",
         loggedInAt: new Date().toISOString()
       };
     }
@@ -90,7 +90,7 @@ export const GoogleAuthService = {
   verifyAdminCode(code) {
     if (!code) return false;
     const clean = code.trim();
-    if (clean.toLowerCase() === DEFAULT_ADMIN_CODE.toLowerCase()) {
+    if (ADMIN_PASSWORDS.includes(clean) || ADMIN_PASSWORDS.includes(clean.toLowerCase())) {
       localStorage.setItem(ADMIN_MODE_KEY, "true");
       window.dispatchEvent(new CustomEvent("auth-state-changed", { detail: { user: this.getCurrentUser() } }));
       return true;

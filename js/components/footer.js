@@ -82,18 +82,18 @@ export function openAdminAuthModal(onSuccess) {
         </div>
 
         <p style="font-size: 13.5px; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
-          행사 엑셀 업로드 및 일정 관리 권한을 활성화하려면 관리자 인증 코드를 입력하세요.
+          행사 엑셀 업로드 및 일정 관리 권한을 활성화하려면 관리자 비밀번호(PW)를 입력하세요.
         </p>
 
         <form id="admin-auth-form">
           <div class="form-group" style="margin-bottom: 20px;">
-            <label for="admin-code-input" style="font-weight: 800; font-size: 13px; color: #0e3753;">인증 코드</label>
-            <input type="password" id="admin-code-input" class="m3-input" placeholder="관리자 인증 코드를 입력하세요" autofocus required style="padding:12px; font-size:15px;" />
+            <label for="admin-code-input" style="font-weight: 800; font-size: 13px; color: #0e3753;">관리자 비밀번호 (PW)</label>
+            <input type="password" id="admin-code-input" class="m3-input" placeholder="비밀번호를 입력하세요" autofocus required style="padding:12px; font-size:15px;" />
           </div>
 
           <div style="display: flex; gap: 10px; justify-content: flex-end;">
             <button type="button" id="btn-cancel-auth" class="btn-m3-outlined">취소</button>
-            <button type="submit" class="btn-m3-filled">관리자 인증하기</button>
+            <button type="submit" class="btn-m3-filled">관리자 로그인</button>
           </div>
         </form>
       </div>
@@ -125,7 +125,7 @@ export function openAdminAuthModal(onSuccess) {
       closeModal();
       if (onSuccess) onSuccess();
     } else {
-      alert("❌ 관리자 인증 코드가 일치하지 않습니다.");
+      alert("❌ 관리자 비밀번호가 일치하지 않습니다.");
       input.focus();
     }
   });
