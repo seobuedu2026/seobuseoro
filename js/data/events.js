@@ -601,15 +601,17 @@ export const DEFAULT_EVENTS_DATA = [
   }
 ];
 
-export const MONTH_THEMES = {
-  1: { monthNum: 1, name: "1월", subtitle: "새학기 준비의 달", themeColor: "#0284c7", themeBg: "#e0f2fe", icon: "❄️" },
-  2: { monthNum: 2, name: "2월", subtitle: "도약과 배움의 달", themeColor: "#6366f1", themeBg: "#ede9fe", icon: "🌱" },
-  3: { monthNum: 3, name: "3월", subtitle: "첫 만남 성장의 달", themeColor: "#16a34a", themeBg: "#dcfce7", icon: "🌸" },
-  4: { monthNum: 4, name: "4월", subtitle: "탐구와 실천의 달", themeColor: "#0d9488", themeBg: "#ccfbf1", icon: "🌿" },
-  5: { monthNum: 5, name: "5월", subtitle: "배움과 감사의 달", themeColor: "#ea580c", themeBg: "#ffedd5", icon: "🌷" },
-  6: { monthNum: 6, name: "6월", subtitle: "수업나눔 열정의 달", themeColor: "#2563eb", themeBg: "#dbeafe", icon: "☀️" },
-  7: { monthNum: 7, name: "7월", subtitle: "1학기 마무리 성장의 달", themeColor: "#0891b2", themeBg: "#cffafe", icon: "🌊" },
-  8: { monthNum: 8, name: "8월", subtitle: "2학기 준비 연수의 달", themeColor: "#4f46e5", themeBg: "#e0e7ff", icon: "🌻" },
+const MONTH_THEMES_STORAGE_KEY = "seobu_month_themes_v3";
+
+export const DEFAULT_MONTH_THEMES = {
+  1: { monthNum: 1, name: "1월", subtitle: "", themeColor: "#0284c7", themeBg: "#e0f2fe", icon: "❄️", highlightWeek: "", highlightRange: "" },
+  2: { monthNum: 2, name: "2월", subtitle: "", themeColor: "#6366f1", themeBg: "#ede9fe", icon: "🌱", highlightWeek: "", highlightRange: "" },
+  3: { monthNum: 3, name: "3월", subtitle: "", themeColor: "#16a34a", themeBg: "#dcfce7", icon: "🌸", highlightWeek: "", highlightRange: "" },
+  4: { monthNum: 4, name: "4월", subtitle: "", themeColor: "#0d9488", themeBg: "#ccfbf1", icon: "🌿", highlightWeek: "", highlightRange: "" },
+  5: { monthNum: 5, name: "5월", subtitle: "", themeColor: "#ea580c", themeBg: "#ffedd5", icon: "🌷", highlightWeek: "", highlightRange: "" },
+  6: { monthNum: 6, name: "6월", subtitle: "", themeColor: "#2563eb", themeBg: "#dbeafe", icon: "☀️", highlightWeek: "", highlightRange: "" },
+  7: { monthNum: 7, name: "7월", subtitle: "", themeColor: "#0891b2", themeBg: "#cffafe", icon: "🌊", highlightWeek: "", highlightRange: "" },
+  8: { monthNum: 8, name: "8월", subtitle: "", themeColor: "#4f46e5", themeBg: "#e0e7ff", icon: "🌻", highlightWeek: "", highlightRange: "" },
   9: {
     monthNum: 9,
     name: "9월",
@@ -640,8 +642,41 @@ export const MONTH_THEMES = {
     highlightWeek: "수업나눔 주간",
     highlightRange: "10월 12일 ~ 11월 14일"
   },
-  12: { monthNum: 12, name: "12월", subtitle: "수업성장 결실의 달", themeColor: "#7c3aed", themeBg: "#f3e8ff", icon: "🎄" }
+  12: { monthNum: 12, name: "12월", subtitle: "", themeColor: "#7c3aed", themeBg: "#f3e8ff", icon: "🎄", highlightWeek: "", highlightRange: "" }
 };
+
+export function getMonthThemes() {
+  const saved = localStorage.getItem(MONTH_THEMES_STORAGE_KEY);
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      const merged = { ...DEFAULT_MONTH_THEMES };
+      Object.keys(parsed).forEach(k => {
+        const numKey = parseInt(k, 10);
+        merged[numKey] = {
+          ...(DEFAULT_MONTH_THEMES[numKey] || { monthNum: numKey, name: `${numKey}월`, icon: '📅' }),
+          ...parsed[k]
+        };
+      });
+      return merged;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  return DEFAULT_MONTH_THEMES;
+}
+
+export function saveMonthTheme(month, data) {
+  const all = getMonthThemes();
+  all[month] = {
+    ...all[month],
+    ...data
+  };
+  localStorage.setItem(MONTH_THEMES_STORAGE_KEY, JSON.stringify(all));
+  window.dispatchEvent(new CustomEvent("events-updated"));
+}
+
+export const MONTH_THEMES = getMonthThemes();
 
 // ============================================================================
 // 대한민국 법정 공휴일 맵 (초기 설정 및 캘린더 자동 반영)

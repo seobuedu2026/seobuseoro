@@ -1,7 +1,7 @@
-import { getEvents, MONTH_THEMES, getActiveMonths, getHolidayName, saveEvents } from "../data/events.js";
+import { getEvents, getMonthThemes, getActiveMonths, getHolidayName, saveEvents } from "../data/events.js";
 import { GoogleAuthService } from "../auth/googleAuth.js";
 import { openEventFormModal } from "./eventFormModal.js";
-import { openMonthManagerModal } from "./monthManagerModal.js";
+import { openMonthManagerModal, openMonthThemeEditModal } from "./monthManagerModal.js";
 
 let currentMonth = "all"; // 'all' (3개월 포스터 모드) | 1 ~ 12
 
@@ -9,6 +9,7 @@ export function renderCalendar(container, onSelectEventModal) {
   const user = GoogleAuthService.getCurrentUser();
   const isAdmin = !!(user && user.isAdmin);
   const activeMonths = getActiveMonths();
+  const monthThemes = getMonthThemes();
 
   // 현재 선택된 월이 활성 월 목록에 없는 경우 첫 번째 활성 월 또는 'all'로 리셋
   if (currentMonth !== "all" && !activeMonths.includes(currentMonth)) {
@@ -23,10 +24,10 @@ export function renderCalendar(container, onSelectEventModal) {
       <div class="calendar-view-mode-bar">
         <div class="filter-chips-row" id="month-chips-row">
           ${activeMonths.map(m => {
-            const theme = MONTH_THEMES[m] || { name: `${m}월`, subtitle: '', icon: '📅' };
+            const theme = monthThemes[m] || { name: `${m}월`, subtitle: '', icon: '📅' };
             return `
               <button class="m3-chip chip-month-${m} ${currentMonth === m ? 'active' : ''}" data-month="${m}">
-                <span>${theme.icon || '📅'} ${m}월</span><span class="chip-text-extra"> · ${theme.subtitle || ''}</span>
+                <span>${theme.icon || '📅'} ${m}월</span>${theme.subtitle ? `<span class="chip-text-extra"> · ${theme.subtitle}</span>` : ''}
               </button>
             `;
           }).join("")}
@@ -95,6 +96,17 @@ export function renderCalendar(container, onSelectEventModal) {
         });
       });
     }
+
+    // 각 월별 문구 수정 버튼 이벤트
+    container.querySelectorAll(".btn-admin-edit-month-theme").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const monthVal = parseInt(btn.dataset.month, 10);
+        openMonthThemeEditModal(monthVal, () => {
+          renderCalendar(container, onSelectEventModal);
+        });
+      });
+    });
   }
 }
 
@@ -239,10 +251,11 @@ function renderCalendarCards(mount, onSelectEventModal, isAdmin, mainContainer) 
 }
 
 function generateMonthCardHTML(month, isFocusView = false, isAdmin = false) {
-  const theme = MONTH_THEMES[month] || {
+  const monthThemes = getMonthThemes();
+  const theme = monthThemes[month] || {
     monthNum: month,
     name: `${month}월`,
-    subtitle: "수업성장의 달",
+    subtitle: "",
     themeColor: "#0e3753",
     themeBg: "#f0fdf4"
   };
@@ -330,16 +343,23 @@ function generateMonthCardHTML(month, isFocusView = false, isAdmin = false) {
     <div class="single-month-card ${focusClass}">
       <div class="month-card-header month-${month}-header" style="background: ${theme.themeBg || '#f8fafc'};">
         <div class="month-title-badge-group">
-          <span class="month-big-num">${theme.name}</span>
-          <span class="month-subtitle-pill">${theme.subtitle}</span>
+          <span class="month-big-num">${theme.name || `${month}월`}</span>
+          ${theme.subtitle ? `<span class="month-subtitle-pill">${theme.subtitle}</span>` : ''}
         </div>
-        <span style="font-size:13px; font-weight:800; color:#475569;">${monthEvents.length}개 프로그램</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size:13px; font-weight:800; color:#475569;">${monthEvents.length}개 프로그램</span>
+          ${isAdmin ? `
+            <button class="btn-admin-edit-month-theme btn-m3-outlined" data-month="${month}" title="이 월의 소제목 및 강조 안내 문구 수정" style="padding: 2px 8px; font-size: 11px; border-radius: 6px; font-weight: 800; border-color: #0e3753; color: #0e3753; background: #ffffff;">
+              ✏️ 문구 수정
+            </button>
+          ` : ''}
+        </div>
       </div>
 
       ${theme.highlightWeek ? `
         <div class="week-highlight-ribbon">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-          <span>${theme.highlightWeek} (${theme.highlightRange})</span>
+          <span>${theme.highlightWeek}${theme.highlightRange ? ` (${theme.highlightRange})` : ''}</span>
         </div>
       ` : ''}
 
