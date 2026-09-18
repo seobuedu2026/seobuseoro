@@ -193,9 +193,14 @@ export function renderReviews(container, preselectedEventId = null) {
                   <strong style="color: #0e3753; font-size: 14px;">후기 승인 관리 모드</strong>
                 </div>
                 ${pendingCount > 0 ? `
-                  <span class="review-pending-notice-pill">
-                    🔔 승인 대기 <strong>${pendingCount}</strong>건
-                  </span>
+                  <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <span class="review-pending-notice-pill">
+                      🔔 승인 대기 <strong>${pendingCount}</strong>건
+                    </span>
+                    <button id="btn-review-approve-all" class="btn-review-batch-approve" title="승인 대기 중인 모든 후기를 한 번에 승인합니다">
+                      ⚡ 일괄 승인 (${pendingCount}건)
+                    </button>
+                  </div>
                 ` : `
                   <span style="font-size: 11.5px; color: #16a34a; font-weight: 700;">모든 후기 승인 완료됨</span>
                 `}
@@ -374,8 +379,9 @@ export function renderReviews(container, preselectedEventId = null) {
     }
   }
 
-  // 관리자 필터 탭 클릭 이벤트
+  // 관리자 모드 이벤트 리스너 바인딩
   if (isAdmin) {
+    // 탭 필터
     container.querySelectorAll(".review-admin-tab-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         currentAdminFilter = btn.dataset.filter;
@@ -383,7 +389,26 @@ export function renderReviews(container, preselectedEventId = null) {
       });
     });
 
-    // 승인 버튼
+    // 일괄 승인 버튼 (확인창 없이 1클릭 즉시 전체 승인)
+    const btnApproveAll = container.querySelector("#btn-review-approve-all");
+    if (btnApproveAll) {
+      btnApproveAll.addEventListener("click", () => {
+        const currentList = getStoredReviews();
+        let updated = false;
+        currentList.forEach(r => {
+          if (r.status === "pending") {
+            r.status = "approved";
+            updated = true;
+          }
+        });
+        if (updated) {
+          saveReviews(currentList);
+          renderReviews(container, preselectedEventId);
+        }
+      });
+    }
+
+    // 승인 버튼 (확인창 없이 1클릭 즉시 승인)
     container.querySelectorAll(".btn-review-mod-approve").forEach(btn => {
       btn.addEventListener("click", () => {
         const revId = btn.dataset.reviewId;
@@ -392,13 +417,12 @@ export function renderReviews(container, preselectedEventId = null) {
         if (target) {
           target.status = "approved";
           saveReviews(currentList);
-          alert("✅ 해당 후기가 승인되어 홈페이지에 노출됩니다.");
           renderReviews(container, preselectedEventId);
         }
       });
     });
 
-    // 승인 취소 버튼
+    // 승인 취소 버튼 (확인창 없이 1클릭 즉시 대기 전환)
     container.querySelectorAll(".btn-review-mod-unapprove").forEach(btn => {
       btn.addEventListener("click", () => {
         const revId = btn.dataset.reviewId;
@@ -407,7 +431,6 @@ export function renderReviews(container, preselectedEventId = null) {
         if (target) {
           target.status = "pending";
           saveReviews(currentList);
-          alert("↩️ 후기 승인이 취소되어 대기 상태(미노출)로 변경되었습니다.");
           renderReviews(container, preselectedEventId);
         }
       });
@@ -421,7 +444,6 @@ export function renderReviews(container, preselectedEventId = null) {
           const currentList = getStoredReviews();
           const filtered = currentList.filter(r => r.id !== revId);
           saveReviews(filtered);
-          alert("🗑️ 후기가 삭제되었습니다.");
           renderReviews(container, preselectedEventId);
         }
       });

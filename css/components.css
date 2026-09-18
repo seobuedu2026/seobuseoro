@@ -876,6 +876,32 @@
   flex-wrap: wrap;
 }
 
+.btn-review-batch-approve {
+  background: #008080;
+  color: #ffffff;
+  border: none;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 6px rgba(0, 128, 128, 0.25);
+  transition: all 0.15s ease;
+}
+
+.btn-review-batch-approve:hover {
+  background: #0d9488;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 128, 128, 0.35);
+}
+
+.btn-review-batch-approve:active {
+  transform: translateY(0);
+}
+
 .btn-review-mod-approve {
   background: #16a34a;
   color: #ffffff;
