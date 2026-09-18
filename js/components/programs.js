@@ -59,10 +59,10 @@ export function renderPrograms(container, onSelectEventModal) {
         </div>
       ` : ''}
 
-      <!-- 월 & 카테고리 필터 칩 바 (중앙 정렬) -->
+      <!-- 월 & 카테고리 필터 칩 바 (두 줄 시작 정렬 맞춤) -->
       <div style="display: flex; justify-content: center; margin-bottom: 24px; width: 100%;">
-        <div style="display: inline-flex; flex-direction: column; gap: 10px; align-items: center; max-width: 100%; width: 100%;">
-          <div class="filter-chips-row" id="prog-month-filter" style="margin-bottom: 0; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; width: 100%;">
+        <div style="display: inline-flex; flex-direction: column; gap: 10px; align-items: flex-start; max-width: 100%;">
+          <div class="filter-chips-row" id="prog-month-filter" style="margin-bottom: 0; display: flex; align-items: center; justify-content: flex-start; gap: 8px; flex-wrap: wrap;">
             ${months.map(m => `
               <button class="m3-chip ${selectedMonth === m.key ? 'active' : ''}" data-month="${m.key}">
                 ${m.label}
@@ -70,7 +70,7 @@ export function renderPrograms(container, onSelectEventModal) {
             `).join("")}
           </div>
 
-          <div class="filter-chips-row" id="prog-cat-filter" style="margin-bottom: 0; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;">
+          <div class="filter-chips-row" id="prog-cat-filter" style="margin-bottom: 0; display: flex; align-items: center; justify-content: flex-start; gap: 8px; flex-wrap: wrap;">
             ${categories.map(cat => `
               <button class="m3-chip ${selectedCategory === cat.key ? 'active' : ''}" data-cat="${cat.key}">
                 ${cat.label}
