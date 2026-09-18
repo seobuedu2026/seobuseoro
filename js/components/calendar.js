@@ -39,6 +39,10 @@ export function renderCalendar(container, onSelectEventModal) {
 
         ${isAdmin ? `
           <div class="calendar-utility-row">
+            <button id="btn-add-calendar-month" class="btn-m3-pill-action" title="캘린더에 표시할 월(Month) 추가 및 관리">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><line x1="12" y1="14" x2="12" y2="18"></line><line x1="10" y1="16" x2="14" y2="16"></line></svg>
+              <span>달력 추가</span>
+            </button>
             <button id="btn-excel-import" class="btn-m3-pill-action" title="행사 엑셀 파일(.xlsx) 업로드 등록">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
               <span>엑셀 파일 등록</span>
@@ -75,6 +79,16 @@ export function renderCalendar(container, onSelectEventModal) {
       renderCalendar(container, onSelectEventModal);
     });
   });
+
+  // 달력 추가 (월 추가/관리) 버튼 이벤트
+  const btnAddMonth = container.querySelector("#btn-add-calendar-month");
+  if (btnAddMonth) {
+    btnAddMonth.addEventListener("click", () => {
+      openMonthManagerModal(() => {
+        renderCalendar(container, onSelectEventModal);
+      });
+    });
+  }
 
   // 엑셀 등록 버튼 이벤트
   const btnExcel = container.querySelector("#btn-excel-import");
