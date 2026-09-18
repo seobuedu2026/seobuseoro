@@ -25,7 +25,65 @@ export function getAdminEmails() {
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     } catch (e) {}
   }
-  return DEFAULT_ADMIN_EMAILS;
+  return [...DEFAULT_ADMIN_EMAILS];
+}
+
+// 새 관리자 이메일 등록/추가
+export function addAdminEmail(email) {
+  if (!email || !email.trim()) return { success: false, message: "이메일 주소를 입력해주세요." };
+  const cleanEmail = email.trim().toLowerCase();
+  
+  // 간단한 이메일 형식 검증
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(cleanEmail)) {
+    return { success: false, message: "올바른 이메일 형식을 입력해주세요. (예: user@senedu.kr)" };
+  }
+
+  const currentEmails = getAdminEmails();
+  if (currentEmails.map(e => e.toLowerCase()).includes(cleanEmail)) {
+    return { success: false, message: "이미 등록된 관리자 이메일입니다." };
+  }
+
+  const updated = [...currentEmails, cleanEmail];
+  localStorage.setItem(ADMIN_EMAIL_STORAGE_KEY, JSON.stringify(updated));
+  window.dispatchEvent(new CustomEvent("auth-state-changed", { detail: { user: GoogleAuthService.getCurrentUser() } }));
+  return { success: true, emails: updated };
+}
+
+// 관리자 이메일 삭제
+export function removeAdminEmail(email) {
+  if (!email) return { success: false, message: "삭제할 이메일이 지정되지 않았습니다." };
+  const cleanEmail = email.trim().toLowerCase();
+  const currentEmails = getAdminEmails();
+
+  if (currentEmails.length <= 1) {
+    return { success: false, message: "최소 1개의 관리자 ID가 유지되어야 합니다." };
+  }
+
+  const updated = currentEmails.filter(e => e.toLowerCase() !== cleanEmail);
+  localStorage.setItem(ADMIN_EMAIL_STORAGE_KEY, JSON.stringify(updated));
+  
+  // 현재 접속중인 관리자 이메일이 삭제된 경우 주 관리자로 변경
+  const activeCustom = (localStorage.getItem("seobu_admin_custom_email") || "").toLowerCase();
+  if (activeCustom === cleanEmail) {
+    localStorage.setItem("seobu_admin_custom_email", updated[0]);
+  }
+
+  window.dispatchEvent(new CustomEvent("auth-state-changed", { detail: { user: GoogleAuthService.getCurrentUser() } }));
+  return { success: true, emails: updated };
+}
+
+// 대표 관리자 지정
+export function setPrimaryAdminEmail(email) {
+  if (!email) return;
+  const cleanEmail = email.trim().toLowerCase();
+  const currentEmails = getAdminEmails();
+  const filtered = currentEmails.filter(e => e.toLowerCase() !== cleanEmail);
+  const updated = [cleanEmail, ...filtered];
+  localStorage.setItem(ADMIN_EMAIL_STORAGE_KEY, JSON.stringify(updated));
+  localStorage.setItem("seobu_admin_custom_email", cleanEmail);
+  window.dispatchEvent(new CustomEvent("auth-state-changed", { detail: { user: GoogleAuthService.getCurrentUser() } }));
+  return updated;
 }
 
 // 현재 관리자 비밀번호 반환
