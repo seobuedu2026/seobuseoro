@@ -422,15 +422,15 @@
 /* 하단 범례 칩 목록 (가득 차게 정렬) */
 .brochure-legend-container {
   background: #ffffff;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 20px;
-  padding: 16px 24px;
-  margin-top: 24px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 10px 18px;
+  margin-top: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 10px;
   box-shadow: var(--elevation-card);
   width: 100%;
 }
@@ -438,15 +438,15 @@
 .legend-chips-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
   justify-content: center;
 }
 
 .legend-badge {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 800;
-  padding: 6px 18px;
+  padding: 5px 14px;
   border-radius: var(--shape-pill);
   border: 1px solid;
   display: inline-flex;
