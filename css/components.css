@@ -536,14 +536,27 @@
   opacity: 0;
   overflow: hidden;
   transition: max-height 0.35s ease, opacity 0.25s ease, margin-top 0.2s ease;
-  border-top: 1px dashed #e2e8f0;
+  border-top: 1px dashed transparent;
 }
 
 .program-card.expanded .prog-accordion-content {
-  max-height: 450px;
+  max-height: 800px;
   opacity: 1;
   margin-top: 16px;
   padding-top: 16px;
+  border-top-color: #e2e8f0;
+}
+
+.prog-chevron {
+  display: inline-block;
+  font-size: 11px;
+  color: #64748b;
+  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), color 0.2s ease;
+}
+
+.program-card.expanded .prog-chevron {
+  transform: rotate(180deg);
+  color: #0e3753;
 }
 
 .prog-info-list {

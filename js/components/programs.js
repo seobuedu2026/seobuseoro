@@ -46,7 +46,7 @@ export function renderPrograms(container, onSelectEventModal) {
           프로그램 한눈에 보기
         </h2>
         <p style="font-size: 15px; color: #64748b; margin-top: 6px;">
-          월과 유형으로 찾아보고, 카드를 누르면 상세 팝업 안내를 확인할 수 있습니다.
+          월과 유형으로 찾아보고, 카드를 누르면 상세 내용을 펼쳐보거나 접을 수 있습니다.
         </p>
       </div>
 
@@ -107,54 +107,58 @@ export function renderPrograms(container, onSelectEventModal) {
                     ✏️ 수정
                   </button>
                 ` : ''}
+                <span class="prog-chevron" style="margin-left: 4px;">▼</span>
               </div>
             </div>
             
             <h3 class="prog-title">${ev.title || '프로그램'}</h3>
             ${ev.subtitle ? `<div class="prog-subtitle">${ev.subtitle}</div>` : ''}
 
-            <!-- 캘린더 스타일과 동일한 정보 박스 -->
-            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-top: 12px; margin-bottom: 12px;">
-              <div class="prog-info-list" style="margin-bottom: 0;">
-                <div class="prog-info-item">
-                  <span class="prog-info-label">일시</span>
-                  <span>2026년 ${ev.month}월 ${ev.day}일 ${evTime}</span>
-                </div>
-                <div class="prog-info-item">
-                  <span class="prog-info-label">장소</span>
-                  <span>${evLoc}</span>
-                </div>
-                <div class="prog-info-item">
-                  <span class="prog-info-label">대상</span>
-                  <span>${evTarget}</span>
-                </div>
-                <div class="prog-info-item">
-                  <span class="prog-info-label">신청방법</span>
-                  <span style="font-weight: 700;">${evApplyMethod}</span>
+            <!-- 아코디언 펼침 상세 내용 영역 -->
+            <div class="prog-accordion-content">
+              <!-- 캘린더 스타일과 동일한 정보 박스 -->
+              <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 12px;">
+                <div class="prog-info-list" style="margin-bottom: 0;">
+                  <div class="prog-info-item">
+                    <span class="prog-info-label">일시</span>
+                    <span>2026년 ${ev.month}월 ${ev.day}일 ${evTime}</span>
+                  </div>
+                  <div class="prog-info-item">
+                    <span class="prog-info-label">장소</span>
+                    <span>${evLoc}</span>
+                  </div>
+                  <div class="prog-info-item">
+                    <span class="prog-info-label">대상</span>
+                    <span>${evTarget}</span>
+                  </div>
+                  <div class="prog-info-item">
+                    <span class="prog-info-label">신청방법</span>
+                    <span style="font-weight: 700;">${evApplyMethod}</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            ${ev.description ? `
-              <div style="font-size: 13.5px; color: #475569; line-height: 1.5; margin-bottom: 14px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
-                ${ev.description}
-              </div>
-            ` : ''}
+              ${ev.description ? `
+                <div style="font-size: 13.5px; color: #475569; line-height: 1.5; margin-bottom: 14px;">
+                  ${ev.description}
+                </div>
+              ` : ''}
 
-            <!-- 캘린더와 동일한 하단 버튼 액션 바 (우측 정렬) -->
-            <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center; margin-top: auto; padding-top: 8px;">
-              <button class="btn-m3-outlined btn-review-shortcut" data-event-id="${ev.id}" onclick="event.stopPropagation();">
-                후기 남기기
-              </button>
-              ${ev.applyUrl && (ev.applyUrl.startsWith('http://') || ev.applyUrl.startsWith('https://')) ? `
-                <a href="${ev.applyUrl}" target="_blank" class="btn-m3-filled" onclick="event.stopPropagation();">
-                  참가 신청 바로가기
-                </a>
-              ` : `
-                <button class="btn-m3-outlined" disabled style="opacity: 0.75; cursor: default; background: #f8fafc; font-weight: 700;" onclick="event.stopPropagation();">
-                  신청: 추후안내
+              <!-- 하단 액션 버튼 바 (우측 정렬) -->
+              <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center; padding-top: 4px;">
+                <button class="btn-m3-outlined btn-review-shortcut" data-event-id="${ev.id}" onclick="event.stopPropagation();">
+                  후기 남기기
                 </button>
-              `}
+                ${ev.applyUrl && (ev.applyUrl.startsWith('http://') || ev.applyUrl.startsWith('https://')) ? `
+                  <a href="${ev.applyUrl}" target="_blank" class="btn-m3-filled" onclick="event.stopPropagation();">
+                    참가 신청 바로가기
+                  </a>
+                ` : `
+                  <button class="btn-m3-outlined" disabled style="opacity: 0.75; cursor: default; background: #f8fafc; font-weight: 700;" onclick="event.stopPropagation();">
+                    신청: 추후안내
+                  </button>
+                `}
+              </div>
             </div>
           </div>
         `;
@@ -200,15 +204,14 @@ export function renderPrograms(container, onSelectEventModal) {
     });
   });
 
-  // 카드 전체 클릭 시 캘린더 탭과 동일한 팝업 모달 오픈
+  // 카드 클릭 시 아코디언 펼치기/접기 토글
   container.querySelectorAll(".clickable-program-card").forEach(card => {
-    card.addEventListener("click", () => {
-      const eventId = card.dataset.cardId;
-      const allEvents = getEvents();
-      const targetEv = allEvents.find(e => e.id === eventId);
-      if (targetEv && onSelectEventModal) {
-        onSelectEventModal(targetEv);
+    card.addEventListener("click", (e) => {
+      // 버튼 또는 링크 클릭 시 카드 접기/펼치기 방지
+      if (e.target.closest("button") || e.target.closest("a") || e.target.closest("input")) {
+        return;
       }
+      card.classList.toggle("expanded");
     });
   });
 
