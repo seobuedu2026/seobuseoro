@@ -15,7 +15,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "14:00 ~ 17:00",
     location: "서부과학교육센터 실험실 1",
     target: "관내 초·중·고 과학실무사",
-    instructor: "서울과학교육연구회 전문강사진",
     description: "초·중등 과학실험 기본 안전 및 디지털 MBL 센서 장비 활용 실습을 통해 과학실험 보조 및 안전관리 역량을 강화합니다.",
     applyMethod: "온라인 링크",
     applyUrl: "https://senedu.kr/apply/ev0904"
@@ -34,7 +33,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "14:00 ~ 17:00",
     location: "서부과학교육센터 실험실 2",
     target: "관내 초·중·고 과학실무사",
-    instructor: "서울과학교육연구회 전문강사진",
     description: "화학 및 생물 영역 중심 시약 취급 주의사항 및 폐액 처리, 현미경 디지털 연계 실습을 진행합니다.",
     applyMethod: "온라인 링크",
     applyUrl: "https://senedu.kr/apply/ev0908"
@@ -53,8 +51,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "15:00 ~ 16:30",
     location: "카페 느티",
     target: "관내 연구(교육과정) 부장",
-    instructor: "초등교육지원과 장학사",
-    manager: "김지선 장학사",
     description: "연구(교육과정) 부장 업무관련 내용 협의 및 개선방안 모색, 서부 교육과정 혁신 방안 소통 협의회입니다.",
     applyMethod: "온라인 링크",
     applyUrl: "https://senedu.kr/apply/ev0909-1"
@@ -73,7 +69,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "14:00 ~ 17:00",
     location: "서부과학교육센터 실험실 3",
     target: "관내 중등 과학실무사",
-    instructor: "서울과학교육연구회 전문강사진",
     description: "물리/지구과학 탐구 실험 장치 세팅 및 안전 점검 실무 과정입니다.",
     applyMethod: "온라인 링크",
     applyUrl: "https://senedu.kr/apply/ev0909-2"
@@ -92,8 +87,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "15:20 ~ 17:00",
     location: "녹번초",
     target: "관내 교무·연구부장 및 희망교원",
-    instructor: "나이스(NEIS) 현장지원단 대표강사",
-    manager: "김지선 장학사",
     description: "다양한 학적 사례 공유 및 처리 방법 안내, 2학기 학적 변동(전출입, 유예, 면제 등) 나이스 처리 실무 가이드.",
     applyMethod: "온라인 링크",
     applyUrl: "https://senedu.kr/apply/ev0910"
@@ -112,8 +105,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "15:30 ~ 16:00",
     location: "온라인 (zoom)",
     target: "2026 서부서로 교수평 지원단",
-    instructor: "지원단 팀장 및 장학사",
-    manager: "김지선 장학사",
     description: "2026 하반기 서부서로 교수평 지원단 운영 일정 안내, 연구모임 운영 경과 공유 등.",
     applyMethod: "별도신청 없음",
     applyUrl: ""
@@ -132,8 +123,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "15:00 ~ 17:00",
     location: "서부교육지원청 강당 (5층)",
     target: "관내 초·중 교원 중 희망자 150명 이내",
-    instructor: "김태호 동화작가",
-    manager: "김영완 장학사",
     description: "『제후의 선택』, 『네모 돼지』 김태호 작가 초청 강연! 과학 독서를 통한 문해력 신장 및 독서 활용 수업 방안 모색.",
     applyMethod: "온라인 링크",
     applyUrl: "https://senedu.kr/apply/ev0918"
@@ -152,8 +141,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "15:20 ~ 17:00",
     location: "카페 언제라도여행",
     target: "관내 교무·연구 부장",
-    instructor: "스마트워크 전문 수석교사",
-    manager: "김지선 장학사",
     description: "노션활용 온라인 교무실 만들기 및 데스크톱 내 챗지피티 시동으로 일하는 AI 활용법.",
     applyMethod: "온라인 링크",
     applyUrl: "https://senedu.kr/apply/ev0922"
@@ -172,8 +159,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "15:00 ~ 17:00",
     location: "카페4293",
     target: "관내 저경력 교사 중 희망교원",
-    instructor: "서부 수석교사 및 수업명인 멘토단",
-    manager: "김지선 장학사",
     description: "수업 및 생활지도의 고민을 함께 나누고 더 나은 수업 성장을 위한 멘토링.",
     applyMethod: "공문통",
     applyUrl: ""
@@ -192,8 +177,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "15:00 ~ 16:30",
     location: "카페 노티",
     target: "관내 교무부장",
-    instructor: "초등교육지원과 장학관",
-    manager: "김지선 장학사",
     description: "2학기 주요 교육 정책 및 학교별 학사일정 조정, 원활한 학교 경영을 위한 교무부장 간 소통 네트워크.",
     applyMethod: "공문통",
     applyUrl: ""
@@ -212,8 +195,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "09:00 ~ 17:00",
     location: "서부교육지원청 및 인근",
     target: "2026학년도 2학기 관내 신규 교감",
-    instructor: "선배 교감 멘토단",
-    manager: "김영완 장학사",
     description: "교원 인사 실무 이해 및 교감 업무 처리 방안 공유, 학교 위기관리 매뉴얼 연수.",
     applyMethod: "공문통",
     applyUrl: ""
@@ -234,8 +215,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "15:00 ~ 17:00",
     location: "로하스A플렉스",
     target: "초·중등 희망 교원 30명",
-    instructor: "다문화교육 전문상담사 & 선도교사",
-    manager: "이수현 장학사",
     description: "이주배경학생의 학교생활 적응 및 한국어 교육을 위한 지원, 초·중등 분임활동을 통한 학교급별 맞춤형 Q&A.",
     applyMethod: "온라인 (유레카)",
     applyUrl: "https://senedu.kr/apply/ev1006"
@@ -254,8 +233,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "15:00 ~ 17:00",
     location: "은평역사한옥박물관",
     target: "관내 초등 희망 교원 20명",
-    instructor: "역사문화 전문 해설사",
-    manager: "이수현 장학사",
     description: "『한옥을 걷다, 꿈을 짓다』는 은평한옥마을을 중심으로 운영하는 서부 지역연계 역사교육 프로그램입니다.",
     applyMethod: "온라인 (유레카)",
     applyUrl: "https://senedu.kr/apply/ev1007"
@@ -274,7 +251,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "15:30 ~ 17:30",
     location: "서부교육지원청 연수실",
     target: "수업 성찰 희망 교원",
-    instructor: "서울초등수석교사회",
     description: "수업 비디오 분석 및 교사-학생 상호작용 언어 분석을 통한 자기 수업 성찰과 코칭 기법.",
     applyMethod: "온라인 링크",
     applyUrl: "https://senedu.kr/apply/ev1012"
@@ -293,7 +269,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "16:00 ~ 18:00",
     location: "서울시립미술관 서소문본관",
     target: "관내 초·중등 교원",
-    instructor: "미술관 도슨트 & 힐링 큐레이터",
     description: "교원 힐링 및 예술 감수성 충전을 위한 가을 미술관 야간 도슨트 투어 및 나눔.",
     applyMethod: "온라인 링크",
     applyUrl: "https://senedu.kr/apply/ev1013"
@@ -312,7 +287,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "15:30 ~ 17:30",
     location: "서부교육지원청 대강당",
     target: "관내 전 교원",
-    instructor: "보이스 트레이너 & 아나운서",
     description: "성대 피로를 줄이고 학생들의 집중도를 높이는 호흡법, 발성법, 음성 관리 실전 트레이닝.",
     applyMethod: "온라인 링크",
     applyUrl: "https://senedu.kr/apply/ev1015"
@@ -331,7 +305,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "14:30 ~ 16:30",
     location: "서울공덕초등학교",
     target: "연구학교 업무담당 및 일반 교원",
-    instructor: "공덕초 연구부",
     description: "서울형 미래학교 연구학교 1년차 운영 성과 및 수업 혁신 사례 공개.",
     applyMethod: "공문통",
     applyUrl: ""
@@ -350,7 +323,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "15:30 ~ 17:30",
     location: "서부진로직업체험지원센터",
     target: "초·중등 진로전담 및 담임 교사",
-    instructor: "신산업 진로 융합 멘토단",
     description: "생성형 AI, 로봇, 모빌리티 등 미래 유망 직업군을 교과와 연계하는 진로 프로젝트 수업 모델.",
     applyMethod: "온라인 링크",
     applyUrl: "https://senedu.kr/apply/ev1021-2"
@@ -369,7 +341,6 @@ export const DEFAULT_EVENTS_DATA = [
     time: "15:30 ~ 17:30",
     location: "서부교육지원청 대강당",
     target: "교원, 학부모, 교육전문직",
-    instructor: "김대식 카이스트 교수",
     description: "뇌과학과 인공지능의 석학 김대식 교수가 전하는 AI 시대 우리 아이들에게 필요한 진짜 문해력과 사고력.",
     applyMethod: "온라인 링크",
     applyUrl: "https://senedu.kr/apply/ev1023"
@@ -663,7 +634,7 @@ export const MONTH_THEMES = {
 // ============================================================================
 // 동적 이벤트 데이터 관리 (LocalStorage 연동 & 엑셀 파서)
 // ============================================================================
-const CUSTOM_EVENTS_KEY = "seobu_custom_events";
+const CUSTOM_EVENTS_KEY = "seobu_custom_events_v4";
 
 // 현재 활성화된 모든 행사 목록 반환
 export function getEvents() {
@@ -710,7 +681,6 @@ export function parseExcelRowToEvent(row, index) {
   };
 
   const seq = getField(["연번", "no", "id", "순번"]) || String(index + 1);
-  const manager = getField(["담당장학사", "담당자", "장학사", "manager"]);
   const rawTitle = getField(["연수명", "행사명", "프로그램명", "title"]);
   const rawDateTime = getField(["일시", "일자", "시간", "date", "datetime"]);
   const location = getField(["장소", "연수장소", "location"]);
@@ -825,8 +795,6 @@ export function parseExcelRowToEvent(row, index) {
     time,
     location: location || "추후 안내",
     target: target || "관내 교원",
-    instructor: manager ? `${manager} (서부교육지원청)` : "초등교육지원과 장학진",
-    manager,
     description: description || "상세 일정은 공문을 통해 확인하시기 바랍니다.",
     applyMethod: applyMethod || "온라인 링크",
     applyUrl: applyMethod.includes("링크") || applyMethod.includes("유레카") ? "https://senedu.kr" : ""

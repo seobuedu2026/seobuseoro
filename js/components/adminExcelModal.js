@@ -22,8 +22,8 @@ export function openAdminExcelModal() {
         </div>
 
         <p style="font-size: 13.5px; color: #475569; margin-bottom: 16px; line-height: 1.5;">
-          장학사님께서 작성하신 행사 일정 엑셀 파일(연번, 담당 장학사, 연수명, 일시, 장소, 대상, 내용, 신청방법)을 업로드하면 
-          <strong>일정, 카테고리 및 장학사 정보가 캘린더와 프로그램 목록에 자동으로 연동</strong>됩니다.
+          행사 일정 엑셀 파일(연번, 연수명, 일시, 장소, 대상, 내용, 신청방법)을 업로드하면 
+          <strong>일정 및 카테고리가 캘린더와 프로그램 목록에 자동으로 연동</strong>됩니다.
         </p>
 
         <!-- 엑셀 드래그 앤 드롭 영역 -->
@@ -69,7 +69,6 @@ export function openAdminExcelModal() {
                   <th>월/일</th>
                   <th>구분(카테고리)</th>
                   <th>연수명</th>
-                  <th>담당 장학사</th>
                   <th>장소</th>
                   <th>시간</th>
                   <th>신청방법</th>
@@ -194,7 +193,6 @@ export function openAdminExcelModal() {
           <div style="font-weight:700; color:#0e3753;">${ev.title}</div>
           ${ev.subtitle ? `<div style="font-size:11px; color:#64748b;">${ev.subtitle}</div>` : ''}
         </td>
-        <td>${ev.manager || '-'}</td>
         <td>${ev.location}</td>
         <td><span style="font-size:11px;">${ev.time}</span></td>
         <td><span style="font-size:11px; background:#f1f5f9; padding:2px 6px; border-radius:4px;">${ev.applyMethod}</span></td>
@@ -242,7 +240,6 @@ function downloadSampleExcel() {
   const sampleData = [
     {
       "연번": 1,
-      "담당 장학사": "김지선",
       "연수명": "(수다박스) 연구부장 협의회",
       "일시": "9. 9.(수) 15:00~16:30",
       "장소": "카페 느티",
@@ -252,7 +249,6 @@ function downloadSampleExcel() {
     },
     {
       "연번": 2,
-      "담당 장학사": "김지선",
       "연수명": "(수다박스) 학적업무 첫걸음",
       "일시": "9. 10.(목) 15:20~17:00",
       "장소": "녹번초",
@@ -262,7 +258,6 @@ function downloadSampleExcel() {
     },
     {
       "연번": 3,
-      "담당 장학사": "김영완",
       "연수명": "김태호 작가와 함께하는 독서교육 특강",
       "일시": "9. 18.(금) 15:00~17:00",
       "장소": "서부교육지원청 강당(5층)",
@@ -272,7 +267,6 @@ function downloadSampleExcel() {
     },
     {
       "연번": 4,
-      "담당 장학사": "이수현",
       "연수명": "서부서로, 다름을 잇다 다문화 연수",
       "일시": "2026. 10. 6.(화) 15:00~17:00",
       "장소": "로하스A플렉스",
