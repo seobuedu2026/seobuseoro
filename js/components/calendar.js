@@ -23,9 +23,9 @@ export function renderCalendar(container, onSelectEventModal) {
         </div>
 
         <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-          <a href="assets/docs/seobu_growth_calendar_print.pdf" target="_blank" class="btn-m3-outlined" style="padding:6px 14px; font-size:12.5px; border-radius:9999px; display:inline-flex; align-items:center; gap:6px; font-weight:800; color:#0e3753;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-            📄 인쇄물 원본 PDF 보기
+          <a href="assets/docs/seobu_growth_calendar_print.pdf" download="2026학년도_서부서로_수업성장캘린더.pdf" target="_blank" class="btn-m3-outlined" style="padding:6px 14px; font-size:12.5px; border-radius:9999px; display:inline-flex; align-items:center; gap:6px; font-weight:800; color:#0e3753;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            PDF 파일 저장
           </a>
           <div style="font-size:14px; font-weight:800; color:#475569;">
             총 <strong>${getEvents().length}개</strong>의 성장 프로그램
