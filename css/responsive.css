@@ -57,16 +57,7 @@
   }
 
   .hero-header {
-    padding: 24px 16px 20px 16px;
-  }
-
-  .title-subu, .title-growth {
-    font-size: 34px;
-    letter-spacing: -1px;
-  }
-
-  .main-slogan-text {
-    font-size: 15px;
+    padding: 16px 12px;
   }
 
   .padlet-cards-grid {
@@ -81,37 +72,113 @@
   }
 }
 
-/* 모바일 화면 (767px 이하) */
-@media (max-width: 767px) {
-  .header-top-row {
-    flex-direction: column;
-    gap: 10px;
-    align-items: center;
+/* 모바일 화면 (768px 이하) - 모바일 최적화 레이아웃 */
+@media (max-width: 768px) {
+  /* 1. 상단 이미지가 여백 없이 가득 채우도록 (Full-Bleed) */
+  .hero-header {
+    padding: 0 !important;
+    margin-bottom: 12px !important;
+    border-bottom: none !important;
+    background: transparent !important;
+    width: 100% !important;
   }
 
-  .title-subu, .title-growth {
-    font-size: 26px;
+  .hero-header-inner {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
   }
 
-  .title-sprout-icon {
-    width: 30px;
-    height: 30px;
+  .main-title-wrap {
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
-  .main-slogan-text {
-    font-size: 13.5px;
+  .header-official-logo-img {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    display: block !important;
+    filter: none !important;
   }
 
-  .handwriting-badge {
-    font-size: 12px;
-    padding: 5px 12px;
+  .container {
+    padding: 0 10px 36px 10px !important;
+  }
+
+  /* 2. 세로로 볼 때에도 4개 탭이 스크롤 없이 한 줄에 완벽히 배열 */
+  .nav-tab-bar {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 4px !important;
+    padding: 0 !important;
+    margin-bottom: 14px !important;
+    overflow-x: visible !important;
+    width: 100% !important;
   }
 
   .nav-tab-item {
-    padding: 9px 18px;
-    font-size: 14px;
+    width: 100% !important;
+    padding: 8px 1px !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.8px !important;
+    border-radius: 12px !important;
+    gap: 2px !important;
+    justify-content: center !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04) !important;
   }
 
+  /* 3. 캘린더 선택 버튼(월 필터 칩)도 한 줄에 4개 배열 */
+  .calendar-view-mode-bar {
+    margin-bottom: 14px !important;
+    gap: 8px !important;
+  }
+
+  #month-chips-row {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 4px !important;
+    width: 100% !important;
+    margin-bottom: 6px !important;
+  }
+
+  #month-chips-row .m3-chip {
+    width: 100% !important;
+    padding: 8px 1px !important;
+    font-size: 12.5px !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.6px !important;
+    border-radius: 10px !important;
+    justify-content: center !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    gap: 0 !important;
+  }
+
+  /* 모바일에서는 불필요하게 긴 부가 텍스트 숨김 (🌿 9월, 🌸 10월, 🍁 11월, ✨ 3개월) */
+  .chip-text-extra {
+    display: none !important;
+  }
+
+  /* 캘린더 모드 바 하단: PDF 파일 저장 및 카운트 가로 정렬 */
+  .calendar-view-mode-bar > div:last-child {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin-top: 4px !important;
+  }
+
+  .calendar-view-mode-bar .btn-m3-outlined {
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+  }
+
+  /* 그리드 및 캘린더 셀 모바일 최적화 */
   .program-cards-grid {
     grid-template-columns: 1fr;
   }
@@ -126,12 +193,12 @@
   }
 
   .cal-grid-days {
-    grid-auto-rows: minmax(70px, auto);
+    grid-auto-rows: minmax(72px, auto);
   }
 
   .cal-cell {
     padding: 3px 2px;
-    min-height: 70px;
+    min-height: 72px;
   }
 
   .cal-cell-daynum {
@@ -139,7 +206,7 @@
   }
 
   .cal-event-pill {
-    font-size: 9px;
+    font-size: 9.5px;
     padding: 3px 2px;
   }
 
@@ -148,11 +215,43 @@
   }
 
   .brochure-legend-container {
-    padding: 14px;
+    padding: 12px 10px;
   }
 
   .legend-badge {
-    font-size: 12px;
-    padding: 4px 12px;
+    font-size: 11.5px;
+    padding: 4px 10px;
+  }
+
+  .site-footer {
+    padding: 24px 16px 32px 16px;
+    margin-top: 36px;
+  }
+
+  .footer-admin-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+  }
+}
+
+/* 초소형 모바일 화면 (380px 이하) 추가 미세 조정 */
+@media (max-width: 380px) {
+  .nav-tab-item {
+    font-size: 11.5px !important;
+    padding: 7px 0 !important;
+    letter-spacing: -1px !important;
+  }
+
+  #month-chips-row .m3-chip {
+    font-size: 11.5px !important;
+    padding: 7px 0 !important;
+    letter-spacing: -0.8px !important;
+  }
+
+  .calendar-view-mode-bar .btn-m3-outlined {
+    padding: 5px 8px !important;
+    font-size: 11px !important;
   }
 }

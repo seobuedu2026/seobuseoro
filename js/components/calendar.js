@@ -9,16 +9,16 @@ export function renderCalendar(container, onSelectEventModal) {
       <div class="calendar-view-mode-bar">
         <div class="filter-chips-row" id="month-chips-row" style="margin-bottom:0;">
           <button class="m3-chip chip-month-9 ${currentMonth === 9 ? 'active' : ''}" data-month="9">
-            🌿 9월 · 수다박스의 달
+            <span>🌿 9월</span><span class="chip-text-extra"> · 수다박스의 달</span>
           </button>
           <button class="m3-chip chip-month-10 ${currentMonth === 10 ? 'active' : ''}" data-month="10">
-            🌸 10월 · 수업나눔의 달
+            <span>🌸 10월</span><span class="chip-text-extra"> · 수업나눔의 달</span>
           </button>
           <button class="m3-chip chip-month-11 ${currentMonth === 11 ? 'active' : ''}" data-month="11">
-            🍁 11월 · 성과공유의 달
+            <span>🍁 11월</span><span class="chip-text-extra"> · 성과공유의 달</span>
           </button>
           <button class="m3-chip ${currentMonth === 'all' ? 'active' : ''}" data-month="all">
-            ✨ 3개월 모아보기
+            <span>✨ 3개월</span><span class="chip-text-extra"> 모아보기</span>
           </button>
         </div>
 
