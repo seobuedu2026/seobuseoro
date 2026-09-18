@@ -137,15 +137,32 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
   const deleteBtn = mount.querySelector("#btn-delete-event");
   const form = mount.querySelector("#event-edit-form");
 
+  const dialog = mount.querySelector(".m3-modal-dialog");
+  if (dialog) {
+    dialog.addEventListener("click", (e) => e.stopPropagation());
+  }
+
   const closeModal = () => {
     backdrop.classList.remove("open");
-    setTimeout(() => { mount.innerHTML = ""; }, 200);
+    setTimeout(() => {
+      if (mount.querySelector("#event-form-backdrop") === backdrop) {
+        mount.innerHTML = "";
+      }
+    }, 200);
   };
 
-  closeBtn.addEventListener("click", closeModal);
-  cancelBtn.addEventListener("click", closeModal);
-  backdrop.addEventListener("click", (e) => {
-    if (e.target === backdrop) closeModal();
+  closeBtn.addEventListener("click", (e) => { e.stopPropagation(); closeModal(); });
+  cancelBtn.addEventListener("click", (e) => { e.stopPropagation(); closeModal(); });
+
+  let isMouseDownOnBackdrop = false;
+  backdrop.addEventListener("mousedown", (e) => {
+    isMouseDownOnBackdrop = (e.target === backdrop);
+  });
+  backdrop.addEventListener("mouseup", (e) => {
+    if (isMouseDownOnBackdrop && e.target === backdrop) {
+      closeModal();
+    }
+    isMouseDownOnBackdrop = false;
   });
 
   // 삭제 처리

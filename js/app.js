@@ -99,14 +99,40 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => { modalMount.innerHTML = ""; }, 200);
     };
 
-    closeBtn.addEventListener("click", closeModal);
-    backdrop.addEventListener("click", (e) => {
-      if (e.target === backdrop) closeModal();
+    const dialog = modalMount.querySelector(".m3-modal-dialog");
+    if (dialog) {
+      dialog.addEventListener("click", (e) => e.stopPropagation());
+    }
+
+    const safeCloseModal = () => {
+      backdrop.classList.remove("open");
+      setTimeout(() => {
+        if (modalMount.querySelector("#modal-backdrop") === backdrop) {
+          modalMount.innerHTML = "";
+        }
+      }, 200);
+    };
+
+    closeBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      safeCloseModal();
+    });
+
+    let isMouseDownOnBackdrop = false;
+    backdrop.addEventListener("mousedown", (e) => {
+      isMouseDownOnBackdrop = (e.target === backdrop);
+    });
+    backdrop.addEventListener("mouseup", (e) => {
+      if (isMouseDownOnBackdrop && e.target === backdrop) {
+        safeCloseModal();
+      }
+      isMouseDownOnBackdrop = false;
     });
 
     if (adminEditBtn) {
-      adminEditBtn.addEventListener("click", () => {
-        closeModal();
+      adminEditBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        modalMount.innerHTML = "";
         openEventFormModal(eventObj, null, () => switchTab(activeTab));
       });
     }
