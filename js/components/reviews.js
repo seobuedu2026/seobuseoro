@@ -8,7 +8,7 @@ const INITIAL_REVIEWS = [
     id: "rev-1",
     eventId: "ev-0910",
     eventTitle: "수다박스 연수 (학적업무 첫걸음)",
-    userName: "이*진 교사",
+    userName: "이*진",
     userEmail: "lee@senedu.kr",
     isSenedu: true,
     rating: 5,
@@ -21,7 +21,7 @@ const INITIAL_REVIEWS = [
     id: "rev-2",
     eventId: "ev-0918",
     eventTitle: "김태호 작가와 함께하는 독서교육 특강",
-    userName: "박*현 교사",
+    userName: "박*현",
     userEmail: "park@senedu.kr",
     isSenedu: true,
     rating: 5,
@@ -34,7 +34,7 @@ const INITIAL_REVIEWS = [
     id: "rev-3",
     eventId: "ev-0904",
     eventTitle: "과학실무사 연수 (실험역량 강화)",
-    userName: "정*우 실무사",
+    userName: "정*우",
     userEmail: "jung@senedu.kr",
     isSenedu: true,
     rating: 4,
@@ -55,6 +55,7 @@ function getStoredReviews() {
     const list = JSON.parse(data);
     return list.map(r => ({
       ...r,
+      userName: (r.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim(),
       status: r.status || "approved"
     }));
   } catch (e) {
@@ -236,21 +237,22 @@ export function renderReviews(container, preselectedEventId = null) {
                 ${!user ? '센스쿨 구글 계정으로 로그인 후 첫 후기를 남겨보세요!' : '새로운 후기를 작성해보세요.'}
               </p>
             </div>
-          ` : displayedReviews.map(rev => `
+          ` : displayedReviews.map(rev => {
+            const cleanName = (rev.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim();
+            return `
             <div class="review-feed-card ${rev.status === 'pending' ? 'is-pending' : ''}" data-review-id="${rev.id}">
-              <!-- 상단 바: 작성자 정보 + 연수 종류 태그 + 별점 & 공감 버튼 -->
+              <!-- 상단 바: 연수 종류 태그(먼저) + 작성자 이름 + 승인 배지(관리자) + 별점 & 공감 버튼 -->
               <div class="review-card-top-row">
                 <div class="review-user-info-group">
                   <div class="review-user-name">
-                    <span class="user-display-name">${rev.userName}</span>
-                    ${rev.isSenedu ? `<span class="review-senedu-badge">@senedu.kr</span>` : ''}
                     <span class="review-event-tag">🎯 ${rev.eventTitle}</span>
+                    <span class="user-display-name">${cleanName}</span>
                     ${isAdmin ? (rev.status === 'pending' 
                       ? `<span class="badge-review-status pending">⏳ 승인 대기 (미노출)</span>` 
                       : `<span class="badge-review-status approved">✅ 승인 완료</span>`) 
                       : ''}
                   </div>
-                  <div class="review-date-text">${rev.createdAt} ${rev.userEmail && isAdmin ? `· ${rev.userEmail}` : ''}</div>
+                  <div class="review-date-text">${rev.createdAt}</div>
                 </div>
 
                 <div class="review-top-actions-group">
@@ -283,7 +285,8 @@ export function renderReviews(container, preselectedEventId = null) {
                 </div>
               ` : ''}
             </div>
-          `).join("")}
+          `;
+          }).join("")}
         </div>
       </div>
     </div>
@@ -342,12 +345,13 @@ export function renderReviews(container, preselectedEventId = null) {
         if (user.name.length >= 2 && !user.name.includes("*") && !isAdmin) {
           maskedName = user.name[0] + "*" + (user.name.length > 2 ? user.name.slice(2) : "");
         }
+        maskedName = maskedName.replace(/\s*(교사|실무사|선생님)$/, "").trim();
 
         const newReview = {
           id: "rev-" + Date.now(),
           eventId: eventId,
           eventTitle: eventObj ? `${eventObj.title} ${eventObj.subtitle ? `(${eventObj.subtitle})` : ''}` : "서부 교육 프로그램",
-          userName: maskedName + (user.name.includes("교사") || user.name.includes("선생님") || isAdmin ? "" : " 교사"),
+          userName: maskedName,
           userEmail: user.email,
           isSenedu: true,
           rating: selectedRating,
