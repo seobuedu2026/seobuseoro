@@ -12,8 +12,6 @@ const ADMIN_EMAILS = [
   "admin@senedu.kr",
   "seobu@senedu.kr",
   "manager@senedu.kr",
-  "gogh9@senedu.kr",
-  "gogh9@susaek.sen.es.kr",
   "seobuedu2026@gmail.com"
 ];
 
