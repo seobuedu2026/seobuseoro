@@ -80,10 +80,6 @@ export function renderPrograms(container, onSelectEventModal) {
         </div>
       </div>
 
-      <div style="font-size: 14px; font-weight: 700; color: #475569; margin-bottom: 16px; text-align: center;">
-        총 <strong>${filteredEvents.length}개</strong>의 프로그램이 검색되었습니다.
-      </div>
-
       <!-- 프로그램 카드 그리드 -->
       <div class="program-cards-grid">
         ${filteredEvents.length === 0 ? `
