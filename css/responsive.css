@@ -207,11 +207,15 @@
     font-size: 13px !important;
   }
 
-  /* 캘린더 모드 바 하단: 모바일에서 PDF 링크 및 총 프로그램 개수 숨김 */
-  .btn-pdf-download,
-  .calendar-program-count,
-  .calendar-utility-row {
+  /* 캘린더 모드 바 하단: 모바일에서 총 프로그램 개수 숨김 */
+  .calendar-program-count {
     display: none !important;
+  }
+
+  .calendar-utility-row {
+    margin-top: 6px;
+    width: 100%;
+    justify-content: flex-end;
   }
 
   /* 3개월 모아보기 모바일 세로 1열 나열 */

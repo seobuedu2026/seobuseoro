@@ -131,6 +131,7 @@
   flex-shrink: 0;
 }
 
+.btn-excel-import-pill,
 .btn-pdf-download {
   padding: 6px 14px;
   font-size: 13px;
