@@ -137,64 +137,79 @@ button {
   margin: 4px 0 2px 0;
 }
 
-.footer-bottom-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 14px;
-  border-top: 1px solid #e2e8f0;
+/* 하단 바 (저작권 문구 가운데 정렬, 관리자 버튼 우측 정렬) */
+.footer-bottom-bar {
+  position: relative;
   width: 100%;
-  flex-wrap: wrap;
-  gap: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 16px;
+  min-height: 40px;
 }
 
 .footer-copy {
   font-size: 13.5px;
   color: #64748b;
   font-weight: 500;
+  text-align: center;
 }
 
 .footer-admin-actions {
+  position: absolute;
+  right: 0;
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-left: auto;
 }
 
-.btn-footer-admin-action {
+/* 범용 액션 캡슐 버튼 (새 프로그램 추가, 새 수업나눔방 추가, 엑셀 등록, 관리자 설정 등 일관된 통일 디자인) */
+.btn-m3-pill-action {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 6px 14px;
+  padding: 6px 16px;
   border-radius: var(--shape-pill);
-  border: 1px solid #cbd5e1;
+  border: 1.5px solid #0e3753;
   background-color: #ffffff;
   color: #0e3753;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 13.5px;
+  font-weight: 800;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+  box-shadow: 0 1px 3px rgba(14, 55, 83, 0.08);
+  white-space: nowrap;
+  text-decoration: none;
 }
 
-.btn-footer-admin-action:hover {
-  background-color: #f1f5f9;
-  border-color: #94a3b8;
-  color: #008080;
+.btn-m3-pill-action:hover {
+  background-color: #0e3753;
+  color: #ffffff;
+  border-color: #0e3753;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(14, 55, 83, 0.18);
+}
+
+.btn-m3-pill-action:active {
+  transform: translateY(0);
 }
 
 .btn-footer-logout {
   display: inline-flex;
   align-items: center;
-  padding: 6px 12px;
+  justify-content: center;
+  padding: 6px 14px;
   border-radius: var(--shape-pill);
-  border: 1px solid #e2e8f0;
+  border: 1.5px solid #cbd5e1;
   background-color: #ffffff;
   color: #64748b;
-  font-size: 12.5px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .btn-footer-logout:hover {

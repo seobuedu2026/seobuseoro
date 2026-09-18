@@ -16,7 +16,7 @@ export function renderPadletRooms(container) {
         </p>
 
         <div style="display: flex; justify-content: center; gap: 8px; margin-top: 16px;">
-          <button id="btn-add-new-room" class="btn-m3-outlined" style="padding: 6px 16px; font-size: 13.5px; border-radius: 9999px; background: #ffffff;">
+          <button id="btn-add-new-room" class="btn-m3-pill-action">
             <span>➕ 새 수업나눔방 추가</span>
           </button>
         </div>

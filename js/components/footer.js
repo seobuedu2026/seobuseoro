@@ -16,21 +16,21 @@ export function renderFooter(container) {
           <p class="footer-notice-text">※ 세부 일정 및 장소는 학교 공문 및 신청 링크를 통해 확인하시기 바랍니다.</p>
         </div>
 
-        <!-- 하단 영역 (좌측: 저작권, 우측: 관리자 계정 설정 및 로그인/로그아웃) -->
-        <div class="footer-bottom-row">
+        <!-- 하단 영역 (저작권 문구 가운데 정렬, 관리자 버튼 우측 정렬) -->
+        <div class="footer-bottom-bar">
           <div class="footer-copy">
             © 2026 서울특별시서부교육지원청. All Rights Reserved.
           </div>
           <div class="footer-admin-actions">
             ${isAdmin ? `
-              <button id="footer-btn-admin-account" class="btn-footer-admin-action" title="관리자 ID 현황 조회, 추가/삭제 및 비밀번호(PW) 설정">
+              <button id="footer-btn-admin-account" class="btn-m3-pill-action" title="관리자 ID 현황 조회, 추가/삭제 및 비밀번호(PW) 설정">
                 👥 관리자 계정 설정
               </button>
               <button id="footer-btn-logout" class="btn-footer-logout" title="관리자 모드 로그아웃">
                 로그아웃
               </button>
             ` : `
-              <button id="footer-btn-admin-verify" class="btn-footer-admin-action" title="관리자 로그인">
+              <button id="footer-btn-admin-verify" class="btn-m3-pill-action" title="관리자 로그인">
                 🔐 관리자 로그인
               </button>
             `}

@@ -52,7 +52,7 @@ export function renderPrograms(container, onSelectEventModal) {
 
       <!-- 새 프로그램 추가 버튼 -->
       <div style="display: flex; justify-content: center; margin-bottom: 20px;">
-        <button id="btn-add-program" class="btn-m3-filled" style="padding: 10px 24px; font-size: 14.5px; font-weight: 800; border-radius: var(--shape-pill); box-shadow: 0 4px 14px rgba(14, 55, 83, 0.25); background: #0e3753; display: inline-flex; align-items: center; gap: 6px;">
+        <button id="btn-add-program" class="btn-m3-pill-action">
           <span>➕ 새 프로그램 추가</span>
         </button>
       </div>
