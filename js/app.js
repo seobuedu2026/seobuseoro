@@ -1,4 +1,5 @@
 import { renderHeader } from "./components/header.js";
+import { renderFooter } from "./components/footer.js";
 import { renderCalendar } from "./components/calendar.js";
 import { renderPrograms } from "./components/programs.js";
 import { renderReviews } from "./components/reviews.js";
@@ -8,12 +9,14 @@ let activeTab = "calendar"; // 'calendar' | 'programs' | 'reviews' | 'padlet'
 
 document.addEventListener("DOMContentLoaded", () => {
   const headerMount = document.getElementById("header-mount");
+  const footerMount = document.getElementById("footer-mount");
   const tabContentMount = document.getElementById("tab-content-mount");
   const modalMount = document.getElementById("modal-mount");
   const navTabs = document.querySelectorAll(".nav-tab-item");
 
-  // 헤더 렌더링
+  // 헤더 및 푸터 렌더링
   renderHeader(headerMount);
+  renderFooter(footerMount);
 
   // 모달 팝업 열기 함수
   function showEventModal(eventObj) {
@@ -143,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 인증 상태 변경 리스너
   window.addEventListener("auth-state-changed", () => {
-    renderHeader(headerMount);
+    renderFooter(footerMount);
     if (activeTab === "reviews") {
       renderReviews(tabContentMount);
     }

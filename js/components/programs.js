@@ -116,13 +116,6 @@ export function renderPrograms(container) {
           </div>
         `).join("")}
       </div>
-
-      <!-- 하단 교육청 공식 푸터 -->
-      <footer class="site-footer">
-        <div class="footer-org-name">
-          서울특별시서부교육지원청 초등교육지원과
-        </div>
-      </footer>
     </div>
   `;
 

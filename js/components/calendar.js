@@ -8,9 +8,6 @@ export function renderCalendar(container, onSelectEventModal) {
       <!-- 상단 월 및 뷰 모드 전환 바 -->
       <div class="calendar-view-mode-bar">
         <div class="filter-chips-row" id="month-chips-row" style="margin-bottom:0;">
-          <button class="m3-chip ${currentMonth === 'all' ? 'active' : ''}" data-month="all">
-            ✨ 3개월 포스터 모드 (인쇄물 한눈에 보기)
-          </button>
           <button class="m3-chip chip-month-9 ${currentMonth === 9 ? 'active' : ''}" data-month="9">
             🌿 9월 · 수다박스의 달
           </button>
@@ -19,6 +16,9 @@ export function renderCalendar(container, onSelectEventModal) {
           </button>
           <button class="m3-chip chip-month-11 ${currentMonth === 11 ? 'active' : ''}" data-month="11">
             🍁 11월 · 성과공유의 달
+          </button>
+          <button class="m3-chip ${currentMonth === 'all' ? 'active' : ''}" data-month="all">
+            ✨ 3개월 모아보기
           </button>
         </div>
 
@@ -50,15 +50,6 @@ export function renderCalendar(container, onSelectEventModal) {
           <span class="legend-badge cat-sudabox">수다박스</span>
         </div>
       </div>
-
-      <!-- 하단 교육청 공식 정보 -->
-      <footer class="site-footer">
-        <div class="footer-org-name">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-          서울특별시서부교육지원청 초등교육지원과
-        </div>
-        <p>※ 세부 일정 및 장소는 학교 공문 및 신청 링크를 통해 확인하시기 바랍니다.</p>
-      </footer>
     </div>
   `;
 

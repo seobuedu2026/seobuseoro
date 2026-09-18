@@ -1,0 +1,156 @@
+import { GoogleAuthService } from "../auth/googleAuth.js";
+import { openAdminExcelModal } from "./adminExcelModal.js";
+
+export function renderFooter(container) {
+  const user = GoogleAuthService.getCurrentUser();
+  const isAdmin = user && user.isAdmin;
+
+  container.innerHTML = `
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <div class="footer-top-info">
+          <div class="footer-org-name">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            <span>서울특별시서부교육지원청 초등교육지원과</span>
+          </div>
+          <p class="footer-notice-text">※ 세부 일정 및 장소는 학교 공문 및 신청 링크를 통해 확인하시기 바랍니다.</p>
+        </div>
+
+        <!-- 하단 관리자 및 인증 유틸리티 바 -->
+        <div class="footer-admin-row">
+          <div class="footer-admin-left">
+            <span class="footer-copy">© 2026 서울특별시서부교육지원청. All Rights Reserved.</span>
+          </div>
+
+          <div class="footer-admin-actions">
+            ${isAdmin ? `
+              <button id="footer-btn-admin-excel" class="btn-footer-pill admin-active">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                ⚙️ 행사 관리 (엑셀 등록)
+              </button>
+            ` : ''}
+
+            ${user ? `
+              <div class="footer-user-tag">
+                <span>
+                  <strong>${user.name}</strong> 
+                  ${user.isAdmin ? '<span style="color:#008080; font-weight:800;">[관리자]</span>' : (user.isSenedu ? '<span style="color:#0284c7;">(@senedu)</span>' : '')}
+                </span>
+                <button id="footer-btn-logout" class="footer-link-btn">로그아웃</button>
+              </div>
+            ` : `
+              <button id="footer-btn-login" class="btn-footer-pill">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.761H12.545z"/></svg>
+                Google 로그인
+              </button>
+              <button id="footer-btn-admin-verify" class="btn-footer-pill admin-badge" title="관리자 인증">
+                🔐 관리자 모드
+              </button>
+            `}
+          </div>
+        </div>
+      </div>
+    </footer>
+  `;
+
+  // 이벤트 리스너 바인딩
+  const btnLogin = container.querySelector("#footer-btn-login");
+  const btnLogout = container.querySelector("#footer-btn-logout");
+  const btnAdminVerify = container.querySelector("#footer-btn-admin-verify");
+  const btnAdminExcel = container.querySelector("#footer-btn-admin-excel");
+
+  if (btnLogin) {
+    btnLogin.addEventListener("click", () => {
+      GoogleAuthService.showLoginPrompt(() => {
+        renderFooter(container);
+      });
+    });
+  }
+
+  if (btnLogout) {
+    btnLogout.addEventListener("click", () => {
+      GoogleAuthService.logout();
+      renderFooter(container);
+    });
+  }
+
+  if (btnAdminVerify) {
+    btnAdminVerify.addEventListener("click", () => {
+      openAdminAuthModal(() => {
+        renderFooter(container);
+      });
+    });
+  }
+
+  if (btnAdminExcel) {
+    btnAdminExcel.addEventListener("click", () => {
+      openAdminExcelModal();
+    });
+  }
+}
+
+// 브라우저 팝업 차단 걱정 없는 깔끔한 M3 관리자 인증 모달
+export function openAdminAuthModal(onSuccess) {
+  const mount = document.getElementById("modal-mount");
+  mount.innerHTML = `
+    <div class="m3-modal-backdrop open" id="admin-auth-backdrop">
+      <div class="m3-modal-dialog" style="max-width: 440px;">
+        <div class="modal-header">
+          <h3 style="font-size: 18px; font-weight: 900; color: #0e3753;">
+            🔐 관리자 인증
+          </h3>
+          <button class="modal-close-btn" id="btn-close-auth-modal" aria-label="닫기">✕</button>
+        </div>
+
+        <p style="font-size: 13.5px; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
+          행사 엑셀 업로드 및 일정 관리 권한을 활성화하려면 관리자 인증 코드를 입력하세요.
+        </p>
+
+        <form id="admin-auth-form">
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label for="admin-code-input" style="font-weight: 800; font-size: 13px; color: #0e3753;">인증 코드</label>
+            <input type="password" id="admin-code-input" class="m3-input" placeholder="기본 코드: seobu2026 또는 1234" autofocus required style="padding:12px; font-size:15px;" />
+            <div style="font-size: 11px; color: #008080; margin-top: 4px; font-weight: 600;">
+              * 기본 인증 코드: seobu2026 또는 1234
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button type="button" id="btn-cancel-auth" class="btn-m3-outlined">취소</button>
+            <button type="submit" class="btn-m3-filled">관리자 인증하기</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+
+  const backdrop = mount.querySelector("#admin-auth-backdrop");
+  const closeBtn = mount.querySelector("#btn-close-auth-modal");
+  const cancelBtn = mount.querySelector("#btn-cancel-auth");
+  const form = mount.querySelector("#admin-auth-form");
+  const input = mount.querySelector("#admin-code-input");
+
+  const closeModal = () => {
+    backdrop.classList.remove("open");
+    setTimeout(() => { mount.innerHTML = ""; }, 200);
+  };
+
+  closeBtn.addEventListener("click", closeModal);
+  cancelBtn.addEventListener("click", closeModal);
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) closeModal();
+  });
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const code = input.value.trim();
+    if (GoogleAuthService.verifyAdminCode(code)) {
+      alert("✅ 관리자 권한이 인증되었습니다!\n이제 하단의 [⚙️ 행사 관리 (엑셀 등록)] 버튼으로 엑셀을 업로드하실 수 있습니다.");
+      closeModal();
+      if (onSuccess) onSuccess();
+    } else {
+      alert("❌ 인증 코드가 일치하지 않습니다. (기본 코드: seobu2026 또는 1234)");
+      input.focus();
+    }
+  });
+}
