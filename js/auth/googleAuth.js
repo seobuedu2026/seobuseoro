@@ -53,11 +53,12 @@ export const GoogleAuthService = {
     }
     // 관리자 모드 활성화 시 가상 관리자 세션
     if (this.isAdminModeActive()) {
+      const customEmail = localStorage.getItem("seobu_admin_custom_email") || "seobuedu2026@gmail.com";
       return {
-        email: "seobuedu2026@gmail.com",
+        email: customEmail,
         name: "관리자",
         picture: "https://api.dicebear.com/7.x/initials/svg?seed=Admin&backgroundColor=0e3753",
-        domain: "gmail.com",
+        domain: customEmail.split("@")[1] || "gmail.com",
         isSenedu: true,
         isAdmin: true,
         role: "관리자",
@@ -86,21 +87,37 @@ export const GoogleAuthService = {
     return localStorage.getItem(ADMIN_MODE_KEY) === "true";
   },
 
-  // 관리자 모드 토글/인증
-  verifyAdminCode(code) {
-    if (!code) return false;
-    const clean = code.trim();
-    if (ADMIN_PASSWORDS.includes(clean) || ADMIN_PASSWORDS.includes(clean.toLowerCase())) {
-      localStorage.setItem(ADMIN_MODE_KEY, "true");
-      window.dispatchEvent(new CustomEvent("auth-state-changed", { detail: { user: this.getCurrentUser() } }));
-      return true;
+  // 관리자 이메일 + 비밀번호 인증
+  verifyAdminCredentials(email, password) {
+    if (!email || !password) return { success: false, message: "이메일과 비밀번호를 모두 입력해주세요." };
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPw = password.trim();
+
+    const isEmailValid = ADMIN_EMAILS.includes(cleanEmail);
+    const isPwValid = ADMIN_PASSWORDS.includes(cleanPw);
+
+    if (!isEmailValid) {
+      return { success: false, message: "등록되지 않은 관리자 이메일입니다." };
     }
-    return false;
+    if (!isPwValid) {
+      return { success: false, message: "관리자 비밀번호가 일치하지 않습니다." };
+    }
+
+    localStorage.setItem(ADMIN_MODE_KEY, "true");
+    localStorage.setItem("seobu_admin_custom_email", cleanEmail);
+    window.dispatchEvent(new CustomEvent("auth-state-changed", { detail: { user: this.getCurrentUser() } }));
+    return { success: true };
+  },
+
+  // 관리자 단일 코드 인증 (호환성 지원)
+  verifyAdminCode(code) {
+    return this.verifyAdminCredentials("seobuedu2026@gmail.com", code).success;
   },
 
   // 관리자 모드 해제
   disableAdminMode() {
     localStorage.removeItem(ADMIN_MODE_KEY);
+    localStorage.removeItem("seobu_admin_custom_email");
     window.dispatchEvent(new CustomEvent("auth-state-changed", { detail: { user: this.getCurrentUser() } }));
   },
 

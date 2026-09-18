@@ -68,7 +68,7 @@ export function renderFooter(container) {
   }
 }
 
-// 브라우저 팝업 차단 걱정 없는 깔끔한 M3 관리자 인증 모달
+// 브라우저 팝업 차단 걱정 없는 깔끔한 M3 관리자 로그인 모달 (이메일 + PW)
 export function openAdminAuthModal(onSuccess) {
   const mount = document.getElementById("modal-mount");
   mount.innerHTML = `
@@ -76,19 +76,24 @@ export function openAdminAuthModal(onSuccess) {
       <div class="m3-modal-dialog" style="max-width: 440px;">
         <div class="modal-header">
           <h3 style="font-size: 18px; font-weight: 900; color: #0e3753;">
-            🔐 관리자 인증
+            🔐 관리자 로그인
           </h3>
           <button class="modal-close-btn" id="btn-close-auth-modal" aria-label="닫기">✕</button>
         </div>
 
         <p style="font-size: 13.5px; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
-          행사 엑셀 업로드 및 일정 관리 권한을 활성화하려면 관리자 비밀번호(PW)를 입력하세요.
+          행사 관리 및 후기 승인 권한을 활성화하려면 관리자 계정 정보를 입력하세요.
         </p>
 
         <form id="admin-auth-form">
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label for="admin-email-input" style="font-weight: 800; font-size: 13px; color: #0e3753;">관리자 이메일</label>
+            <input type="email" id="admin-email-input" class="m3-input" placeholder="seobuedu2026@gmail.com" value="seobuedu2026@gmail.com" required style="padding:11px 12px; font-size:14.5px;" />
+          </div>
+
           <div class="form-group" style="margin-bottom: 20px;">
-            <label for="admin-code-input" style="font-weight: 800; font-size: 13px; color: #0e3753;">관리자 비밀번호 (PW)</label>
-            <input type="password" id="admin-code-input" class="m3-input" placeholder="비밀번호를 입력하세요" autofocus required style="padding:12px; font-size:15px;" />
+            <label for="admin-pw-input" style="font-weight: 800; font-size: 13px; color: #0e3753;">비밀번호 (PW)</label>
+            <input type="password" id="admin-pw-input" class="m3-input" placeholder="비밀번호를 입력하세요" autofocus required style="padding:11px 12px; font-size:14.5px;" />
           </div>
 
           <div style="display: flex; gap: 10px; justify-content: flex-end;">
@@ -104,7 +109,8 @@ export function openAdminAuthModal(onSuccess) {
   const closeBtn = mount.querySelector("#btn-close-auth-modal");
   const cancelBtn = mount.querySelector("#btn-cancel-auth");
   const form = mount.querySelector("#admin-auth-form");
-  const input = mount.querySelector("#admin-code-input");
+  const emailInput = mount.querySelector("#admin-email-input");
+  const pwInput = mount.querySelector("#admin-pw-input");
 
   const closeModal = () => {
     backdrop.classList.remove("open");
@@ -119,14 +125,17 @@ export function openAdminAuthModal(onSuccess) {
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const code = input.value.trim();
-    if (GoogleAuthService.verifyAdminCode(code)) {
-      alert("✅ 관리자 권한이 인증되었습니다!\n이제 하단의 [⚙️ 행사 관리 (엑셀 등록)] 버튼으로 엑셀을 업로드하실 수 있습니다.");
+    const email = emailInput.value.trim();
+    const pw = pwInput.value.trim();
+
+    const res = GoogleAuthService.verifyAdminCredentials(email, pw);
+    if (res.success) {
+      alert("✅ 관리자 권한으로 로그인되었습니다!\n행사 관리 및 후기 승인 기능을 이용하실 수 있습니다.");
       closeModal();
       if (onSuccess) onSuccess();
     } else {
-      alert("❌ 관리자 비밀번호가 일치하지 않습니다.");
-      input.focus();
+      alert(`❌ ${res.message || '관리자 인증 정보가 일치하지 않습니다.'}`);
+      pwInput.focus();
     }
   });
 }
