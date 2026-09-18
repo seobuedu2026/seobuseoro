@@ -239,7 +239,7 @@ export function renderReviews(container, preselectedEventId = null) {
             const cleanName = (rev.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim();
             return `
             <div class="review-feed-card ${rev.status === 'pending' ? 'is-pending' : ''}" data-review-id="${rev.id}">
-              <!-- 상단 바: 연수 종류 태그(먼저) + 작성자 이름 + 작성일시 + 승인 배지(관리자) | 별점 & 공감 버튼 -->
+              <!-- 상단 바: 연수 종류 태그(먼저) + 작성자 이름 + 작성일시 | 별점 & 공감 버튼 -->
               <div class="review-card-top-row">
                 <div class="review-user-name">
                   <span class="review-event-tag">🎯 ${rev.eventTitle}</span>
@@ -247,10 +247,6 @@ export function renderReviews(container, preselectedEventId = null) {
                     <span class="user-display-name">${cleanName}</span>
                     <span class="review-date-text">${rev.createdAt}</span>
                   </span>
-                  ${isAdmin ? (rev.status === 'pending' 
-                    ? `<span class="badge-review-status pending">⏳ 승인 대기 (미노출)</span>` 
-                    : `<span class="badge-review-status approved">✅ 승인 완료</span>`) 
-                    : ''}
                 </div>
 
                 <div class="review-top-actions-group">
@@ -265,9 +261,12 @@ export function renderReviews(container, preselectedEventId = null) {
 
               <p class="review-content-body">${rev.content}</p>
 
-              <!-- 관리자 승인/반려/삭제 액션 바 -->
+              <!-- 관리자 상태 배지 및 승인/반려/삭제 액션 바 -->
               ${isAdmin ? `
                 <div class="review-admin-card-actions">
+                  <span class="badge-review-status ${rev.status === 'pending' ? 'pending' : 'approved'}">
+                    ${rev.status === 'pending' ? '⏳ 승인 대기 (미노출)' : '✅ 승인 완료'}
+                  </span>
                   ${rev.status === 'pending' ? `
                     <button class="btn-review-mod-approve" data-review-id="${rev.id}">
                       ✓ 승인하기 (홈페이지 노출)

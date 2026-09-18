@@ -875,12 +875,13 @@
 .badge-review-status {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 12px;
+  gap: 5px;
+  font-size: 13px;
   font-weight: 800;
-  padding: 3px 9px;
-  border-radius: 6px;
-  margin-left: 6px;
+  padding: 7px 13px;
+  border-radius: 8px;
+  margin-left: 0;
+  box-sizing: border-box;
 }
 
 .badge-review-status.approved {
