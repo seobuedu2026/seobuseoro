@@ -81,16 +81,12 @@ export function openAdminAuthModal(onSuccess) {
       <div class="m3-modal-dialog" style="max-width: 440px;">
         <div class="modal-header">
           <h3 style="font-size: 18px; font-weight: 900; color: #0e3753;">
-            🔐 관리자 로그인
+            관리자 로그인
           </h3>
           <button class="modal-close-btn" id="btn-close-auth-modal" aria-label="닫기">✕</button>
         </div>
 
-        <p style="font-size: 13.5px; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
-          행사 관리 및 후기 승인 권한을 활성화하려면 관리자 계정 정보를 입력하세요.
-        </p>
-
-        <form id="admin-auth-form">
+        <form id="admin-auth-form" style="margin-top: 6px;">
           <div class="form-group" style="margin-bottom: 14px;">
             <label for="admin-email-input" style="font-weight: 800; font-size: 14px; color: #0e3753;">관리자 이메일</label>
             <input type="email" id="admin-email-input" class="m3-input" placeholder="관리자 이메일을 입력하세요" value="" autofocus required autocomplete="off" style="padding:11px 12px; font-size:15px;" />
@@ -101,9 +97,9 @@ export function openAdminAuthModal(onSuccess) {
             <input type="password" id="admin-pw-input" class="m3-input" placeholder="비밀번호를 입력하세요" required autocomplete="current-password" style="padding:11px 12px; font-size:15px;" />
           </div>
 
-          <div style="display: flex; gap: 10px; justify-content: flex-end;">
-            <button type="button" id="btn-cancel-auth" class="btn-m3-outlined">취소</button>
-            <button type="submit" class="btn-m3-filled">관리자 로그인</button>
+          <div style="display: flex; gap: 8px; justify-content: flex-end;">
+            <button type="button" id="btn-cancel-auth" class="btn-admin-action">취소</button>
+            <button type="submit" class="btn-admin-action filled">관리자 로그인</button>
           </div>
         </form>
       </div>
