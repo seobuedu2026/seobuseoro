@@ -43,14 +43,9 @@ export function openMonthManagerModal(onSaved) {
             }).join("")}
           </div>
 
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <button type="button" id="btn-reset-months" class="btn-admin-action">
-              기본(9~11월) 복원
-            </button>
-            <div style="display: flex; gap: 8px;">
-              <button type="button" id="btn-cancel-month-mgr" class="btn-admin-action">취소</button>
-              <button type="submit" class="btn-admin-action filled">캘린더 월 적용</button>
-            </div>
+          <div style="display: flex; justify-content: flex-end; gap: 8px;">
+            <button type="button" id="btn-cancel-month-mgr" class="btn-admin-action">취소</button>
+            <button type="submit" class="btn-admin-action filled">캘린더 월 적용</button>
           </div>
         </form>
       </div>
@@ -60,7 +55,6 @@ export function openMonthManagerModal(onSaved) {
   const backdrop = mount.querySelector("#month-manager-backdrop");
   const closeBtn = mount.querySelector("#btn-close-month-mgr");
   const cancelBtn = mount.querySelector("#btn-cancel-month-mgr");
-  const resetBtn = mount.querySelector("#btn-reset-months");
   const form = mount.querySelector("#month-mgr-form");
 
   const closeModal = () => {
@@ -86,12 +80,7 @@ export function openMonthManagerModal(onSaved) {
     isMouseDownOnBackdrop = false;
   });
 
-  resetBtn.addEventListener("click", () => {
-    saveActiveMonths([9, 10, 11]);
-    alert("✅ 캘린더 월이 기본(9월, 10월, 11월)으로 설정되었습니다.");
-    closeModal();
-    if (onSaved) onSaved();
-  });
+
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();

@@ -26,17 +26,9 @@ export function renderCalendar(container, onSelectEventModal) {
     <div class="calendar-view-wrapper ${isSingleMonth ? 'is-single-month-view' : 'is-poster-view'}">
       <!-- 상단 연도/월 및 뷰 모드 전환 바 (중앙: 연도+월 칩 / 우측: 달력추가+엑셀등록) -->
       <div class="calendar-view-mode-bar">
-        <!-- 화면 정가운데: 연도 선택기 + 월 칩 목록 -->
+        <!-- 화면 정가운데: 월 칩 목록 -->
         <div class="calendar-center-controls">
-          <!-- 연도 선택기 -->
-          <div class="year-selector-pill" style="display: inline-flex; align-items: center; gap: 6px; background: #0e3753; color: #ffffff; padding: 4px 12px; border-radius: 9999px; box-shadow: 0 2px 6px rgba(14, 55, 83, 0.2);">
-            <span style="font-size: 13px;">📅</span>
-            <select id="cal-year-select" style="background: transparent; color: #ffffff; border: none; font-size: 13.5px; font-weight: 800; cursor: pointer; outline: none; padding: 2px 2px; font-family: inherit;">
-              ${AVAILABLE_YEARS.map(y => `
-                <option value="${y}" ${currentYear === y ? 'selected' : ''} style="color: #0e3753; background: #ffffff;">${y}년</option>
-              `).join("")}
-            </select>
-          </div>
+          <!-- 월 칩 목록 -->
 
           <!-- 월 칩 목록 -->
           <div class="filter-chips-row" id="month-chips-row">
@@ -88,14 +80,7 @@ export function renderCalendar(container, onSelectEventModal) {
   const contentMount = container.querySelector("#calendar-content-mount");
   renderCalendarCards(contentMount, onSelectEventModal, isAdmin, container, currentYear);
 
-  // 연도 선택 이벤트
-  const yearSelect = container.querySelector("#cal-year-select");
-  if (yearSelect) {
-    yearSelect.addEventListener("change", (e) => {
-      setSelectedYear(parseInt(e.target.value, 10));
-      renderCalendar(container, onSelectEventModal);
-    });
-  }
+
 
   // 칩 클릭 이벤트
   container.querySelectorAll("#month-chips-row .m3-chip[data-month]").forEach(chip => {
