@@ -1,12 +1,12 @@
-import { renderHeader } from "./components/header.js";
-import { renderFooter } from "./components/footer.js";
-import { renderCalendar } from "./components/calendar.js";
-import { renderPrograms } from "./components/programs.js";
-import { renderReviews } from "./components/reviews.js";
-import { renderPadletRooms } from "./components/padletRooms.js";
-import { openEventFormModal } from "./components/eventFormModal.js";
-import { GoogleAuthService } from "./auth/googleAuth.js";
-import { isEventPastOrToday } from "./data/events.js";
+import { renderHeader } from "./components/header.js?v=20260920_v4";
+import { renderFooter } from "./components/footer.js?v=20260920_v4";
+import { renderCalendar } from "./components/calendar.js?v=20260920_v4";
+import { renderPrograms } from "./components/programs.js?v=20260920_v4";
+import { renderReviews } from "./components/reviews.js?v=20260920_v4";
+import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v4";
+import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v4";
+import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v4";
+import { isEventPastOrToday } from "./data/events.js?v=20260920_v4";
 
 let activeTab = "calendar"; // 'calendar' | 'programs' | 'reviews' | 'padlet'
 
@@ -33,9 +33,6 @@ document.addEventListener("DOMContentLoaded", () => {
             <div style="display:flex; align-items:center; gap:8px;">
               <span class="prog-category-badge ${eventObj.categoryClass}">
                 ${eventObj.categoryLabel}
-              </span>
-              <span style="font-size:13px; font-weight:700; color:#64748b;">
-                ${eventObj.year || 2026}년 ${eventObj.month}월 ${eventObj.day}일
               </span>
             </div>
             <button class="modal-close-btn" id="btn-modal-close" aria-label="닫기">✕</button>
@@ -85,19 +82,18 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
           </div>
 
-          <div style="font-size:14px; color:#334155; line-height:1.6; margin-bottom:24px;">
+          <div style="font-size:14px; color:#334155; line-height:1.6; margin-bottom:16px;">
             ${eventObj.description}
           </div>
 
-          <!-- 하단 액션 버튼 바 -->
-          <div style="display:flex; gap:10px; justify-content:flex-end; align-items:center; flex-wrap:wrap; border-top:1px solid #f1f5f9; padding-top:14px;">
-            ${isAdmin ? `
+          ${isAdmin ? `
+            <!-- 하단 액션 버튼 바 -->
+            <div style="display:flex; gap:10px; justify-content:flex-end; align-items:center; flex-wrap:wrap; border-top:1px solid #f1f5f9; padding-top:14px;">
               <button id="btn-modal-edit" class="btn-admin-action">
                 행사 수정
               </button>
-            ` : ''}
-            <button id="btn-modal-review" class="btn-m3-outlined">후기 남기기</button>
-          </div>
+            </div>
+          ` : ''}
         </div>
       </div>
     `;
@@ -105,7 +101,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // 닫기 이벤트
     const backdrop = modalMount.querySelector("#modal-backdrop");
     const closeBtn = modalMount.querySelector("#btn-modal-close");
-    const reviewBtn = modalMount.querySelector("#btn-modal-review");
     const editBtn = modalMount.querySelector("#btn-modal-edit");
 
     const closeModal = () => {
@@ -150,15 +145,6 @@ document.addEventListener("DOMContentLoaded", () => {
         openEventFormModal(eventObj, null, () => switchTab(activeTab));
       });
     }
-
-    reviewBtn.addEventListener("click", () => {
-      if (!isEventPastOrToday(eventObj)) {
-        alert(`⚠️ [${eventObj.month}월 ${eventObj.day}일] 행사는 아직 진행 전입니다.\n후기 작성은 행사 진행 당일부터 가능합니다.`);
-        return;
-      }
-      closeModal();
-      switchTab("reviews", eventObj.id);
-    });
   }
 
   // 탭 변경 함수
