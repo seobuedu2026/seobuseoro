@@ -43,30 +43,6 @@ export function openMonthManagerModal(onSaved) {
             }).join("")}
           </div>
 
-          <!-- 활성 월별 소제목 및 안내 문구 관리 영역 -->
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; margin-bottom: 20px;">
-            <div style="font-size: 13px; font-weight: 800; color: #0e3753; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
-              <span>📝 월별 소제목 및 안내 문구 설정</span>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; padding-right: 2px;">
-              ${currentActive.map(m => {
-                const theme = monthThemes[m] || { name: `${m}월`, subtitle: '', highlightWeek: '' };
-                return `
-                  <div style="display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1px solid #e2e8f0; padding: 7px 12px; border-radius: 8px;">
-                    <div style="display: flex; align-items: center; gap: 6px; font-size: 13px;">
-                      <strong style="color: #0e3753;">${m}월</strong>
-                      <span style="color: #64748b; font-size: 12px;">${theme.subtitle ? `[${theme.subtitle}]` : '(소제목 없음)'}</span>
-                      ${theme.highlightWeek ? `<span style="color: #2563eb; font-size: 11px; font-weight: 700;">· ${theme.highlightWeek}</span>` : ''}
-                    </div>
-                    <button type="button" class="btn-edit-single-month-theme btn-m3-outlined" data-month="${m}" style="padding: 2px 8px; font-size: 11px; border-radius: 6px; font-weight: 800;">
-                      ✏️ 문구 수정
-                    </button>
-                  </div>
-                `;
-              }).join("")}
-            </div>
-          </div>
-
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <button type="button" id="btn-reset-months" class="btn-m3-outlined" style="font-size: 12px; padding: 6px 12px;">
               기본(9~11월) 복원
@@ -108,17 +84,6 @@ export function openMonthManagerModal(onSaved) {
       closeModal();
     }
     isMouseDownOnBackdrop = false;
-  });
-
-  // 각 월별 문구 수정 버튼
-  mount.querySelectorAll(".btn-edit-single-month-theme").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const monthVal = parseInt(btn.dataset.month, 10);
-      openMonthThemeEditModal(monthVal, () => {
-        openMonthManagerModal(onSaved);
-      });
-    });
   });
 
   resetBtn.addEventListener("click", () => {
