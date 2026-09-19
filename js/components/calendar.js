@@ -373,7 +373,7 @@ function generateMonthCardHTML(month, isFocusView = false, isAdmin = false, curr
           ${theme.subtitle ? `<span class="month-subtitle-pill">${theme.subtitle}</span>` : ''}
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size:13px; font-weight:800; color:#475569;">${monthEvents.length}개 프로그램</span>
+          <span class="month-program-count" style="font-size:13px; font-weight:800; color:#475569;">${monthEvents.length}개 프로그램</span>
           ${isAdmin ? `
             <button class="btn-edit-month-theme btn-admin-action" data-month="${month}" title="이 월의 소제목 및 강조 안내 문구 수정">
               문구 수정
