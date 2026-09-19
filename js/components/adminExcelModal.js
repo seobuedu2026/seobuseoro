@@ -1,10 +1,31 @@
 import { getEvents, saveEvents, resetEventsToDefault, parseExcelRowToEvent } from "../data/events.js";
 
 let parsedEventsPreview = [];
+let xlsxPromise = null;
+
+// SheetJS 엑셀 라이브러리 온디맨드(지연) 로더 (일반 접속자 데이터 절약)
+function loadSheetJS() {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  if (xlsxPromise) return xlsxPromise;
+
+  xlsxPromise = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
+    script.async = true;
+    script.onload = () => resolve(window.XLSX);
+    script.onerror = () => {
+      xlsxPromise = null;
+      reject(new Error("SheetJS 로드 실패"));
+    };
+    document.head.appendChild(script);
+  });
+  return xlsxPromise;
+}
 
 export function openAdminExcelModal() {
   const mount = document.getElementById("modal-mount");
   parsedEventsPreview = [];
+  loadSheetJS(); // 모달 오픈 시 백그라운드 프리페치
 
   mount.innerHTML = `
     <div class="m3-modal-backdrop open" id="admin-excel-backdrop">
@@ -139,9 +160,11 @@ export function openAdminExcelModal() {
   });
 
   // 파일 파싱 처리
-  function handleFile(file) {
-    if (!window.XLSX) {
-      alert("SheetJS 라이브러리를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+  async function handleFile(file) {
+    try {
+      await loadSheetJS();
+    } catch (err) {
+      alert("SheetJS 라이브러리를 불러오는데 실패했습니다: " + err.message);
       return;
     }
 
@@ -234,7 +257,13 @@ export function openAdminExcelModal() {
 }
 
 // 표준 샘플 엑셀 파일 동적 생성 및 다운로드
-function downloadSampleExcel() {
+async function downloadSampleExcel() {
+  try {
+    await loadSheetJS();
+  } catch (err) {
+    alert("SheetJS 라이브러리를 불러오는데 실패했습니다: " + err.message);
+    return;
+  }
   if (!window.XLSX) return;
 
   const sampleData = [

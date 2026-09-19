@@ -9,23 +9,32 @@
   <meta property="og:description" content="시작은 촘촘하게, 기본은 탄탄하게, 성장은 다양하게. 서부 수업성장 캘린더">
   <meta property="og:type" content="website">
 
-  <!-- Fonts (Pretendard, Roboto, Gaegu for handwriting slogan) -->
-  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <!-- Preconnect & DNS-Prefetch for External CDNs -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://accounts.google.com">
+
+  <!-- Preload Critical LCP Asset -->
+  <link rel="preload" as="image" href="assets/images/title-logo.png" type="image/png">
+
+  <!-- Fonts (Pretendard, Roboto, Gaegu) -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
 
   <!-- Google Identity Services (GSI) -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-  <!-- SheetJS (Excel Parser) -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Theme & Favicon -->
+  <meta name="theme-color" content="#0e3753">
+  <link rel="icon" type="image/png" href="assets/images/title-logo.png">
 
   <!-- Style Sheets with Cache Busting -->
-  <link rel="stylesheet" href="css/m3-tokens.css?v=20260918_v68">
-  <link rel="stylesheet" href="css/base.css?v=20260918_v68">
-  <link rel="stylesheet" href="css/components.css?v=20260918_v68">
-  <link rel="stylesheet" href="css/responsive.css?v=20260918_v68">
+  <link rel="stylesheet" href="css/m3-tokens.css?v=20260919_opt">
+  <link rel="stylesheet" href="css/base.css?v=20260919_opt">
+  <link rel="stylesheet" href="css/components.css?v=20260919_opt">
+  <link rel="stylesheet" href="css/responsive.css?v=20260919_opt">
 </head>
 <body>
   <!-- 상단 헤더 마운트 영역 -->
@@ -60,6 +69,6 @@
   <div id="modal-mount"></div>
 
   <!-- 메인 스크립트 진입점 -->
-  <script type="module" src="js/app.js?v=20260918_v68"></script>
+  <script type="module" src="js/app.js?v=20260919_opt"></script>
 </body>
 </html>
