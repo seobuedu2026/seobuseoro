@@ -1,4 +1,4 @@
-import { getEvents, getMonthThemes, getActiveMonths, getCategories, getHolidayName, saveEvents } from "../data/events.js";
+import { getEvents, getMonthThemes, getActiveMonths, getCategories, getHolidayName, saveEvents, getSelectedYear, setSelectedYear, AVAILABLE_YEARS } from "../data/events.js";
 import { GoogleAuthService } from "../auth/googleAuth.js";
 import { openEventFormModal } from "./eventFormModal.js";
 import { openMonthManagerModal, openMonthThemeEditModal } from "./monthManagerModal.js";
@@ -10,6 +10,7 @@ let currentMonth = "all"; // 'all' (3개월 포스터 모드) | 1 ~ 12
 export function renderCalendar(container, onSelectEventModal) {
   const user = GoogleAuthService.getCurrentUser();
   const isAdmin = !!(user && user.isAdmin);
+  const currentYear = getSelectedYear();
   const activeMonths = getActiveMonths();
   const monthThemes = getMonthThemes();
   const categories = getCategories();
@@ -23,20 +24,33 @@ export function renderCalendar(container, onSelectEventModal) {
 
   container.innerHTML = `
     <div class="calendar-view-wrapper ${isSingleMonth ? 'is-single-month-view' : 'is-poster-view'}">
-      <!-- 상단 월 및 뷰 모드 전환 바 (중앙 정렬 및 컴팩트 1줄 구성) -->
-      <div class="calendar-view-mode-bar">
-        <div class="filter-chips-row" id="month-chips-row">
-          ${activeMonths.map(m => {
-            const theme = monthThemes[m] || { name: `${m}월`, subtitle: '', icon: '📅' };
-            return `
-              <button class="m3-chip chip-month-${m} ${currentMonth === m ? 'active' : ''}" data-month="${m}">
-                <span>${theme.icon || '📅'} ${m}월</span>${theme.subtitle ? `<span class="chip-text-extra"> · ${theme.subtitle}</span>` : ''}
-              </button>
-            `;
-          }).join("")}
-          <button class="m3-chip ${currentMonth === 'all' ? 'active' : ''}" data-month="all">
-            <span>✨ 3개월</span><span class="chip-text-extra"> 모아보기</span>
-          </button>
+      <!-- 상단 연도/월 및 뷰 모드 전환 바 (연도 선택기 + 월 칩 목록) -->
+      <div class="calendar-view-mode-bar" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <!-- 연도 선택기 -->
+          <div class="year-selector-pill" style="display: inline-flex; align-items: center; gap: 6px; background: #0e3753; color: #ffffff; padding: 4px 12px; border-radius: 9999px; box-shadow: 0 2px 6px rgba(14, 55, 83, 0.2);">
+            <span style="font-size: 13px;">📅</span>
+            <select id="cal-year-select" style="background: transparent; color: #ffffff; border: none; font-size: 13.5px; font-weight: 800; cursor: pointer; outline: none; padding: 2px 2px; font-family: inherit;">
+              ${AVAILABLE_YEARS.map(y => `
+                <option value="${y}" ${currentYear === y ? 'selected' : ''} style="color: #0e3753; background: #ffffff;">${y}년</option>
+              `).join("")}
+            </select>
+          </div>
+
+          <!-- 월 칩 목록 -->
+          <div class="filter-chips-row" id="month-chips-row" style="margin-bottom: 0;">
+            ${activeMonths.map(m => {
+              const theme = monthThemes[m] || { name: `${m}월`, subtitle: '', icon: '📅' };
+              return `
+                <button class="m3-chip chip-month-${m} ${currentMonth === m ? 'active' : ''}" data-month="${m}">
+                  <span>${theme.icon || '📅'} ${m}월</span>${theme.subtitle ? `<span class="chip-text-extra"> · ${theme.subtitle}</span>` : ''}
+                </button>
+              `;
+            }).join("")}
+            <button class="m3-chip ${currentMonth === 'all' ? 'active' : ''}" data-month="all">
+              <span>✨ 3개월</span><span class="chip-text-extra"> 모아보기</span>
+            </button>
+          </div>
         </div>
 
         ${isAdmin ? `
@@ -74,7 +88,16 @@ export function renderCalendar(container, onSelectEventModal) {
   `;
 
   const contentMount = container.querySelector("#calendar-content-mount");
-  renderCalendarCards(contentMount, onSelectEventModal, isAdmin, container);
+  renderCalendarCards(contentMount, onSelectEventModal, isAdmin, container, currentYear);
+
+  // 연도 선택 이벤트
+  const yearSelect = container.querySelector("#cal-year-select");
+  if (yearSelect) {
+    yearSelect.addEventListener("change", (e) => {
+      setSelectedYear(parseInt(e.target.value, 10));
+      renderCalendar(container, onSelectEventModal);
+    });
+  }
 
   // 칩 클릭 이벤트
   container.querySelectorAll("#month-chips-row .m3-chip[data-month]").forEach(chip => {
@@ -125,7 +148,7 @@ export function renderCalendar(container, onSelectEventModal) {
   });
 }
 
-function renderCalendarCards(mount, onSelectEventModal, isAdmin, mainContainer) {
+function renderCalendarCards(mount, onSelectEventModal, isAdmin, mainContainer, currentYear) {
   const activeMonths = getActiveMonths();
 
   if (currentMonth === "all") {
@@ -146,14 +169,14 @@ function renderCalendarCards(mount, onSelectEventModal, isAdmin, mainContainer) 
 
     mount.innerHTML = `
       <div class="poster-three-months-grid">
-        ${threeMonths.map(m => generateMonthCardHTML(m, false, isAdmin)).join("")}
+        ${threeMonths.map(m => generateMonthCardHTML(m, false, isAdmin, currentYear)).join("")}
       </div>
     `;
   } else {
     // 단일 월 집중 모드 (화면 100% 꽉 차는 와이드 뷰)
     mount.innerHTML = `
       <div style="width:100%; margin-bottom: 24px;">
-        ${generateMonthCardHTML(currentMonth, true, isAdmin)}
+        ${generateMonthCardHTML(currentMonth, true, isAdmin, currentYear)}
       </div>
     `;
   }
@@ -165,7 +188,7 @@ function renderCalendarCards(mount, onSelectEventModal, isAdmin, mainContainer) 
         if (e.target.closest(".cal-event-pill")) return;
         const monthVal = parseInt(cell.dataset.month, 10);
         const dayVal = cell.dataset.day;
-        openEventFormModal(null, { month: monthVal, day: dayVal }, () => {
+        openEventFormModal(null, { year: currentYear, month: monthVal, day: dayVal }, () => {
           renderCalendar(mainContainer, onSelectEventModal);
         });
       });
@@ -249,12 +272,13 @@ function renderCalendarCards(mount, onSelectEventModal, isAdmin, mainContainer) 
       if (targetEvent) {
         const isSameDate = targetEvent.month === targetMonth && String(targetEvent.day) === String(targetDay);
         if (!isSameDate) {
+          targetEvent.year = currentYear;
           targetEvent.month = targetMonth;
           targetEvent.day = targetDay;
           if (typeof targetDay === "number") {
-            targetEvent.dateStr = `${targetEvent.year || 2026}-${String(targetMonth).padStart(2, "0")}-${String(targetDay).padStart(2, "0")}`;
+            targetEvent.dateStr = `${currentYear}-${String(targetMonth).padStart(2, "0")}-${String(targetDay).padStart(2, "0")}`;
           } else {
-            targetEvent.dateStr = `${targetEvent.year || 2026}-12-02`;
+            targetEvent.dateStr = `${currentYear}-12-02`;
           }
 
           saveEvents(allEvents);
@@ -265,7 +289,7 @@ function renderCalendarCards(mount, onSelectEventModal, isAdmin, mainContainer) 
   });
 }
 
-function generateMonthCardHTML(month, isFocusView = false, isAdmin = false) {
+function generateMonthCardHTML(month, isFocusView = false, isAdmin = false, currentYear = 2026) {
   const monthThemes = getMonthThemes();
   const theme = monthThemes[month] || {
     monthNum: month,
@@ -276,10 +300,14 @@ function generateMonthCardHTML(month, isFocusView = false, isAdmin = false) {
   };
 
   const allEvents = getEvents();
-  const monthEvents = allEvents.filter(ev => ev.month === month);
+  // 연도별 및 월별 필터링
+  const monthEvents = allEvents.filter(ev => {
+    const evYear = ev.year ? parseInt(ev.year, 10) : 2026;
+    return ev.month === month && evYear === currentYear;
+  });
 
-  // 2026년 기준 캘린더 날짜 계산 (윤년 및 월별 일수 자동 반영)
-  const year = 2026;
+  // 선택된 연도 기준 캘린더 날짜 계산 (윤년 및 월별 일수 자동 반영)
+  const year = currentYear;
   const firstDayOfWeek = new Date(year, month - 1, 1).getDay(); // 0(일) ~ 6(토)
   const totalDays = new Date(year, month, 0).getDate();
 

@@ -1,9 +1,9 @@
-import { getEvents, saveEvents, getActiveMonths, getCategories } from "../data/events.js";
+import { getEvents, saveEvents, getActiveMonths, getCategories, AVAILABLE_YEARS, getSelectedYear } from "../data/events.js";
 
 /**
  * 새 행사 추가 또는 기존 행사 수정 모달 열기
  * @param {Object|null} eventObj 수정할 행사 객체 (null이면 새 행사 추가)
- * @param {Object|null} defaultDate 기본 설정 일자 { month: 9, day: 15 }
+ * @param {Object|null} defaultDate 기본 설정 일자 { year: 2026, month: 9, day: 15 }
  * @param {Function|null} onSaved 저장 후 콜백
  */
 export function openEventFormModal(eventObj = null, defaultDate = null, onSaved = null) {
@@ -12,61 +12,71 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
   if (!mount) return;
 
   const activeMonths = getActiveMonths();
+  const currentYear = eventObj ? (eventObj.year || 2026) : (defaultDate?.year || getSelectedYear());
   const currentMonth = eventObj ? eventObj.month : (defaultDate?.month || activeMonths[0] || 9);
   const currentDay = eventObj ? eventObj.day : (defaultDate?.day || 1);
-    const categories = getCategories();
-    const currentCat = eventObj ? (eventObj.category || "workshop") : "workshop";
+  const categories = getCategories();
+  const currentCat = eventObj ? (eventObj.category || "workshop") : "workshop";
 
-    mount.innerHTML = `
-      <div class="m3-modal-backdrop open" id="event-form-backdrop">
-        <div class="m3-modal-dialog" style="max-width: 540px; max-height: 90vh; overflow-y: auto;">
-          <div class="modal-header">
-            <h3 style="font-size: 19px; font-weight: 900; color: #0e3753; display: flex; align-items: center; gap: 8px;">
-              <span>${isEdit ? '✏️ 행사(프로그램) 수정' : '➕ 새 행사(프로그램) 추가'}</span>
-              <span style="font-size: 11px; font-weight: 800; background: #0e3753; color: #ffffff; padding: 2px 8px; border-radius: 9999px;">
-                관리자 모드
-              </span>
-            </h3>
-            <button class="modal-close-btn" id="btn-close-event-form" aria-label="닫기">✕</button>
+  mount.innerHTML = `
+    <div class="m3-modal-backdrop open" id="event-form-backdrop">
+      <div class="m3-modal-dialog" style="max-width: 560px; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-header">
+          <h3 style="font-size: 19px; font-weight: 900; color: #0e3753; display: flex; align-items: center; gap: 8px;">
+            <span>${isEdit ? '✏️ 행사(프로그램) 수정' : '➕ 새 행사(프로그램) 추가'}</span>
+            <span style="font-size: 11px; font-weight: 800; background: #0e3753; color: #ffffff; padding: 2px 8px; border-radius: 9999px;">
+              관리자 모드
+            </span>
+          </h3>
+          <button class="modal-close-btn" id="btn-close-event-form" aria-label="닫기">✕</button>
+        </div>
+
+        <form id="event-edit-form" style="display: flex; flex-direction: column; gap: 14px; margin-top: 8px;">
+          <!-- 행사명 & 부제목 -->
+          <div class="form-group">
+            <label for="ef-title" style="font-weight: 800; font-size: 13px; color: #0e3753;">행사명 (주제) *</label>
+            <input type="text" id="ef-title" class="m3-input" placeholder="예: 과학실무사 연수" required value="${eventObj?.title || ''}" />
           </div>
 
-          <form id="event-edit-form" style="display: flex; flex-direction: column; gap: 14px; margin-top: 8px;">
-            <!-- 행사명 & 부제목 -->
+          <div class="form-group">
+            <label for="ef-subtitle" style="font-weight: 800; font-size: 13px; color: #0e3753;">상세 부제목 (선택)</label>
+            <input type="text" id="ef-subtitle" class="m3-input" placeholder="예: 실험역량 강화" value="${eventObj?.subtitle || ''}" />
+          </div>
+
+          <!-- 일정 및 구분 (연도, 월, 일자, 구분) -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1.3fr; gap: 8px;">
             <div class="form-group">
-              <label for="ef-title" style="font-weight: 800; font-size: 13px; color: #0e3753;">행사명 (주제) *</label>
-              <input type="text" id="ef-title" class="m3-input" placeholder="예: 과학실무사 연수" required value="${eventObj?.title || ''}" />
+              <label for="ef-year" style="font-weight: 800; font-size: 13px; color: #0e3753;">연도 *</label>
+              <select id="ef-year" class="m3-select" required>
+                ${AVAILABLE_YEARS.map(y => `
+                  <option value="${y}" ${currentYear == y ? 'selected' : ''}>${y}년</option>
+                `).join("")}
+              </select>
             </div>
 
             <div class="form-group">
-              <label for="ef-subtitle" style="font-weight: 800; font-size: 13px; color: #0e3753;">상세 부제목 (선택)</label>
-              <input type="text" id="ef-subtitle" class="m3-input" placeholder="예: 실험역량 강화" value="${eventObj?.subtitle || ''}" />
+              <label for="ef-month" style="font-weight: 800; font-size: 13px; color: #0e3753;">월 *</label>
+              <select id="ef-month" class="m3-select" required>
+                ${activeMonths.map(m => `
+                  <option value="${m}" ${currentMonth == m ? 'selected' : ''}>${m}월</option>
+                `).join("")}
+              </select>
             </div>
 
-            <!-- 일정 및 구분 -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 10px;">
-              <div class="form-group">
-                <label for="ef-month" style="font-weight: 800; font-size: 13px; color: #0e3753;">월 *</label>
-                <select id="ef-month" class="m3-select" required>
-                  ${activeMonths.map(m => `
-                    <option value="${m}" ${currentMonth == m ? 'selected' : ''}>${m}월</option>
-                  `).join("")}
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label for="ef-day" style="font-weight: 800; font-size: 13px; color: #0e3753;">일자 *</label>
-                <input type="text" id="ef-day" class="m3-input" placeholder="예: 18" required value="${currentDay}" />
-              </div>
-
-              <div class="form-group">
-                <label for="ef-category" style="font-weight: 800; font-size: 13px; color: #0e3753;">구분 *</label>
-                <select id="ef-category" class="m3-select" required>
-                  ${categories.map(cat => `
-                    <option value="${cat.key}" ${currentCat === cat.key ? 'selected' : ''}>${cat.label}</option>
-                  `).join("")}
-                </select>
-              </div>
+            <div class="form-group">
+              <label for="ef-day" style="font-weight: 800; font-size: 13px; color: #0e3753;">일자 *</label>
+              <input type="text" id="ef-day" class="m3-input" placeholder="예: 18" required value="${currentDay}" />
             </div>
+
+            <div class="form-group">
+              <label for="ef-category" style="font-weight: 800; font-size: 13px; color: #0e3753;">구분 *</label>
+              <select id="ef-category" class="m3-select" required>
+                ${categories.map(cat => `
+                  <option value="${cat.key}" ${currentCat === cat.key ? 'selected' : ''}>${cat.label}</option>
+                `).join("")}
+              </select>
+            </div>
+          </div>
 
           <!-- 시간 & 장소 -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -174,6 +184,7 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
 
     const title = document.getElementById("ef-title").value.trim();
     const subtitle = document.getElementById("ef-subtitle").value.trim();
+    const year = parseInt(document.getElementById("ef-year").value, 10) || 2026;
     const month = parseInt(document.getElementById("ef-month").value, 10);
     const rawDay = document.getElementById("ef-day").value.trim();
     const day = rawDay.includes("/") ? rawDay : (parseInt(rawDay, 10) || 1);
@@ -193,6 +204,10 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
 
     const allEvents = getEvents();
 
+    const dateStr = typeof day === "number"
+      ? `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+      : `${year}-12-02`;
+
     if (isEdit) {
       // 기존 수정
       const updatedEvents = allEvents.map(item => {
@@ -201,8 +216,10 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
             ...item,
             title,
             subtitle,
+            year,
             month,
             day,
+            dateStr,
             category,
             categoryLabel: catInfo.label,
             categoryClass: catInfo.cls,
@@ -222,9 +239,10 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
       // 신규 추가
       const newEvent = {
         id: "ev-" + Date.now(),
-        year: 2026,
+        year,
         month,
         day,
+        dateStr,
         title,
         subtitle,
         category,

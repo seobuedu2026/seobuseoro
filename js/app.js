@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 ${eventObj.categoryLabel}
               </span>
               <span style="font-size:13px; font-weight:700; color:#64748b;">
-                2026년 ${eventObj.month}월 ${eventObj.day}일
+                ${eventObj.year || 2026}년 ${eventObj.month}월 ${eventObj.day}일
               </span>
             </div>
             <button class="modal-close-btn" id="btn-modal-close" aria-label="닫기">✕</button>
@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="prog-info-list">
               <div class="prog-info-item">
                 <span class="prog-info-label">일시</span>
-                <span>2026년 ${eventObj.month}월 ${eventObj.day}일 ${eventObj.time}</span>
+                <span>${eventObj.year || 2026}년 ${eventObj.month}월 ${eventObj.day}일 ${eventObj.time}</span>
               </div>
               <div class="prog-info-item">
                 <span class="prog-info-label">장소</span>

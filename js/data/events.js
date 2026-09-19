@@ -679,9 +679,52 @@ export function saveMonthTheme(month, data) {
 export const MONTH_THEMES = getMonthThemes();
 
 // ============================================================================
+// 연도(Year) 상태 및 선택 관리
+// ============================================================================
+export const AVAILABLE_YEARS = [2024, 2025, 2026, 2027, 2028, 2029, 2030];
+const SELECTED_YEAR_KEY = "seobu_selected_year_v1";
+
+export function getSelectedYear() {
+  const saved = localStorage.getItem(SELECTED_YEAR_KEY);
+  if (saved) {
+    const y = parseInt(saved, 10);
+    if (!isNaN(y) && AVAILABLE_YEARS.includes(y)) return y;
+  }
+  return 2026;
+}
+
+export function setSelectedYear(year) {
+  const y = parseInt(year, 10) || 2026;
+  localStorage.setItem(SELECTED_YEAR_KEY, String(y));
+  window.dispatchEvent(new CustomEvent("year-changed", { detail: { year: y } }));
+  window.dispatchEvent(new CustomEvent("events-updated"));
+}
+
+// ============================================================================
 // 대한민국 법정 공휴일 맵 (초기 설정 및 캘린더 자동 반영)
 // ============================================================================
 export const KOREAN_HOLIDAYS_MAP = {
+  2024: {
+    1: { 1: "신정" },
+    2: { 9: "설날연휴", 10: "설날", 11: "설날연휴", 12: "대체공휴일" },
+    3: { 1: "삼일절" },
+    4: { 10: "국회의원선거" },
+    5: { 5: "어린이날", 6: "대체공휴일", 15: "부처님오신날" },
+    6: { 6: "현충일" },
+    8: { 15: "광복절" },
+    9: { 16: "추석연휴", 17: "추석", 18: "추석연휴" },
+    10: { 1: "국군의날", 3: "개천절", 9: "한글날" },
+    12: { 25: "기독탄신일(성탄절)" }
+  },
+  2025: {
+    1: { 1: "신정", 28: "설날연휴", 29: "설날", 30: "설날연휴" },
+    3: { 1: "삼일절", 3: "대체공휴일" },
+    5: { 5: "어린이날", 6: "부처님오신날(대체공휴일)" },
+    6: { 6: "현충일" },
+    8: { 15: "광복절" },
+    10: { 3: "개천절", 5: "추석연휴", 6: "추석", 7: "추석연휴", 8: "대체공휴일", 9: "한글날" },
+    12: { 25: "기독탄신일(성탄절)" }
+  },
   2026: {
     1: { 1: "신정" },
     2: { 16: "설날연휴", 17: "설날", 18: "설날연휴" },
@@ -705,13 +748,39 @@ export const KOREAN_HOLIDAYS_MAP = {
     9: { 14: "추석연휴", 15: "추석", 16: "추석연휴" },
     10: { 3: "개천절", 4: "대체공휴일", 9: "한글날", 11: "대체공휴일" },
     12: { 25: "기독탄신일(성탄절)" }
+  },
+  2028: {
+    1: { 1: "신정", 26: "설날연휴", 27: "설날", 28: "설날연휴" },
+    3: { 1: "삼일절" },
+    5: { 2: "부처님오신날", 5: "어린이날" },
+    6: { 6: "현충일" },
+    8: { 15: "광복절" },
+    10: { 2: "추석연휴", 3: "개천절·추석", 4: "추석연휴", 5: "대체공휴일", 9: "한글날" },
+    12: { 25: "기독탄신일(성탄절)" }
   }
 };
 
+// 고정 공휴일 (월-일 기본 매핑)
+const FIXED_ANNUAL_HOLIDAYS = {
+  "1-1": "신정",
+  "3-1": "삼일절",
+  "5-5": "어린이날",
+  "6-6": "현충일",
+  "7-17": "제헌절",
+  "8-15": "광복절",
+  "10-3": "개천절",
+  "10-9": "한글날",
+  "12-25": "성탄절"
+};
+
 export function getHolidayName(year, month, day) {
-  const yMap = KOREAN_HOLIDAYS_MAP[year] || KOREAN_HOLIDAYS_MAP[2026];
+  const yMap = KOREAN_HOLIDAYS_MAP[year];
   if (yMap && yMap[month] && yMap[month][day]) {
     return yMap[month][day];
+  }
+  const key = `${month}-${day}`;
+  if (FIXED_ANNUAL_HOLIDAYS[key]) {
+    return FIXED_ANNUAL_HOLIDAYS[key];
   }
   return null;
 }
