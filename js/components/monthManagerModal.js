@@ -1,23 +1,25 @@
-import { getActiveMonths, saveActiveMonths, getMonthThemes, saveMonthTheme } from "../data/events.js";
+import { getActiveMonths, saveActiveMonths, getMonthThemes, saveMonthTheme, getSelectedYear, setSelectedYear, AVAILABLE_YEARS } from "../data/events.js";
 
 /**
- * 관리자용 캘린더 월 추가 및 관리 모달
+ * 관리자용 캘린더 연도 및 월 추가/관리 모달
  * @param {Function} onSaved 저장 후 콜백
  */
 export function openMonthManagerModal(onSaved) {
   const mount = document.getElementById("modal-mount");
   if (!mount) return;
 
+  const currentYear = getSelectedYear();
   const currentActive = getActiveMonths();
   const monthThemes = getMonthThemes();
   const allMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+  const yearsList = AVAILABLE_YEARS.filter(y => y >= 2025 && y <= 2030);
 
   mount.innerHTML = `
     <div class="m3-modal-backdrop open" id="month-manager-backdrop">
-      <div class="m3-modal-dialog" style="max-width: 480px;">
+      <div class="m3-modal-dialog" style="max-width: 500px;">
         <div class="modal-header">
           <h3 style="font-size: 19px; font-weight: 900; color: #0e3753; display: flex; align-items: center; gap: 8px;">
-            <span>🗓️ 캘린더 월(Month) 추가 및 관리</span>
+            <span>🗓️ 캘린더 연도 및 월(Month) 관리</span>
             <span style="font-size: 11px; font-weight: 800; background: #0e3753; color: #ffffff; padding: 2px 8px; border-radius: 9999px;">
               관리자
             </span>
@@ -26,11 +28,34 @@ export function openMonthManagerModal(onSaved) {
         </div>
 
         <p style="font-size: 13.5px; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
-          캘린더 상단에 노출할 월을 선택하세요. (체크된 월만 캘린더에 표시됩니다)
+          캘린더 기준 연도와 상단에 노출할 월을 선택하세요.
         </p>
 
         <form id="month-mgr-form">
-          <!-- 1~12월 깔끔한 선택 그리드 (설명 없이 달 숫자만 깔끔하게 표시) -->
+          <!-- 연도 선택 영역 (2025~2028년 이상 계속 활용 가능) -->
+          <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <label for="month-mgr-year-select" style="font-weight: 800; font-size: 14px; color: #0e3753;">
+                기준 연도 선택
+              </label>
+              <select id="month-mgr-year-select" class="m3-select" style="font-size: 14px; font-weight: 800; color: #0e3753; padding: 6px 12px; min-width: 140px; border: 1.5px solid #0e3753; border-radius: 6px; background-color: #ffffff; cursor: pointer;">
+                ${yearsList.map(y => `
+                  <option value="${y}" ${currentYear === y ? 'selected' : ''}>${y}년 (${y}학년도)</option>
+                `).join("")}
+              </select>
+            </div>
+            <div style="font-size: 11.5px; color: #64748b; margin-top: 6px;">
+              * 선택한 연도의 행사 일정과 법정 공휴일이 캘린더에 자동으로 매핑됩니다.
+            </div>
+          </div>
+
+          <!-- 월 선택 영역 안내 -->
+          <div style="margin-bottom: 8px;">
+            <span style="font-weight: 800; font-size: 13.5px; color: #0e3753;">노출할 월(Month) 선택</span>
+            <span style="font-size: 11.5px; color: #64748b; margin-left: 6px;">(체크된 월만 캘린더에 표시됩니다)</span>
+          </div>
+
+          <!-- 1~12월 깔끔한 선택 그리드 -->
           <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px;">
             ${allMonths.map(m => {
               const isChecked = currentActive.includes(m);
@@ -45,7 +70,7 @@ export function openMonthManagerModal(onSaved) {
 
           <div style="display: flex; justify-content: flex-end; gap: 8px;">
             <button type="button" id="btn-cancel-month-mgr" class="btn-admin-action">취소</button>
-            <button type="submit" class="btn-admin-action filled">캘린더 월 적용</button>
+            <button type="submit" class="btn-admin-action filled">캘린더 설정 적용</button>
           </div>
         </form>
       </div>
@@ -80,17 +105,34 @@ export function openMonthManagerModal(onSaved) {
     isMouseDownOnBackdrop = false;
   });
 
-
+  // 체크박스 클릭 시 스타일 실시간 전환
+  form.querySelectorAll("input[name='active_month']").forEach(cb => {
+    cb.addEventListener("change", () => {
+      const label = cb.closest(".month-chip-select-item");
+      if (label) {
+        if (cb.checked) {
+          label.style.background = "#f0fdf4";
+          label.style.borderColor = "#16a34a";
+        } else {
+          label.style.background = "#f8fafc";
+          label.style.borderColor = "#e2e8f0";
+        }
+      }
+    });
+  });
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
+    const yearSelect = form.querySelector("#month-mgr-year-select");
+    const selectedYear = parseInt(yearSelect.value, 10) || 2026;
     const checked = Array.from(form.querySelectorAll("input[name='active_month']:checked")).map(cb => parseInt(cb.value, 10));
     if (checked.length === 0) {
       alert("⚠️ 최소 1개 이상의 월을 선택해야 합니다.");
       return;
     }
+    setSelectedYear(selectedYear);
     saveActiveMonths(checked);
-    alert(`✅ 캘린더 월 설정이 저장되었습니다. (${checked.map(m => m + '월').join(', ')})`);
+    alert(`✅ [${selectedYear}년] 캘린더 설정이 적용되었습니다. (${checked.map(m => m + '월').join(', ')})`);
     closeModal();
     if (onSaved) onSaved();
   });
