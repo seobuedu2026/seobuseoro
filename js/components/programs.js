@@ -1,9 +1,8 @@
-import { getEvents, isEventPastOrToday, getActiveMonths, getCategories, AVAILABLE_YEARS, getSelectedYear } from "../data/events.js";
+import { getEvents, isEventPastOrToday, getActiveMonths, getCategories } from "../data/events.js";
 import { GoogleAuthService } from "../auth/googleAuth.js";
 import { openEventFormModal } from "./eventFormModal.js";
 import { openCategoryManagerModal } from "./categoryManagerModal.js";
 
-let selectedYear = "all"; // 'all' | '2024' | '2025' | '2026' | '2027' ...
 let selectedCategory = "all";
 let selectedMonth = "all";
 
@@ -11,11 +10,6 @@ export function renderPrograms(container, onSelectEventModal) {
   const user = GoogleAuthService.getCurrentUser();
   const isAdmin = !!(user && user.isAdmin);
   const allEvents = getEvents();
-
-  const years = [
-    { key: "all", label: "전체 연도" },
-    ...AVAILABLE_YEARS.map(y => ({ key: String(y), label: `${y}년` }))
-  ];
 
   const categories = [
     { key: "all", label: "전체" },
@@ -29,11 +23,9 @@ export function renderPrograms(container, onSelectEventModal) {
   ];
 
   const filteredEvents = allEvents.filter(ev => {
-    const evYear = String(ev.year || 2026);
-    const matchYear = selectedYear === "all" || evYear === selectedYear;
     const matchCat = selectedCategory === "all" || ev.category === selectedCategory;
     const matchMonth = selectedMonth === "all" || String(ev.month) === selectedMonth;
-    return matchYear && matchCat && matchMonth;
+    return matchCat && matchMonth;
   }).sort((a, b) => {
     const yearA = parseInt(a.year, 10) || 2026;
     const yearB = parseInt(b.year, 10) || 2026;
@@ -65,18 +57,9 @@ export function renderPrograms(container, onSelectEventModal) {
         </div>
       ` : ''}
 
-      <!-- 연도, 월 & 카테고리 필터 칩 바 -->
+      <!-- 월 & 카테고리 필터 칩 바 -->
       <div style="display: flex; justify-content: center; margin-bottom: 24px; width: 100%;">
         <div style="display: inline-flex; flex-direction: column; gap: 10px; align-items: flex-start; max-width: 100%;">
-          <!-- 연도 필터 -->
-          <div class="filter-chips-row" id="prog-year-filter" style="margin-bottom: 0; display: flex; align-items: center; justify-content: flex-start; gap: 8px; flex-wrap: wrap;">
-            ${years.map(y => `
-              <button class="m3-chip ${selectedYear === y.key ? 'active' : ''}" data-year="${y.key}" style="font-weight: 800;">
-                ${y.label}
-              </button>
-            `).join("")}
-          </div>
-
           <!-- 월 필터 -->
           <div class="filter-chips-row" id="prog-month-filter" style="margin-bottom: 0; display: flex; align-items: center; justify-content: flex-start; gap: 8px; flex-wrap: wrap;">
             ${months.map(m => `
@@ -211,14 +194,6 @@ export function renderPrograms(container, onSelectEventModal) {
       if (targetEv) {
         openEventFormModal(targetEv, null, () => renderPrograms(container, onSelectEventModal));
       }
-    });
-  });
-
-  // 연도 필터 이벤트
-  container.querySelectorAll("#prog-year-filter .m3-chip").forEach(chip => {
-    chip.addEventListener("click", () => {
-      selectedYear = chip.dataset.year;
-      renderPrograms(container, onSelectEventModal);
     });
   });
 
