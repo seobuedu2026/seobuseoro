@@ -74,13 +74,13 @@ export function openAdminAccountModal(onSaved) {
           <!-- 탭 메뉴 버튼 -->
           <div style="display: flex; gap: 8px; border-bottom: 2px solid #e2e8f0; margin-bottom: 18px; padding-bottom: 2px;">
             <button type="button" class="tab-btn ${activeTab === 'list' ? 'active' : ''}" id="tab-btn-list" style="padding: 8px 14px; font-size: 13.5px; font-weight: 800; border: none; background: none; cursor: pointer; color: ${activeTab === 'list' ? '#0e3753' : '#64748b'}; border-bottom: 2px solid ${activeTab === 'list' ? '#0e3753' : 'transparent'}; margin-bottom: -4px;">
-              📋 관리자 ID & 비밀번호 등록 (${adminEmails.length})
+              관리자 ID & 비밀번호 등록 (${adminEmails.length})
             </button>
             <button type="button" class="tab-btn ${activeTab === 'password' ? 'active' : ''}" id="tab-btn-password" style="padding: 8px 14px; font-size: 13.5px; font-weight: 800; border: none; background: none; cursor: pointer; color: ${activeTab === 'password' ? '#0e3753' : '#64748b'}; border-bottom: 2px solid ${activeTab === 'password' ? '#0e3753' : 'transparent'}; margin-bottom: -4px;">
-              🔒 비밀번호(PW) 변경
+              비밀번호(PW) 변경
             </button>
             <button type="button" class="tab-btn ${activeTab === 'session' ? 'active' : ''}" id="tab-btn-session" style="padding: 8px 14px; font-size: 13.5px; font-weight: 800; border: none; background: none; cursor: pointer; color: ${activeTab === 'session' ? '#0e3753' : '#64748b'}; border-bottom: 2px solid ${activeTab === 'session' ? '#0e3753' : 'transparent'}; margin-bottom: -4px;">
-              ℹ️ 권한 및 세션 정보
+              권한 및 세션 정보
             </button>
           </div>
 
@@ -120,8 +120,8 @@ export function openAdminAccountModal(onSaved) {
                 <span style="font-size: 11.5px; color: #64748b;">
                   * 관리자 ID 등록 시 사용할 전용 비밀번호를 직접 지정합니다.
                 </span>
-                <button type="submit" class="btn-m3-filled" style="background: #008080; border-color: #008080; white-space: nowrap; padding: 8px 18px; font-size: 13.5px; font-weight: 800;">
-                  ➕ 관리자 ID 및 PW 등록
+                <button type="submit" class="btn-admin-action filled">
+                  관리자 ID 및 PW 등록
                 </button>
               </div>
             </form>
@@ -131,14 +131,14 @@ export function openAdminAccountModal(onSaved) {
               <div id="box-inline-pw-edit" style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px; padding: 14px; margin-bottom: 16px; animation: fadeIn 0.2s ease;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                   <span style="font-weight: 900; font-size: 13px; color: #92400e; display: flex; align-items: center; gap: 6px;">
-                    🔑 [${selectedEmailForPwEdit}] 비밀번호(PW) 변경
+                    [${selectedEmailForPwEdit}] 비밀번호(PW) 변경
                   </span>
                   <button type="button" id="btn-cancel-inline-pw" style="background: none; border: none; font-size: 14px; color: #92400e; cursor: pointer;">✕</button>
                 </div>
                 <form id="form-inline-pw-save" style="display: flex; gap: 8px; flex-wrap: wrap;">
                   <input type="password" id="input-inline-pw" class="m3-input" placeholder="새 비밀번호 입력 (4자 이상)" required minlength="4" style="flex: 1; min-width: 160px; padding: 8px 12px; font-size: 13.5px; background: #ffffff;" />
                   <input type="password" id="input-inline-pw-confirm" class="m3-input" placeholder="새 비밀번호 확인" required minlength="4" style="flex: 1; min-width: 160px; padding: 8px 12px; font-size: 13.5px; background: #ffffff;" />
-                  <button type="submit" class="btn-m3-filled" style="background: #d97706; border-color: #d97706; padding: 8px 16px; font-size: 13px; font-weight: 800;">
+                  <button type="submit" class="btn-admin-action filled">
                     저장
                   </button>
                 </form>
@@ -195,17 +195,17 @@ export function openAdminAccountModal(onSaved) {
                     </div>
 
                     <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
-                      <button type="button" class="btn-quick-edit-pw btn-m3-outlined" data-email="${email}" style="padding: 4px 8px; font-size: 11.5px; border-radius: 6px; color: #0e3753; border-color: #cbd5e1; font-weight: 700;" title="이 ID의 비밀번호 변경">
-                        🔑 PW 변경
+                      <button type="button" class="btn-quick-edit-pw btn-admin-action" data-email="${email}" title="이 ID의 비밀번호 변경">
+                        PW 변경
                       </button>
                       ${!isPrimary ? `
-                        <button type="button" class="btn-set-primary btn-m3-outlined" data-email="${email}" style="padding: 4px 8px; font-size: 11.5px; border-radius: 6px; color: #0284c7; border-color: #bae6fd;">
+                        <button type="button" class="btn-set-primary btn-admin-action" data-email="${email}">
                           대표 지정
                         </button>
                       ` : ''}
                       ${adminEmails.length > 1 ? `
-                        <button type="button" class="btn-delete-admin btn-m3-outlined" data-email="${email}" style="padding: 4px 8px; font-size: 11.5px; border-radius: 6px; color: #ef4444; border-color: #fecaca;" title="관리자 ID 삭제">
-                          🗑️ 삭제
+                        <button type="button" class="btn-delete-admin btn-admin-action danger" data-email="${email}" title="관리자 ID 삭제">
+                          삭제
                         </button>
                       ` : `
                         <span style="font-size: 11px; color: #94a3b8; padding: 4px 6px;">(기본 ID)</span>
@@ -254,8 +254,8 @@ export function openAdminAccountModal(onSaved) {
               </div>
 
               <div style="display: flex; justify-content: flex-end;">
-                <button type="submit" class="btn-m3-filled" style="background: #0e3753; border-color: #0e3753; padding: 8px 18px; font-size: 13px; font-weight: 800;">
-                  💾 비밀번호 변경 저장
+                <button type="submit" class="btn-admin-action filled">
+                  비밀번호 변경 저장
                 </button>
               </div>
             </form>
@@ -281,7 +281,7 @@ export function openAdminAccountModal(onSaved) {
                 <div style="font-size: 12.5px; font-weight: 800; color: #0369a1;">현재 세션: ${currentUser.email}</div>
                 <div style="font-size: 11.5px; color: #64748b; margin-top: 2px;">안전한 관리를 위해 작업 완료 후 로그아웃을 권장합니다.</div>
               </div>
-              <button type="button" id="btn-session-logout" class="btn-m3-outlined" style="color: #ef4444; border-color: #fecaca; padding: 6px 12px; font-size: 12px; font-weight: 800;">
+              <button type="button" id="btn-session-logout" class="btn-admin-action danger">
                 관리자 로그아웃
               </button>
             </div>
@@ -289,7 +289,7 @@ export function openAdminAccountModal(onSaved) {
 
           <!-- 모달 하단 닫기 버튼 -->
           <div style="display: flex; justify-content: flex-end; margin-top: 18px; border-top: 1px solid #e2e8f0; padding-top: 14px;">
-            <button type="button" id="btn-close-bottom" class="btn-m3-filled" style="padding: 8px 18px; font-size: 13.5px;">
+            <button type="button" id="btn-close-bottom" class="btn-admin-action filled">
               확인 (닫기)
             </button>
           </div>

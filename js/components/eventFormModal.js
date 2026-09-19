@@ -113,15 +113,15 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
           <!-- 액션 버튼 바 -->
           <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 12px; border-top: 1px solid #e2e8f0;">
             ${isEdit ? `
-              <button type="button" id="btn-delete-event" class="btn-m3-outlined" style="color: #dc2626; border-color: #fca5a5; background: #fff1f2;">
-                🗑️ 행사 삭제
+              <button type="button" id="btn-delete-event" class="btn-admin-action danger">
+                행사 삭제
               </button>
             ` : '<div></div>'}
 
             <div style="display: flex; gap: 8px;">
-              <button type="button" id="btn-cancel-event-form" class="btn-m3-outlined">취소</button>
-              <button type="submit" class="btn-m3-filled">
-                ${isEdit ? '💾 수정사항 저장' : '➕ 새 행사 등록'}
+              <button type="button" id="btn-cancel-event-form" class="btn-admin-action">취소</button>
+              <button type="submit" class="btn-admin-action filled">
+                ${isEdit ? '수정사항 저장' : '새 행사 등록'}
               </button>
             </div>
           </div>

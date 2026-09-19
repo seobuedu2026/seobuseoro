@@ -82,12 +82,12 @@ export function openHeaderImageModal(onSaved) {
 
           <!-- 하단 버튼 바 -->
           <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <button type="button" id="btn-reset-header-img" class="btn-m3-outlined" style="font-size: 12.5px; padding: 8px 14px;">
-              🔄 기본 배너로 복원
+            <button type="button" id="btn-reset-header-img" class="btn-admin-action">
+              기본 배너로 복원
             </button>
             <div style="display: flex; gap: 8px;">
-              <button type="button" id="btn-cancel-header-modal" class="btn-m3-outlined">취소</button>
-              <button type="submit" class="btn-m3-filled">💾 새 이미지 적용</button>
+              <button type="button" id="btn-cancel-header-modal" class="btn-admin-action">취소</button>
+              <button type="submit" class="btn-admin-action filled">새 이미지 적용</button>
             </div>
           </div>
         </form>

@@ -45,11 +45,11 @@ export function openAdminExcelModal() {
 
         <!-- 템플릿 다운로드 및 기본값 복원 바 -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin: 12px 0 18px 0; flex-wrap: wrap; gap: 8px;">
-          <button id="btn-download-sample-excel" class="btn-m3-outlined" style="padding: 6px 14px; font-size: 12px;">
-            📥 표준 엑셀 양식 템플릿 다운로드
+          <button id="btn-download-sample-excel" class="btn-admin-action">
+            표준 엑셀 양식 다운로드
           </button>
-          <button id="btn-reset-default-events" class="btn-m3-outlined" style="padding: 6px 14px; font-size: 12px; color: #dc2626; border-color: #fca5a5;">
-            🔄 기본 캘린더 데이터로 초기화
+          <button id="btn-reset-default-events" class="btn-admin-action danger">
+            기본 데이터로 초기화
           </button>
         </div>
 
@@ -80,11 +80,11 @@ export function openAdminExcelModal() {
 
           <!-- 반영 버튼 그룹 -->
           <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-            <button id="btn-apply-merge" class="btn-m3-outlined" style="padding: 10px 20px;">
+            <button id="btn-apply-merge" class="btn-admin-action">
               기존 일정에 추가하기
             </button>
-            <button id="btn-apply-replace" class="btn-m3-filled" style="padding: 10px 22px;">
-              ✨ 캘린더에 전체 반영하기 (교체)
+            <button id="btn-apply-replace" class="btn-admin-action filled">
+              캘린더에 전체 반영하기
             </button>
           </div>
         </div>

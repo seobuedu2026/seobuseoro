@@ -56,13 +56,11 @@ export function renderCalendar(container, onSelectEventModal) {
 
         ${isAdmin ? `
           <div class="calendar-utility-row">
-            <button id="btn-add-calendar-month" class="btn-m3-pill-action" title="캘린더에 표시할 월(Month) 추가 및 관리">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><line x1="12" y1="14" x2="12" y2="18"></line><line x1="10" y1="16" x2="14" y2="16"></line></svg>
-              <span>달력 추가</span>
+            <button id="btn-add-calendar-month" class="btn-admin-action" title="캘린더에 표시할 월(Month) 추가 및 관리">
+              달력 추가
             </button>
-            <button id="btn-excel-import" class="btn-m3-pill-action" title="행사 엑셀 파일(.xlsx) 업로드 등록">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-              <span>엑셀 파일 등록</span>
+            <button id="btn-excel-import" class="btn-admin-action" title="행사 엑셀 파일(.xlsx) 업로드 등록">
+              엑셀 파일 등록
             </button>
           </div>
         ` : ''}
@@ -78,9 +76,8 @@ export function renderCalendar(container, onSelectEventModal) {
             <span class="legend-badge ${cat.cls}">${cat.label}</span>
           `).join("")}
           ${isAdmin ? `
-            <button id="btn-edit-legend-cats" class="btn-m3-pill-action" style="padding: 4px 12px; font-size: 12.5px; border-color: #cbd5e1; background: #f8fafc; color: #0e3753;" title="프로그램 유형 추가 및 관리">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-              <span>🏷️ 유형 추가·관리</span>
+            <button id="btn-edit-legend-cats" class="btn-admin-action" title="프로그램 유형 추가 및 관리">
+              유형 추가·관리
             </button>
           ` : ''}
         </div>
@@ -393,8 +390,8 @@ function generateMonthCardHTML(month, isFocusView = false, isAdmin = false, curr
         <div style="display: flex; align-items: center; gap: 8px;">
           <span style="font-size:13px; font-weight:800; color:#475569;">${monthEvents.length}개 프로그램</span>
           ${isAdmin ? `
-            <button class="btn-edit-month-theme btn-m3-outlined" data-month="${month}" title="이 월의 소제목 및 강조 안내 문구 수정" style="padding: 2px 8px; font-size: 11px; border-radius: 6px; font-weight: 800; border-color: #0e3753; color: #0e3753; background: #ffffff;">
-              ✏️ 문구 수정
+            <button class="btn-edit-month-theme btn-admin-action" data-month="${month}" title="이 월의 소제목 및 강조 안내 문구 수정">
+              문구 수정
             </button>
           ` : ''}
         </div>

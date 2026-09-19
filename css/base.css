@@ -164,19 +164,75 @@ button {
   gap: 8px;
 }
 
-/* 범용 액션 캡슐 버튼 (새 프로그램 추가, 새 수업나눔방 추가, 엑셀 등록, 관리자 설정 등 일관된 통일 디자인) */
+/* 관리자 모드 전용 네모(각진 상자) 형태의 통일된 액션 버튼 */
+.btn-admin-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 4px; /* 각진 네모 상자 형태 */
+  border: 1.5px solid #0e3753;
+  background-color: #ffffff;
+  color: #0e3753;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(14, 55, 83, 0.08);
+  white-space: nowrap;
+  text-decoration: none;
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+.btn-admin-action:hover {
+  background-color: #0e3753;
+  color: #ffffff;
+  border-color: #0e3753;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(14, 55, 83, 0.18);
+}
+
+.btn-admin-action:active {
+  transform: translateY(0);
+}
+
+.btn-admin-action.danger {
+  border-color: #dc2626;
+  color: #dc2626;
+  background-color: #ffffff;
+}
+
+.btn-admin-action.danger:hover {
+  background-color: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
+}
+
+.btn-admin-action.filled {
+  background-color: #0e3753;
+  color: #ffffff;
+  border-color: #0e3753;
+}
+
+.btn-admin-action.filled:hover {
+  background-color: #1e40af;
+  border-color: #1e40af;
+}
+
+/* 범용 액션 캡슐 버튼 */
 .btn-m3-pill-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   padding: 6px 16px;
-  border-radius: var(--shape-pill);
+  border-radius: 4px; /* 관리자 모드 버튼 네모 형태로 통일 */
   border: 1.5px solid #0e3753;
   background-color: #ffffff;
   color: #0e3753;
-  font-size: 13.5px;
-  font-weight: 800;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
   box-shadow: 0 1px 3px rgba(14, 55, 83, 0.08);

@@ -60,14 +60,14 @@ export function openRoomEditModal(roomObj, onSaved) {
           <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
             <div>
               ${isEdit ? `
-                <button type="button" id="btn-delete-room" class="btn-m3-outlined" style="color: #dc2626; border-color: #fca5a5; background: #fee2e2; padding: 8px 14px; font-size: 13px;">
-                  🗑️ 삭제
+                <button type="button" id="btn-delete-room" class="btn-admin-action danger">
+                  삭제
                 </button>
               ` : ''}
             </div>
             <div style="display: flex; gap: 8px;">
-              <button type="button" id="btn-cancel-room" class="btn-m3-outlined">취소</button>
-              <button type="submit" class="btn-m3-filled">💾 저장하기</button>
+              <button type="button" id="btn-cancel-room" class="btn-admin-action">취소</button>
+              <button type="submit" class="btn-admin-action filled">저장하기</button>
             </div>
           </div>
         </form>

@@ -44,12 +44,12 @@ export function openMonthManagerModal(onSaved) {
           </div>
 
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <button type="button" id="btn-reset-months" class="btn-m3-outlined" style="font-size: 12px; padding: 6px 12px;">
+            <button type="button" id="btn-reset-months" class="btn-admin-action">
               기본(9~11월) 복원
             </button>
             <div style="display: flex; gap: 8px;">
-              <button type="button" id="btn-cancel-month-mgr" class="btn-m3-outlined">취소</button>
-              <button type="submit" class="btn-m3-filled">💾 캘린더 월 적용</button>
+              <button type="button" id="btn-cancel-month-mgr" class="btn-admin-action">취소</button>
+              <button type="submit" class="btn-admin-action filled">캘린더 월 적용</button>
             </div>
           </div>
         </form>
@@ -163,8 +163,8 @@ export function openMonthThemeEditModal(month, onSaved) {
           </div>
 
           <div style="display: flex; justify-content: flex-end; gap: 8px;">
-            <button type="button" id="btn-cancel-theme-edit" class="btn-m3-outlined">취소</button>
-            <button type="submit" class="btn-m3-filled">💾 저장하기</button>
+            <button type="button" id="btn-cancel-theme-edit" class="btn-admin-action">취소</button>
+            <button type="submit" class="btn-admin-action filled">저장하기</button>
           </div>
         </form>
       </div>

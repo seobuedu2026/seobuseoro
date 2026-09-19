@@ -11,8 +11,8 @@ export function renderHeader(container) {
       <div class="hero-header-inner" style="position: relative;">
         ${isAdmin ? `
           <div class="header-admin-action-bar" style="position: absolute; top: 10px; right: 10px; z-index: 10;">
-            <button id="btn-change-header-img" class="btn-m3-pill-action" style="font-size: 12px; padding: 6px 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.12);" title="상단 타이틀 배너 이미지 변경">
-              <span>🖼️ 타이틀 이미지 변경</span>
+            <button id="btn-change-header-img" class="btn-admin-action" style="box-shadow: 0 2px 10px rgba(0,0,0,0.12);" title="상단 타이틀 배너 이미지 변경">
+              타이틀 이미지 변경
             </button>
           </div>
         ` : ''}

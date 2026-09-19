@@ -92,8 +92,8 @@ document.addEventListener("DOMContentLoaded", () => {
           <!-- 하단 액션 버튼 바 -->
           <div style="display:flex; gap:10px; justify-content:flex-end; align-items:center; flex-wrap:wrap; border-top:1px solid #f1f5f9; padding-top:14px;">
             ${isAdmin ? `
-              <button id="btn-modal-edit" class="btn-m3-outlined" style="border-color:#0e3753; color:#0e3753; font-weight:800;">
-                ✏️ 행사 수정
+              <button id="btn-modal-edit" class="btn-admin-action">
+                행사 수정
               </button>
             ` : ''}
             <button id="btn-modal-review" class="btn-m3-outlined">후기 남기기</button>

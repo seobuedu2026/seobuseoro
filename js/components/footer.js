@@ -23,15 +23,15 @@ export function renderFooter(container) {
           </div>
           <div class="footer-admin-actions">
             ${isAdmin ? `
-              <button id="footer-btn-admin-account" class="btn-m3-pill-action" title="관리자 ID 현황 조회, 추가/삭제 및 비밀번호(PW) 설정">
-                👥 관리자 계정 설정
+              <button id="footer-btn-admin-account" class="btn-admin-action" title="관리자 ID 현황 조회, 추가/삭제 및 비밀번호(PW) 설정">
+                관리자 계정 관리
               </button>
-              <button id="footer-btn-logout" class="btn-footer-logout" title="관리자 모드 로그아웃">
+              <button id="footer-btn-logout" class="btn-admin-action danger" title="관리자 모드 로그아웃">
                 로그아웃
               </button>
             ` : `
-              <button id="footer-btn-admin-verify" class="btn-m3-pill-action" title="관리자 로그인">
-                🔐 관리자 로그인
+              <button id="footer-btn-admin-verify" class="btn-admin-action" title="관리자 로그인">
+                관리자 로그인
               </button>
             `}
           </div>

@@ -36,8 +36,8 @@ export function openCategoryManagerModal(onSaved) {
               <span style="font-size: 13.5px; font-weight: 800; color: #0e3753;">
                 등록된 유형 목록 (<span id="cat-count">${categories.length}</span>개)
               </span>
-              <button type="button" id="btn-add-cat-row" class="btn-m3-filled" style="background: #008080; color: #ffffff; font-size: 13px; font-weight: 800; padding: 6px 14px; border-radius: 9999px; display: inline-flex; align-items: center; gap: 5px;">
-                <span>➕ 새 프로그램 유형 추가</span>
+              <button type="button" id="btn-add-cat-row" class="btn-admin-action filled">
+                새 프로그램 유형 추가
               </button>
             </div>
 
@@ -48,16 +48,16 @@ export function openCategoryManagerModal(onSaved) {
           </div>
 
           <div class="modal-footer" style="padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; background: #f8fafc; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;">
-            <button type="button" id="btn-reset-categories" class="btn-m3-text" style="color: #64748b; font-size: 13px; font-weight: 700;">
-              🔄 기본값으로 초기화
+            <button type="button" id="btn-reset-categories" class="btn-admin-action">
+              기본값으로 초기화
             </button>
             
             <div style="display: flex; gap: 8px;">
-              <button type="button" id="btn-cancel-cat-mgr" class="btn-m3-outlined" style="padding: 7px 16px; font-size: 13px;">
+              <button type="button" id="btn-cancel-cat-mgr" class="btn-admin-action">
                 취소
               </button>
-              <button type="button" id="btn-save-cat-mgr" class="btn-m3-filled" style="padding: 7px 20px; font-size: 13px; font-weight: 800; background: #0e3753;">
-                💾 저장하기
+              <button type="button" id="btn-save-cat-mgr" class="btn-admin-action filled">
+                저장하기
               </button>
             </div>
           </div>
@@ -104,8 +104,8 @@ export function openCategoryManagerModal(onSaved) {
 
         <!-- 삭제 버튼 -->
         <div style="display: flex; align-items: center;">
-          <button type="button" class="btn-delete-cat-item btn-m3-outlined" data-cat-key="${cat.key}" title="이 유형 삭제" style="color: #dc2626; border-color: #fecaca; background: #fff5f5; padding: 6px 9px; font-size: 12px; border-radius: 8px; cursor: pointer;">
-            🗑️
+          <button type="button" class="btn-delete-cat-item btn-admin-action danger" data-cat-key="${cat.key}" title="이 유형 삭제">
+            삭제
           </button>
         </div>
       </div>

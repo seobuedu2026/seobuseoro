@@ -180,16 +180,15 @@ export function renderReviews(container, preselectedEventId = null) {
             <div class="review-admin-filter-bar">
               <div class="review-admin-filter-title">
                 <div style="display: flex; align-items: center; gap: 6px;">
-                  <span style="font-size: 16px;">🛡️</span>
                   <strong style="color: #0e3753; font-size: 14px;">후기 승인 관리 모드</strong>
                 </div>
                 ${pendingCount > 0 ? `
                   <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                     <span class="review-pending-notice-pill">
-                      🔔 승인 대기 <strong>${pendingCount}</strong>건
+                      승인 대기 <strong>${pendingCount}</strong>건
                     </span>
                     <button id="btn-review-approve-all" class="btn-review-batch-approve" title="승인 대기 중인 모든 후기를 한 번에 승인합니다">
-                      ⚡ 일괄 승인 (${pendingCount}건)
+                      일괄 승인 (${pendingCount}건)
                     </button>
                   </div>
                 ` : `
@@ -201,10 +200,10 @@ export function renderReviews(container, preselectedEventId = null) {
                   전체 (${allReviews.length})
                 </button>
                 <button class="review-admin-tab-btn ${currentAdminFilter === 'approved' ? 'active' : ''}" data-filter="approved">
-                  ✅ 승인 완료 (${approvedCount})
+                  승인 완료 (${approvedCount})
                 </button>
                 <button class="review-admin-tab-btn ${currentAdminFilter === 'pending' ? 'active' : ''}" data-filter="pending">
-                  ⏳ 승인 대기 (${pendingCount})
+                  승인 대기 (${pendingCount})
                 </button>
               </div>
             </div>
@@ -251,19 +250,19 @@ export function renderReviews(container, preselectedEventId = null) {
               ${isAdmin ? `
                 <div class="review-admin-card-actions">
                   <span class="badge-review-status ${rev.status === 'pending' ? 'pending' : 'approved'}">
-                    ${rev.status === 'pending' ? '⏳ 승인 대기 (미노출)' : '✅ 승인 완료'}
+                    ${rev.status === 'pending' ? '승인 대기' : '승인 완료'}
                   </span>
                   ${rev.status === 'pending' ? `
                     <button class="btn-review-mod-approve" data-review-id="${rev.id}">
-                      ✓ 승인하기 (홈페이지 노출)
+                      승인
                     </button>
                   ` : `
                     <button class="btn-review-mod-unapprove" data-review-id="${rev.id}">
-                      ↩️ 승인 취소 (대기로 변경)
+                      승인 취소
                     </button>
                   `}
                   <button class="btn-review-mod-delete" data-review-id="${rev.id}">
-                    🗑️ 삭제
+                    삭제
                   </button>
                 </div>
               ` : ''}

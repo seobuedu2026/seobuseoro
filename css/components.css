@@ -870,19 +870,20 @@
 
 .review-admin-tab-btn {
   background: #ffffff;
-  border: 1px solid #cbd5e1;
-  color: #475569;
-  font-size: 14.5px;
+  border: 1.5px solid #0e3753;
+  color: #0e3753;
+  font-size: 13px;
   font-weight: 700;
-  padding: 7px 16px;
-  border-radius: 9999px;
+  padding: 6px 14px;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .review-admin-tab-btn:hover {
-  background: #f1f5f9;
-  border-color: #94a3b8;
+  background: #0e3753;
+  color: #ffffff;
+  border-color: #0e3753;
 }
 
 .review-admin-tab-btn.active {
@@ -898,8 +899,8 @@
   gap: 5px;
   font-size: 13px;
   font-weight: 800;
-  padding: 7px 13px;
-  border-radius: 8px;
+  padding: 6px 12px;
+  border-radius: 4px;
   margin-left: 0;
   box-sizing: border-box;
 }
@@ -938,20 +939,20 @@
   border: none;
   font-size: 13px;
   font-weight: 800;
-  padding: 5px 14px;
-  border-radius: 9999px;
+  padding: 6px 14px;
+  border-radius: 4px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  box-shadow: 0 2px 6px rgba(0, 128, 128, 0.25);
+  box-shadow: 0 1px 3px rgba(0, 128, 128, 0.25);
   transition: all 0.15s ease;
 }
 
 .btn-review-batch-approve:hover {
   background: #0d9488;
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(0, 128, 128, 0.35);
+  box-shadow: 0 3px 6px rgba(0, 128, 128, 0.35);
 }
 
 .btn-review-batch-approve:active {
@@ -964,8 +965,8 @@
   border: none;
   font-size: 13px;
   font-weight: 800;
-  padding: 7px 15px;
-  border-radius: 8px;
+  padding: 6px 14px;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.15s ease;
   display: inline-flex;
@@ -984,8 +985,8 @@
   border: 1px solid #cbd5e1;
   font-size: 13px;
   font-weight: 700;
-  padding: 7px 14px;
-  border-radius: 8px;
+  padding: 6px 14px;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -996,21 +997,21 @@
 }
 
 .btn-review-mod-delete {
-  background: #fee2e2;
+  background: #ffffff;
   color: #dc2626;
-  border: 1px solid #fca5a5;
+  border: 1.5px solid #dc2626;
   font-size: 13px;
   font-weight: 700;
-  padding: 7px 14px;
-  border-radius: 8px;
+  padding: 6px 14px;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.15s ease;
   margin-left: auto;
 }
 
 .btn-review-mod-delete:hover {
-  background: #fecaca;
-  color: #b91c1c;
+  background: #dc2626;
+  color: #ffffff;
 }
 
 /* ==========================================================================
