@@ -103,25 +103,25 @@ export function renderReviews(container, preselectedEventId = null) {
       <div class="review-layout">
         <!-- 후기 작성 영역 (@senedu.kr 전용 로그인) -->
         <div class="review-form-card">
-          <div style="position: relative; margin-bottom: 18px; text-align: center;">
-            <h3 style="font-size: 19px; font-weight: 900; color: #0e3753; margin: 0; text-align: center;">
+          <div style="position: relative; margin-bottom: 14px; text-align: center;">
+            <h3 style="font-size: 17.5px; font-weight: 900; color: #0e3753; margin: 0; text-align: center;">
               참여 후기 등록
             </h3>
             ${user ? `<button id="btn-review-logout" class="footer-link-btn" style="position: absolute; right: 0; top: 2px; font-size: 12px; font-weight: 600; color: #64748b;">[로그아웃]</button>` : ''}
           </div>
 
           ${!user ? `
-            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px 18px; text-align: center;">
-              <p style="font-size: 15px; font-weight: 800; color: #0e3753; margin-bottom: 6px; line-height: 1.5;">
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 12px; text-align: center;">
+              <p style="font-size: 14px; font-weight: 800; color: #0e3753; margin-bottom: 6px; line-height: 1.45;">
                 후기 작성은 로그인 후 가능합니다.
               </p>
-              <p style="font-size: 13.5px; color: #0284c7; font-weight: 700; margin-bottom: 16px;">
+              <p style="font-size: 12.5px; color: #0284c7; font-weight: 700; margin-bottom: 14px;">
                 (센스쿨 구글 계정 @senedu.kr)
               </p>
 
               <!-- 센스쿨 구글 계정 로그인 버튼 (컴팩트 사이즈) -->
               <div style="display: flex; justify-content: center;">
-                <button id="btn-custom-google-login" class="btn-m3-filled" style="padding: 7px 24px; font-size: 13.5px; font-weight: 800; border-radius: var(--shape-pill); justify-content: center; box-shadow: 0 2px 8px rgba(14, 55, 83, 0.15);">
+                <button id="btn-custom-google-login" class="btn-m3-filled" style="padding: 6px 22px; font-size: 13px; font-weight: 800; border-radius: var(--shape-pill); justify-content: center; box-shadow: 0 2px 8px rgba(14, 55, 83, 0.15);">
                   로그인
                 </button>
               </div>
