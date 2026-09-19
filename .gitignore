@@ -1,0 +1,13 @@
+# Firebase & Hosting cache
+.firebase/
+.netlify/
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.bak
