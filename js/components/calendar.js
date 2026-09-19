@@ -24,9 +24,10 @@ export function renderCalendar(container, onSelectEventModal) {
 
   container.innerHTML = `
     <div class="calendar-view-wrapper ${isSingleMonth ? 'is-single-month-view' : 'is-poster-view'}">
-      <!-- 상단 연도/월 및 뷰 모드 전환 바 (연도 선택기 + 월 칩 목록) -->
-      <div class="calendar-view-mode-bar" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
-        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+      <!-- 상단 연도/월 및 뷰 모드 전환 바 (중앙: 연도+월 칩 / 우측: 달력추가+엑셀등록) -->
+      <div class="calendar-view-mode-bar">
+        <!-- 화면 정가운데: 연도 선택기 + 월 칩 목록 -->
+        <div class="calendar-center-controls">
           <!-- 연도 선택기 -->
           <div class="year-selector-pill" style="display: inline-flex; align-items: center; gap: 6px; background: #0e3753; color: #ffffff; padding: 4px 12px; border-radius: 9999px; box-shadow: 0 2px 6px rgba(14, 55, 83, 0.2);">
             <span style="font-size: 13px;">📅</span>
@@ -38,7 +39,7 @@ export function renderCalendar(container, onSelectEventModal) {
           </div>
 
           <!-- 월 칩 목록 -->
-          <div class="filter-chips-row" id="month-chips-row" style="margin-bottom: 0;">
+          <div class="filter-chips-row" id="month-chips-row">
             ${activeMonths.map(m => {
               const theme = monthThemes[m] || { name: `${m}월`, subtitle: '', icon: '📅' };
               return `

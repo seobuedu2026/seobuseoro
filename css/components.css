@@ -109,10 +109,17 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 20px;
+  position: relative;
   width: 100%;
+  margin-bottom: 20px;
+}
+
+.calendar-center-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 #month-chips-row {
@@ -129,6 +136,23 @@
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+@media (max-width: 1024px) {
+  .calendar-view-mode-bar {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .calendar-utility-row {
+    position: static;
+    transform: none;
+    justify-content: center;
+    margin-top: 4px;
+  }
 }
 
 .btn-excel-import-pill,
