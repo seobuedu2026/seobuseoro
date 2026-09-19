@@ -207,13 +207,7 @@ export function renderReviews(container, preselectedEventId = null) {
                 </button>
               </div>
             </div>
-          ` : `
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 0 4px;">
-              <span style="font-size: 14px; font-weight: 800; color: #0e3753;">
-                공개된 참여후기 <span style="color: #008080;">${displayedReviews.length}</span>개
-              </span>
-            </div>
-          `}
+          ` : ''}
 
           ${displayedReviews.length === 0 ? `
             <div style="background: #ffffff; border: 1.5px dashed #cbd5e1; border-radius: 18px; padding: 48px 20px; text-align: center; color: #64748b;">
