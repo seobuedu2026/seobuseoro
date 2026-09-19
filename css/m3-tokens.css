@@ -44,6 +44,43 @@
   --cat-sudabox-text: #334155;
   --cat-sudabox-border: #94a3b8;
 
+  /* 확장 카테고리 컬러 프리셋 */
+  --cat-purple-bg: #f3e8ff;
+  --cat-purple-text: #7e22ce;
+  --cat-purple-border: #c084fc;
+
+  --cat-cyan-bg: #cffafe;
+  --cat-cyan-text: #0e7490;
+  --cat-cyan-border: #22d3ee;
+
+  --cat-rose-bg: #ffe4e6;
+  --cat-rose-text: #be123c;
+  --cat-rose-border: #fb7185;
+
+  --cat-indigo-bg: #e0e7ff;
+  --cat-indigo-text: #4338ca;
+  --cat-indigo-border: #818cf8;
+
+  --cat-emerald-bg: #d1fae5;
+  --cat-emerald-text: #065f46;
+  --cat-emerald-border: #34d399;
+
+  --cat-amber-bg: #fef3c7;
+  --cat-amber-text: #92400e;
+  --cat-amber-border: #fcd34d;
+
+  --cat-teal-bg: #ccfbf1;
+  --cat-teal-text: #0f766e;
+  --cat-teal-border: #2dd4bf;
+
+  --cat-lime-bg: #ecfccb;
+  --cat-lime-text: #3f6212;
+  --cat-lime-border: #84cc16;
+
+  --cat-fuchsia-bg: #fae8ff;
+  --cat-fuchsia-text: #86198f;
+  --cat-fuchsia-border: #e879f9;
+
   /* Typography & Layout */
   --font-main: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-handwriting: 'Nanum Pen Script', 'Gaegu', cursive, var(--font-main);

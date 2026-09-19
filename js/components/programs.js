@@ -1,6 +1,7 @@
 import { getEvents, isEventPastOrToday, getActiveMonths, getCategories } from "../data/events.js";
 import { GoogleAuthService } from "../auth/googleAuth.js";
 import { openEventFormModal } from "./eventFormModal.js";
+import { openCategoryManagerModal } from "./categoryManagerModal.js";
 
 let selectedCategory = "all";
 let selectedMonth = "all";
@@ -41,11 +42,14 @@ export function renderPrograms(container, onSelectEventModal) {
         <p class="tab-header-desc">월과 유형으로 찾아보고, 카드를 누르면 상세 내용을 펼쳐보거나 접을 수 있습니다.</p>
       </div>
 
-      <!-- 새 프로그램 추가 버튼 (관리자 전용) -->
+      <!-- 새 프로그램 추가 및 유형 관리 버튼 (관리자 전용) -->
       ${isAdmin ? `
-        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
           <button id="btn-add-program" class="btn-m3-pill-action">
             <span>➕ 새 프로그램 추가</span>
+          </button>
+          <button id="btn-manage-cats-prog" class="btn-m3-pill-action" style="border-color: #cbd5e1; background: #f8fafc; color: #0e3753;" title="프로그램 유형 추가 및 관리">
+            <span>🏷️ 유형 추가·관리</span>
           </button>
         </div>
       ` : ''}
@@ -163,6 +167,14 @@ export function renderPrograms(container, onSelectEventModal) {
   if (btnAddProg) {
     btnAddProg.addEventListener("click", () => {
       openEventFormModal(null, null, () => renderPrograms(container, onSelectEventModal));
+    });
+  }
+
+  // 프로그램 유형 관리 버튼 이벤트 바인딩
+  const btnManageCats = container.querySelector("#btn-manage-cats-prog");
+  if (btnManageCats) {
+    btnManageCats.addEventListener("click", () => {
+      openCategoryManagerModal(() => renderPrograms(container, onSelectEventModal));
     });
   }
 

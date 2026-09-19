@@ -90,7 +90,7 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
 
             <div class="form-group">
               <label for="ef-apply-url" style="font-weight: 800; font-size: 13px; color: #0e3753;">신청 링크 URL (선택)</label>
-              <input type="url" id="ef-apply-url" class="m3-input" placeholder="https://..." value="${eventObj?.applyUrl || ''}" />
+              <input type="text" id="ef-apply-url" class="m3-input" placeholder="https://... (미입력 시 '신청: 추후안내'로 표시)" value="${eventObj?.applyUrl || ''}" />
             </div>
           </div>
 
@@ -181,7 +181,11 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
     const time = document.getElementById("ef-time").value.trim() || "14:00 ~ 17:00";
     const location = document.getElementById("ef-location").value.trim() || "서부교육지원청";
     const target = document.getElementById("ef-target").value.trim() || "관내 교원";
-    const applyUrl = document.getElementById("ef-apply-url").value.trim();
+    let applyUrl = document.getElementById("ef-apply-url").value.trim();
+    if (applyUrl && !applyUrl.startsWith("http://") && !applyUrl.startsWith("https://")) {
+      applyUrl = "https://" + applyUrl;
+    }
+    const applyMethod = applyUrl ? "온라인 링크" : "추후안내";
     const description = document.getElementById("ef-desc").value.trim() || `${title} 행사입니다.`;
 
     const currentCats = getCategories();
@@ -206,7 +210,7 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
             location,
             target,
             applyUrl,
-            applyMethod: applyUrl ? "온라인 링크" : "추후안내",
+            applyMethod,
             description
           };
         }
@@ -230,7 +234,7 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
         location,
         target,
         applyUrl,
-        applyMethod: applyUrl ? "온라인 링크" : "추후안내",
+        applyMethod,
         description
       };
       saveEvents([newEvent, ...allEvents]);

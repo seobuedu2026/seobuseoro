@@ -41,10 +41,28 @@ document.addEventListener("DOMContentLoaded", () => {
             <button class="modal-close-btn" id="btn-modal-close" aria-label="닫기">✕</button>
           </div>
 
-          <h2 style="font-size:22px; font-weight:900; color:#1e293b; margin-bottom:4px; line-height:1.3;">
-            ${eventObj.title}
-          </h2>
-          ${eventObj.subtitle ? `<div style="font-size:15px; font-weight:600; color:#475569; margin-bottom:16px;">${eventObj.subtitle}</div>` : '<div style="margin-bottom:16px;"></div>'}
+          <!-- 제목 및 부제목 & 신청 바로가기 버튼 영역 -->
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:18px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:240px;">
+              <h2 style="font-size:22px; font-weight:900; color:#0e3753; margin-bottom:4px; line-height:1.3;">
+                ${eventObj.title}
+              </h2>
+              ${eventObj.subtitle ? `<div style="font-size:15px; font-weight:600; color:#475569;">${eventObj.subtitle}</div>` : ''}
+            </div>
+
+            <!-- 제목/설명 우측 신청 바로가기 버튼 -->
+            <div style="flex-shrink:0; display:flex; align-items:center;">
+              ${(eventObj.applyUrl && (eventObj.applyUrl.startsWith('http://') || eventObj.applyUrl.startsWith('https://'))) ? `
+                <a href="${eventObj.applyUrl}" target="_blank" class="btn-m3-filled" style="white-space:nowrap; padding:9px 18px; font-size:13.5px; font-weight:800; background:#0e3753; color:#ffffff; border-radius:9999px; text-decoration:none; display:inline-flex; align-items:center; box-shadow:0 2px 8px rgba(14, 55, 83, 0.2);">
+                  참가 신청 바로가기
+                </a>
+              ` : `
+                <button class="btn-m3-outlined" disabled style="opacity:0.75; cursor:default; background:#f8fafc; font-weight:700; white-space:nowrap; padding:8px 16px; font-size:13px; border-radius:9999px; border-color:#cbd5e1; color:#64748b;">
+                  신청: 추후안내
+                </button>
+              `}
+            </div>
+          </div>
 
           <div style="background-color:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin-bottom:16px;">
             <div class="prog-info-list">
@@ -71,18 +89,14 @@ document.addEventListener("DOMContentLoaded", () => {
             ${eventObj.description}
           </div>
 
-          <div style="display:flex; gap:10px; justify-content:flex-end; align-items:center; flex-wrap:wrap;">
+          <!-- 하단 액션 버튼 바 -->
+          <div style="display:flex; gap:10px; justify-content:flex-end; align-items:center; flex-wrap:wrap; border-top:1px solid #f1f5f9; padding-top:14px;">
             ${isAdmin ? `
               <button id="btn-modal-edit" class="btn-m3-outlined" style="border-color:#0e3753; color:#0e3753; font-weight:800;">
                 ✏️ 행사 수정
               </button>
             ` : ''}
             <button id="btn-modal-review" class="btn-m3-outlined">후기 남기기</button>
-            ${(eventObj.applyUrl && (eventObj.applyUrl.startsWith('http://') || eventObj.applyUrl.startsWith('https://'))) ? `
-              <a href="${eventObj.applyUrl}" target="_blank" class="btn-m3-filled">참가 신청 바로가기</a>
-            ` : `
-              <button class="btn-m3-outlined" disabled style="opacity:0.75; cursor:default; background:#f8fafc; font-weight:700;">신청: 추후안내</button>
-            `}
           </div>
         </div>
       </div>

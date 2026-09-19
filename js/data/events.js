@@ -747,12 +747,30 @@ export function saveActiveMonths(months) {
 // 카테고리(유형/범례) 관리
 // ============================================================================
 export const DEFAULT_CATEGORIES = [
-  { key: "workshop", label: "연수·워크숍", cls: "cat-workshop" },
-  { key: "lecture", label: "특강", cls: "cat-lecture" },
-  { key: "festival", label: "성과공유·보고·한마당", cls: "cat-festival" },
-  { key: "mentoring", label: "멘토링", cls: "cat-mentoring" },
-  { key: "sharing", label: "수업나눔 교육콘서트", cls: "cat-sharing" },
-  { key: "sudabox", label: "수다박스", cls: "cat-sudabox" }
+  { key: "workshop", label: "연수·워크숍", cls: "cat-workshop", isCustom: false },
+  { key: "lecture", label: "특강", cls: "cat-lecture", isCustom: false },
+  { key: "festival", label: "성과공유·보고·한마당", cls: "cat-festival", isCustom: false },
+  { key: "mentoring", label: "멘토링", cls: "cat-mentoring", isCustom: false },
+  { key: "sharing", label: "수업나눔 교육콘서트", cls: "cat-sharing", isCustom: false },
+  { key: "sudabox", label: "수다박스", cls: "cat-sudabox", isCustom: false }
+];
+
+export const CATEGORY_COLOR_PRESETS = [
+  { cls: "cat-workshop", label: "분홍 (핑크)", sample: "연수·워크숍" },
+  { cls: "cat-lecture", label: "하늘 (블루)", sample: "특강" },
+  { cls: "cat-festival", label: "주황 (오렌지)", sample: "성과공유" },
+  { cls: "cat-mentoring", label: "초록 (그린)", sample: "멘토링" },
+  { cls: "cat-sharing", label: "노랑 (옐로우)", sample: "교육콘서트" },
+  { cls: "cat-sudabox", label: "슬레이트 (그레이)", sample: "수다박스" },
+  { cls: "cat-purple", label: "보라 (퍼플)", sample: "직무연수" },
+  { cls: "cat-cyan", label: "청록 (사이언)", sample: "체험활동" },
+  { cls: "cat-emerald", label: "에메랄드", sample: "연구활동" },
+  { cls: "cat-rose", label: "장미 (로즈)", sample: "특별행사" },
+  { cls: "cat-indigo", label: "남색 (인디고)", sample: "포럼·세미나" },
+  { cls: "cat-amber", label: "호박 (앰버)", sample: "협의회" },
+  { cls: "cat-teal", label: "민트 (틸)", sample: "수업나눔" },
+  { cls: "cat-lime", label: "라임 (라임)", sample: "교원연수" },
+  { cls: "cat-fuchsia", label: "자홍 (푸시아)", sample: "학술제" }
 ];
 
 const CATEGORIES_KEY = "seobu_categories_v2";
@@ -763,12 +781,13 @@ export function getCategories() {
     try {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        // 기본 6대 카테고리 구조와 병합하여 cls 및 key 보장
-        return DEFAULT_CATEGORIES.map(def => {
-          const match = parsed.find(p => p.key === def.key);
+        return parsed.map((item, idx) => {
+          const defMatch = DEFAULT_CATEGORIES.find(def => def.key === item.key);
           return {
-            ...def,
-            label: match && match.label ? match.label.trim() : def.label
+            key: item.key || `custom_cat_${Date.now()}_${idx}`,
+            label: (item.label || (defMatch ? defMatch.label : "새 유형")).trim(),
+            cls: item.cls || (defMatch ? defMatch.cls : "cat-purple"),
+            isCustom: item.isCustom !== undefined ? item.isCustom : !defMatch
           };
         });
       }
@@ -776,17 +795,19 @@ export function getCategories() {
       console.error("Failed to parse categories", e);
     }
   }
-  return DEFAULT_CATEGORIES;
+  return DEFAULT_CATEGORIES.map(c => ({ ...c, isCustom: false }));
 }
 
 export function saveCategories(categoriesList) {
   localStorage.setItem(CATEGORIES_KEY, JSON.stringify(categoriesList));
   window.dispatchEvent(new CustomEvent("categories-updated", { detail: { categories: categoriesList } }));
+  window.dispatchEvent(new CustomEvent("events-updated"));
 }
 
 export function resetCategoriesToDefault() {
   localStorage.removeItem(CATEGORIES_KEY);
   window.dispatchEvent(new CustomEvent("categories-updated", { detail: { categories: DEFAULT_CATEGORIES } }));
+  window.dispatchEvent(new CustomEvent("events-updated"));
 }
 
 // ============================================================================

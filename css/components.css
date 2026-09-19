@@ -412,13 +412,22 @@
   opacity: 0.9;
 }
 
-/* 6대 카테고리 클래스 */
+/* 6대 카테고리 + 확장 카테고리 클래스 */
 .cat-workshop { background-color: var(--cat-workshop-bg); color: var(--cat-workshop-text); border-color: var(--cat-workshop-border); }
 .cat-lecture { background-color: var(--cat-lecture-bg); color: var(--cat-lecture-text); border-color: var(--cat-lecture-border); }
 .cat-festival { background-color: var(--cat-festival-bg); color: var(--cat-festival-text); border-color: var(--cat-festival-border); }
 .cat-mentoring { background-color: var(--cat-mentoring-bg); color: var(--cat-mentoring-text); border-color: var(--cat-mentoring-border); }
 .cat-sharing { background-color: var(--cat-sharing-bg); color: var(--cat-sharing-text); border-color: var(--cat-sharing-border); }
 .cat-sudabox { background-color: var(--cat-sudabox-bg); color: var(--cat-sudabox-text); border-color: var(--cat-sudabox-border); }
+.cat-purple { background-color: var(--cat-purple-bg); color: var(--cat-purple-text); border-color: var(--cat-purple-border); }
+.cat-cyan { background-color: var(--cat-cyan-bg); color: var(--cat-cyan-text); border-color: var(--cat-cyan-border); }
+.cat-rose { background-color: var(--cat-rose-bg); color: var(--cat-rose-text); border-color: var(--cat-rose-border); }
+.cat-indigo { background-color: var(--cat-indigo-bg); color: var(--cat-indigo-text); border-color: var(--cat-indigo-border); }
+.cat-emerald { background-color: var(--cat-emerald-bg); color: var(--cat-emerald-text); border-color: var(--cat-emerald-border); }
+.cat-amber { background-color: var(--cat-amber-bg); color: var(--cat-amber-text); border-color: var(--cat-amber-border); }
+.cat-teal { background-color: var(--cat-teal-bg); color: var(--cat-teal-text); border-color: var(--cat-teal-border); }
+.cat-lime { background-color: var(--cat-lime-bg); color: var(--cat-lime-text); border-color: var(--cat-lime-border); }
+.cat-fuchsia { background-color: var(--cat-fuchsia-bg); color: var(--cat-fuchsia-text); border-color: var(--cat-fuchsia-border); }
 
 /* 하단 범례 칩 목록 (가득 차게 정렬) */
 .brochure-legend-container {
