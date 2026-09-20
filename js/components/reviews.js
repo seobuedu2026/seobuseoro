@@ -110,13 +110,10 @@ export function renderReviews(container, preselectedEventId = null) {
 
           ${isAdmin ? `
             <div style="background-color: #f8fafc; border: 1.5px solid #0e3753; border-radius: 12px; padding: 16px 14px; text-align: left;">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0;">
+              <div style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0;">
                 <div style="font-size: 14.5px; font-weight: 800; color: #0e3753; display: flex; align-items: center; gap: 6px;">
                   ⚙️ <span>후기 작성 방식 설정</span>
                 </div>
-                <button type="button" id="btn-review-logout" class="btn-review-logout-inline" style="height: 32px; padding: 4px 10px; font-size: 12px;" title="관리자 모드 로그아웃">
-                  로그아웃
-                </button>
               </div>
 
               <p style="font-size: 12px; color: #475569; margin-bottom: 10px; line-height: 1.45;">
