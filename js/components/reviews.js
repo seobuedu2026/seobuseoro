@@ -333,6 +333,9 @@ export function renderReviews(container, preselectedEventId = null, page = 1) {
                         승인
                       </button>
                     `}
+                    <button class="btn-review-mod-delete btn-admin-action" data-review-id="${rev.id}" style="padding: 3px 8px; font-size: 11.5px; color: #dc2626; border-color: #fecdd3;" title="후기 영구 삭제 (되돌릴 수 없음)">
+                      삭제
+                    </button>
                   ` : ''}
                 </div>
               </div>
@@ -525,6 +528,27 @@ export function renderReviews(container, preselectedEventId = null, page = 1) {
         FirestoreReviewService.updateReviewStatus(revId, "pending");
         renderReviews(container, preselectedEventId);
       }
+    });
+  });
+
+  // 관리자 후기 삭제 버튼 바인딩 (영구 삭제이므로 확인 후 진행)
+  container.querySelectorAll(".btn-review-mod-delete").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const revId = btn.dataset.reviewId;
+      const currentList = getStoredReviews();
+      const target = currentList.find(r => r.id === revId);
+      if (!target) return;
+
+      const preview = (target.content || "").slice(0, 40);
+      if (!confirm(`이 후기를 영구 삭제하시겠습니까?\n\n작성자: ${target.userName || "서부 교원"}\n내용: ${preview}${(target.content || "").length > 40 ? "…" : ""}\n\n삭제하면 되돌릴 수 없습니다.`)) {
+        return;
+      }
+
+      saveReviews(currentList.filter(r => r.id !== revId));
+      FirestoreReviewService.deleteReview(revId);
+      renderReviews(container, preselectedEventId);
     });
   });
 

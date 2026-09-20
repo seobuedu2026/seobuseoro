@@ -1,12 +1,12 @@
-import { renderHeader } from "./components/header.js?v=20260920_v65";
-import { renderFooter } from "./components/footer.js?v=20260920_v65";
-import { renderCalendar } from "./components/calendar.js?v=20260920_v65";
-import { renderPrograms } from "./components/programs.js?v=20260920_v65";
-import { renderReviews } from "./components/reviews.js?v=20260920_v65";
-import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v65";
-import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v65";
-import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v65";
-import { isEventPastOrToday } from "./data/events.js?v=20260920_v65";
+import { renderHeader } from "./components/header.js?v=20260920_v66";
+import { renderFooter } from "./components/footer.js?v=20260920_v66";
+import { renderCalendar } from "./components/calendar.js?v=20260920_v66";
+import { renderPrograms } from "./components/programs.js?v=20260920_v66";
+import { renderReviews } from "./components/reviews.js?v=20260920_v66";
+import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v66";
+import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v66";
+import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v66";
+import { isEventPastOrToday, resolveApplyLink } from "./data/events.js?v=20260920_v66";
 import { initSiteSync } from "./data/siteSync.js";
 
 let activeTab = "calendar"; // 'calendar' | 'programs' | 'reviews' | 'padlet'
@@ -76,9 +76,12 @@ function initApp() {
               <div class="prog-info-item">
                 <span class="prog-info-label">신청방법</span>
                 <span style="font-weight:700;">
-                  ${(eventObj.applyUrl && (eventObj.applyUrl.startsWith('http://') || eventObj.applyUrl.startsWith('https://'))) 
-                    ? `<a href="${eventObj.applyUrl}" target="_blank" rel="noopener noreferrer" style="color:#0284c7; text-decoration:underline; font-weight:800; display:inline-flex; align-items:center; gap:4px;" title="신청 링크 바로가기">${eventObj.applyMethod === 'URL 링크' ? 'URL 링크 ↗' : (eventObj.applyMethod || 'URL 링크') + ' ↗'}</a>` 
-                    : (eventObj.applyMethod || '추후안내')}
+                  ${(() => {
+                    const apply = resolveApplyLink(eventObj);
+                    return apply.href
+                      ? `<a href="${apply.href}" target="_blank" rel="noopener noreferrer" style="color:#0284c7; text-decoration:underline; font-weight:800; display:inline-flex; align-items:center; gap:4px;" title="신청 페이지로 이동">${apply.label} ↗</a>`
+                      : apply.label;
+                  })()}
                 </span>
               </div>
             </div>

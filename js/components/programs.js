@@ -1,7 +1,7 @@
-import { getEvents, isEventPastOrToday, getActiveMonths, getCategories } from "../data/events.js?v=20260920_v65";
-import { GoogleAuthService } from "../auth/googleAuth.js?v=20260920_v65";
-import { openEventFormModal } from "./eventFormModal.js?v=20260920_v65";
-import { openCategoryManagerModal } from "./categoryManagerModal.js?v=20260920_v65";
+import { getEvents, isEventPastOrToday, getActiveMonths, getCategories, resolveApplyLink } from "../data/events.js?v=20260920_v66";
+import { GoogleAuthService } from "../auth/googleAuth.js?v=20260920_v66";
+import { openEventFormModal } from "./eventFormModal.js?v=20260920_v66";
+import { openCategoryManagerModal } from "./categoryManagerModal.js?v=20260920_v66";
 
 let selectedCategory = "all";
 let selectedMonth = "all";
@@ -93,9 +93,10 @@ export function renderPrograms(container, onSelectEventModal) {
           const evTime = ev.time || '15:00 ~ 17:00';
           const evLoc = ev.location || '서부교육지원청';
           const evTarget = ev.target || '관내 초등희망교원';
-          const evApplyMethod = (ev.applyUrl && (ev.applyUrl.startsWith('http://') || ev.applyUrl.startsWith('https://'))) 
-            ? `<a href="${ev.applyUrl}" target="_blank" rel="noopener noreferrer" style="color: #0284c7; text-decoration: underline; font-weight: 800; display: inline-flex; align-items: center; gap: 4px;" onclick="event.stopPropagation();" title="신청 링크 바로가기">${ev.applyMethod === 'URL 링크' ? 'URL 링크 ↗' : (ev.applyMethod || 'URL 링크') + ' ↗'}</a>` 
-            : (ev.applyMethod || '추후안내');
+          const apply = resolveApplyLink(ev);
+          const evApplyMethod = apply.href
+            ? `<a href="${apply.href}" target="_blank" rel="noopener noreferrer" style="color: #0284c7; text-decoration: underline; font-weight: 800; display: inline-flex; align-items: center; gap: 4px;" onclick="event.stopPropagation();" title="신청 페이지로 이동">${apply.label} ↗</a>`
+            : apply.label;
 
           const isPast = isEventPastOrToday(ev);
 

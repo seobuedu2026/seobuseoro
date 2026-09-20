@@ -957,6 +957,42 @@ export function resetEventsToDefault() {
   window.dispatchEvent(new CustomEvent("events-updated", { detail: { events: DEFAULT_EVENTS_DATA } }));
 }
 
+// ============================================================================
+// 신청방법에 따른 링크 연결 규칙
+// ============================================================================
+// 교육행정 데이터 포털(교데통) 주소
+export const GYODAETONG_URL = "https://sen.edmgr.kr/";
+
+// 교데통으로 안내할 신청방법 표기 (과거 '공문통' 표기 포함)
+const GYODAETONG_METHODS = ["교데통", "공문통"];
+
+/**
+ * 행사의 신청방법을 화면에 어떻게 보여줄지 결정한다.
+ * @returns {{label: string, href: string|null}} href가 null이면 링크 없이 문구만 표시
+ */
+export function resolveApplyLink(ev) {
+  const method = String((ev && ev.applyMethod) || "").trim();
+  const url = String((ev && ev.applyUrl) || "").trim();
+
+  // 교데통 → 교육행정 데이터 포털로 이동
+  if (GYODAETONG_METHODS.includes(method)) {
+    return { label: "교데통", href: GYODAETONG_URL };
+  }
+
+  // 추후안내 → 링크 없이 안내 문구만
+  if (method === "추후안내" || method === "") {
+    return { label: "추후안내", href: null };
+  }
+
+  // 입력된 URL이 있으면 그 주소로 이동
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return { label: method, href: url };
+  }
+
+  // '별도신청 없음' 등 링크가 필요 없는 안내
+  return { label: method, href: null };
+}
+
 // 오늘 날짜 및 오늘 이전(진행 완료/진행 중) 행사인지 판별하는 함수 (후기 작성용)
 export function isEventPastOrToday(ev) {
   if (!ev) return false;
