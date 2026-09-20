@@ -145,21 +145,10 @@ export function renderReviews(container, preselectedEventId = null) {
             </div>
           ` : `
             <form id="review-submit-form">
-              <div class="form-group" style="margin-bottom: 14px;">
-                <label style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 4px;">작성 교원</label>
-                <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 9px 12px; border-radius: 10px; display: flex; flex-direction: column; gap: 4px;">
-                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-                    <div style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 800; color: #166534; white-space: nowrap;">
-                      <span>👤 ${user.name}</span>
-                      <span style="font-size: 10.5px; font-weight: 800; background: #0284c7; color: #ffffff; padding: 2px 6px; border-radius: 9999px; white-space: nowrap;">
-                        @senedu.kr
-                      </span>
-                    </div>
-                  </div>
-                  <div style="font-size: 11.5px; color: #15803d; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    ${user.email}
-                  </div>
-                </div>
+              <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 9px 12px; border-radius: 10px; margin-bottom: 14px; font-size: 13.5px; font-weight: 700; color: #166534; display: flex; align-items: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                <span>👤</span>
+                <span style="font-weight: 800; color: #166534;">${user.name}</span>
+                <span style="font-size: 12px; font-weight: 500; color: #15803d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">(${user.email})</span>
               </div>
 
               <div class="form-group">
