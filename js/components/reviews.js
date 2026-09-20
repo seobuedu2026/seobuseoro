@@ -145,16 +145,16 @@ export function renderReviews(container, preselectedEventId = null) {
             </div>
           ` : `
             <form id="review-submit-form">
-              <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 9px 12px; border-radius: 10px; margin-bottom: 14px; font-size: 13.5px; font-weight: 700; color: #166534; display: flex; align-items: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 10px 12px; border-radius: 10px; margin-bottom: 14px; font-size: 15px; font-weight: 700; color: #166534; display: flex; align-items: center; justify-content: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                 <span>👤</span>
-                <span style="font-weight: 800; color: #166534;">${user.name}</span>
-                <span style="font-size: 12px; font-weight: 500; color: #15803d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">(${user.email})</span>
+                <span style="font-weight: 800; color: #166534; font-size: 15px;">${user.name}</span>
+                <span style="font-size: 14px; font-weight: 600; color: #15803d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">(${user.email})</span>
               </div>
 
               <div class="form-group">
                 <label for="review-event-select" style="font-weight: 800; font-size: 13px; color: #0e3753;">참여한 행사 선택 *</label>
                 <select id="review-event-select" class="m3-select" required>
-                  <option value="">행사를 선택하세요 (오늘 및 이전 행사)</option>
+                  <option value="">행사를 선택하세요</option>
                   ${getEvents().filter(isEventPastOrToday).map(ev => `
                     <option value="${ev.id}" ${preselectedEventId === ev.id ? 'selected' : ''}>
                       [${ev.month}월 ${ev.day}일] ${ev.title} ${ev.subtitle ? `(${ev.subtitle})` : ''}
