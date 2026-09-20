@@ -1,7 +1,14 @@
 import { getEvents, isEventPastOrToday } from "../data/events.js";
 import { GoogleAuthService } from "../auth/googleAuth.js";
 
-const REVIEWS_STORAGE_KEY = "seobu_user_reviews_v6";
+const REVIEWS_STORAGE_KEY = "seobu_user_reviews_v7";
+
+// 이전 레거시 저장소 키 정리
+try {
+  localStorage.removeItem("seobu_user_reviews");
+  localStorage.removeItem("seobu_user_reviews_v5");
+  localStorage.removeItem("seobu_user_reviews_v6");
+} catch (e) {}
 
 const INITIAL_REVIEWS = [
   {
@@ -15,45 +22,6 @@ const INITIAL_REVIEWS = [
     content: "연수를 준비하며 제가 새로 알게된 것이 많아 좋았습니다.",
     likes: 0,
     createdAt: "2026-09-18 13:09",
-    status: "approved"
-  },
-  {
-    id: "rev-1",
-    eventId: "ev-0910",
-    eventTitle: "수다박스 연수 (학적업무 첫걸음)",
-    userName: "이*진",
-    userEmail: "lee@senedu.kr",
-    isSenedu: true,
-    rating: 5,
-    content: "2학기 전출입 처리가 막막했는데 나이스 화면을 하나하나 짚어주셔서 정말 큰 도움이 되었습니다! 실무 팁 감사합니다.",
-    likes: 12,
-    createdAt: "2026-09-11 10:24",
-    status: "approved"
-  },
-  {
-    id: "rev-2",
-    eventId: "ev-0918",
-    eventTitle: "김태호 작가와 함께하는 독서교육 특강",
-    userName: "박*현",
-    userEmail: "park@senedu.kr",
-    isSenedu: true,
-    rating: 5,
-    content: "작가의 눈으로 바라본 독서 수업의 매력을 느낄 수 있었습니다. 교실에서 아이들과 함께 질문 중심 수업을 실천해보고 싶어요.",
-    likes: 8,
-    createdAt: "2026-09-19 14:10",
-    status: "approved"
-  },
-  {
-    id: "rev-3",
-    eventId: "ev-0904",
-    eventTitle: "과학실무사 연수 (실험역량 강화)",
-    userName: "정*우",
-    userEmail: "jung@senedu.kr",
-    isSenedu: true,
-    rating: 4,
-    content: "MBL 센서 연결 방법과 안전관리 체크리스트가 명확해서 2학기 실험 준비에 큰 도움이 될 것 같습니다.",
-    likes: 5,
-    createdAt: "2026-09-05 16:30",
     status: "approved"
   }
 ];
