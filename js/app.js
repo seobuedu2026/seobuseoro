@@ -1,12 +1,12 @@
-import { renderHeader } from "./components/header.js?v=20260920_v6";
-import { renderFooter } from "./components/footer.js?v=20260920_v6";
-import { renderCalendar } from "./components/calendar.js?v=20260920_v6";
-import { renderPrograms } from "./components/programs.js?v=20260920_v6";
-import { renderReviews } from "./components/reviews.js?v=20260920_v6";
-import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v6";
-import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v6";
-import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v6";
-import { isEventPastOrToday } from "./data/events.js?v=20260920_v6";
+import { renderHeader } from "./components/header.js?v=20260920_v7";
+import { renderFooter } from "./components/footer.js?v=20260920_v7";
+import { renderCalendar } from "./components/calendar.js?v=20260920_v7";
+import { renderPrograms } from "./components/programs.js?v=20260920_v7";
+import { renderReviews } from "./components/reviews.js?v=20260920_v7";
+import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v7";
+import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v7";
+import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v7";
+import { isEventPastOrToday } from "./data/events.js?v=20260920_v7";
 
 let activeTab = "calendar"; // 'calendar' | 'programs' | 'reviews' | 'padlet'
 
@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
           </div>
 
-          <div style="font-size:14px; color:#334155; line-height:1.6; margin-bottom:16px;">
+          <div style="font-size:16px; color:#334155; line-height:1.65; margin-bottom:16px;">
             ${eventObj.description}
           </div>
 
