@@ -162,7 +162,7 @@ export function renderPrograms(container, onSelectEventModal) {
               </div>
 
               ${ev.description ? `
-                <div style="font-size: 15.5px; color: #475569; line-height: 1.6;">
+                <div style="font-size: 16px; color: #475569; line-height: 1.6;">
                   ${ev.description}
                 </div>
               ` : ''}
