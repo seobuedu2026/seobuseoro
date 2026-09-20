@@ -5,6 +5,19 @@ const REVIEWS_STORAGE_KEY = "seobu_user_reviews";
 
 const INITIAL_REVIEWS = [
   {
+    id: "rev-4",
+    eventId: "ev-0904",
+    eventTitle: "과학실무사 연수 (실험역량 강화)",
+    userName: "김*찬",
+    userEmail: "gogh9@senedu.kr",
+    isSenedu: true,
+    rating: 5,
+    content: "연수를 준비하며 제가 새로 알게된 것이 많아 좋았습니다.",
+    likes: 0,
+    createdAt: "2026-09-18 13:09",
+    status: "approved"
+  },
+  {
     id: "rev-1",
     eventId: "ev-0910",
     eventTitle: "수다박스 연수 (학적업무 첫걸음)",
@@ -53,7 +66,17 @@ function getStoredReviews() {
   }
   try {
     const list = JSON.parse(data);
-    return list.map(r => ({
+    const existingIds = new Set(list.map(r => r.id));
+
+    // INITIAL_REVIEWS에 새로 추가된 후기가 기존 로컬 데이터에 없다면 자동으로 추가 병합
+    const mergedList = [...list];
+    INITIAL_REVIEWS.forEach(initRev => {
+      if (!existingIds.has(initRev.id)) {
+        mergedList.unshift(initRev);
+      }
+    });
+
+    return mergedList.map(r => ({
       ...r,
       userName: (r.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim(),
       status: r.status || "approved"
