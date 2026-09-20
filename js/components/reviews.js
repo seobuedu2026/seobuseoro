@@ -2,13 +2,7 @@ import { getEvents, isEventPastOrToday } from "../data/events.js";
 import { GoogleAuthService } from "../auth/googleAuth.js";
 
 const REVIEWS_STORAGE_KEY = "seobu_user_reviews_v7";
-
-// 이전 레거시 저장소 키 정리
-try {
-  localStorage.removeItem("seobu_user_reviews");
-  localStorage.removeItem("seobu_user_reviews_v5");
-  localStorage.removeItem("seobu_user_reviews_v6");
-} catch (e) {}
+const EXCLUDED_IDS = new Set(["rev-1", "rev-2", "rev-3"]);
 
 const INITIAL_REVIEWS = [
   {
@@ -27,29 +21,51 @@ const INITIAL_REVIEWS = [
 ];
 
 function getStoredReviews() {
-  const data = localStorage.getItem(REVIEWS_STORAGE_KEY);
-  if (data === null) {
+  let data = localStorage.getItem(REVIEWS_STORAGE_KEY);
+  
+  // v7에 데이터가 없으면 이전 버전(v6 등)에서 사용자 작성 후기 마이그레이션 시도
+  if (!data) {
+    const v6Data = localStorage.getItem("seobu_user_reviews_v6");
+    if (v6Data) {
+      try {
+        const parsedV6 = JSON.parse(v6Data);
+        if (Array.isArray(parsedV6) && parsedV6.length > 0) {
+          const migrated = parsedV6.filter(r => !EXCLUDED_IDS.has(r.id));
+          if (migrated.length > 0) {
+            localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(migrated));
+            data = JSON.stringify(migrated);
+          }
+        }
+      } catch (e) {}
+    }
+  }
+
+  if (!data) {
     localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(INITIAL_REVIEWS));
     return INITIAL_REVIEWS;
   }
+
   try {
     const list = JSON.parse(data);
     if (Array.isArray(list)) {
-      return list.map(r => ({
-        ...r,
-        userName: (r.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim(),
-        status: r.status === "pending" ? "pending" : "approved"
-      }));
+      return list
+        .filter(r => !EXCLUDED_IDS.has(r.id))
+        .map(r => ({
+          ...r,
+          userName: (r.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim(),
+          status: r.status === "pending" ? "pending" : "approved"
+        }));
     }
-    return [];
+    return INITIAL_REVIEWS;
   } catch (e) {
-    return [];
+    return INITIAL_REVIEWS;
   }
 }
 
 function saveReviews(reviews) {
-  localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(reviews));
-  window.dispatchEvent(new CustomEvent("reviews-updated", { detail: { reviews } }));
+  const cleanList = reviews.filter(r => !EXCLUDED_IDS.has(r.id));
+  localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(cleanList));
+  window.dispatchEvent(new CustomEvent("reviews-updated", { detail: { reviews: cleanList } }));
 }
 
 let selectedRating = 5;
