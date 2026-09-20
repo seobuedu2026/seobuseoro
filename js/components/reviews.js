@@ -510,34 +510,30 @@ function openReviewLookupModal(container, preselectedEventId) {
   const renderLookupStep = () => {
     mount.innerHTML = `
       <div class="m3-modal-backdrop open" id="review-lookup-backdrop">
-        <div class="m3-modal-dialog" style="max-width: 500px; width: 92%;">
+        <div class="m3-modal-dialog" style="max-width: 480px; width: 92%;">
           <div class="modal-header" style="padding-bottom: 12px; border-bottom: 1.5px solid #f1f5f9;">
             <h3 style="font-size: 18px; font-weight: 900; color: #0e3753; display: flex; align-items: center; gap: 8px; margin: 0;">
-              <span>✏️ 작성한 후기 수정 / 삭제</span>
+              <span>✏️ 후기 수정 / 삭제</span>
             </h3>
             <button class="modal-close-btn" id="btn-close-lookup" aria-label="닫기">✕</button>
           </div>
 
           <form id="review-lookup-form" style="display: flex; flex-direction: column; gap: 14px; margin-top: 14px;">
-            <div style="background: #f0f9ff; border: 1.5px solid #bae6fd; border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #0369a1; line-height: 1.5;">
-              ℹ️ 후기 작성 시 입력하셨던 <strong>성함</strong>과 <strong>비밀번호</strong>를 입력하시면 작성하신 후기를 찾아 수정 또는 삭제하실 수 있습니다.
-            </div>
-
             <div id="lookup-error-msg" style="display: none; background: #fef2f2; border: 1.5px solid #fecdd3; border-radius: 10px; padding: 9px 12px; color: #dc2626; font-size: 13px; font-weight: 700;">
             </div>
 
             <div class="form-group" style="margin-bottom: 0;">
               <label for="lookup-author-name" style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 4px; display: block;">
-                작성자 성함 *
+                작성자 성함
               </label>
-              <input type="text" id="lookup-author-name" class="m3-input" placeholder="작성 시 입력한 성함 (예: 김세찬)" required style="font-size: 13.5px; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff;" />
+              <input type="text" id="lookup-author-name" class="m3-input" required style="font-size: 13.5px; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff;" />
             </div>
 
             <div class="form-group" style="margin-bottom: 0;">
               <label for="lookup-password" style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 4px; display: block;">
-                비밀번호 *
+                비밀번호
               </label>
-              <input type="password" id="lookup-password" class="m3-input" placeholder="후기 작성 시 설정한 비밀번호" required style="font-size: 13.5px; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff;" />
+              <input type="password" id="lookup-password" class="m3-input" required style="font-size: 13.5px; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff;" />
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;">
@@ -545,7 +541,7 @@ function openReviewLookupModal(container, preselectedEventId) {
                 닫기
               </button>
               <button type="submit" class="btn-m3-filled" style="padding: 8px 22px; font-size: 13.5px; font-weight: 800; border-radius: 10px; cursor: pointer; background: #0e3753; color: #ffffff;">
-                후기 조회하기
+                조회하기
               </button>
             </div>
           </form>
@@ -581,7 +577,7 @@ function openReviewLookupModal(container, preselectedEventId) {
       if (matched.length === 0) {
         if (errBox) {
           errBox.style.display = "block";
-          errBox.textContent = "❌ 입력하신 성함과 비밀번호와 일치하는 참여 후기를 찾을 수 없습니다.";
+          errBox.textContent = "일치하는 후기를 찾을 수 없습니다.";
         }
         return;
       }
@@ -605,7 +601,7 @@ function openReviewLookupModal(container, preselectedEventId) {
         <div class="m3-modal-dialog" style="max-width: 520px; width: 92%; max-height: 90vh; overflow-y: auto;">
           <div class="modal-header" style="padding-bottom: 12px; border-bottom: 1.5px solid #f1f5f9;">
             <h3 style="font-size: 18px; font-weight: 900; color: #0e3753; display: flex; align-items: center; gap: 8px; margin: 0;">
-              <span>📋 수정할 후기 선택 (${matchedList.length}건 발견)</span>
+              <span>후기 선택 (${matchedList.length}건)</span>
             </h3>
             <button class="modal-close-btn" id="btn-close-lookup" aria-label="닫기">✕</button>
           </div>
@@ -659,7 +655,7 @@ function openReviewLookupModal(container, preselectedEventId) {
         <div class="m3-modal-dialog" style="max-width: 540px; width: 92%; max-height: 90vh; overflow-y: auto;">
           <div class="modal-header" style="padding-bottom: 12px; border-bottom: 1.5px solid #f1f5f9;">
             <h3 style="font-size: 18px; font-weight: 900; color: #0e3753; display: flex; align-items: center; gap: 8px; margin: 0;">
-              <span>✏️ 후기 내용 수정 / 삭제</span>
+              <span>✏️ 후기 수정</span>
             </h3>
             <button class="modal-close-btn" id="btn-close-lookup" aria-label="닫기">✕</button>
           </div>
@@ -677,14 +673,14 @@ function openReviewLookupModal(container, preselectedEventId) {
 
             <div class="form-group" style="margin-bottom: 0;">
               <label for="review-direct-content" style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 4px; display: block;">
-                후기 내용 (줄바꿈 자유롭게 편집) *
+                후기 내용
               </label>
-              <textarea id="review-direct-content" class="m3-textarea" rows="6" placeholder="수정할 후기 내용을 입력해주세요." required style="resize: vertical; white-space: pre-wrap; line-height: 1.6; font-size: 14px; padding: 12px; width: 100%; box-sizing: border-box; border: 1.5px solid #cbd5e1; border-radius: 10px; background: #ffffff;"></textarea>
+              <textarea id="review-direct-content" class="m3-textarea" rows="6" required style="resize: vertical; white-space: pre-wrap; line-height: 1.6; font-size: 14px; padding: 12px; width: 100%; box-sizing: border-box; border: 1.5px solid #cbd5e1; border-radius: 10px; background: #ffffff;"></textarea>
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
               <button type="button" id="btn-delete-direct" class="btn-m3-outlined" style="padding: 8px 16px; font-size: 13px; font-weight: 800; border-radius: 10px; color: #ef4444; border-color: #fecdd3; cursor: pointer;">
-                🗑️ 후기 삭제
+                후기 삭제
               </button>
 
               <div style="display: flex; gap: 8px;">
@@ -713,7 +709,7 @@ function openReviewLookupModal(container, preselectedEventId) {
       e.preventDefault();
       const newText = textarea ? textarea.value.trim() : "";
       if (!newText) {
-        alert("⚠️ 수정할 내용을 입력해주세요.");
+        alert("수정할 내용을 입력해주세요.");
         if (textarea) textarea.focus();
         return;
       }
@@ -727,19 +723,19 @@ function openReviewLookupModal(container, preselectedEventId) {
       }
 
       closeModal();
-      alert("✅ 후기가 성공적으로 수정되었습니다.");
+      alert("후기가 수정되었습니다.");
       renderReviews(container, preselectedEventId);
     });
 
     // 삭제 버튼
     mount.querySelector("#btn-delete-direct")?.addEventListener("click", () => {
-      if (confirm("정말 이 참여 후기를 삭제하시겠습니까?\n(삭제 후 복구할 수 없습니다.)")) {
+      if (confirm("정말 이 참여 후기를 삭제하시겠습니까?")) {
         const currentList = getStoredReviews();
         const filtered = currentList.filter(r => r.id !== targetRev.id);
         saveReviews(filtered);
         FirestoreReviewService.deleteReview(targetRev.id);
         closeModal();
-        alert("🗑️ 후기가 성공적으로 삭제되었습니다.");
+        alert("후기가 삭제되었습니다.");
         renderReviews(container, preselectedEventId);
       }
     });
