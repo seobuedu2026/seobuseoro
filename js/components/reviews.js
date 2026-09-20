@@ -10,7 +10,7 @@ const INITIAL_REVIEWS = [
     id: "rev-4",
     eventId: "ev-0904",
     eventTitle: "과학실무사 연수 (실험역량 강화)",
-    userName: "김*찬",
+    userName: "김형찬",
     userEmail: "gogh9@senedu.kr",
     isSenedu: true,
     rating: 5,
@@ -52,7 +52,9 @@ function getStoredReviews() {
         .filter(r => !EXCLUDED_IDS.has(r.id))
         .map(r => ({
           ...r,
-          userName: (r.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim(),
+          userName: (r.userEmail === "gogh9@senedu.kr" || r.userName === "김*찬")
+            ? "김형찬"
+            : (r.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim(),
           status: r.status === "pending" ? "pending" : "approved"
         }));
     }
@@ -139,39 +141,25 @@ export function renderReviews(container, preselectedEventId = null) {
           </div>
 
           ${isAdmin ? `
-            <div style="background-color: #f8fafc; border: 1.5px solid #0e3753; border-radius: 12px; padding: 16px 14px; text-align: left;">
-              <div style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0;">
-                <div style="font-size: 14.5px; font-weight: 800; color: #0e3753; display: flex; align-items: center; gap: 6px;">
+            <div style="background-color: #f8fafc; border: 1.5px solid #0e3753; border-radius: 12px; padding: 14px; text-align: left;">
+              <div style="margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #e2e8f0;">
+                <div style="font-size: 14px; font-weight: 800; color: #0e3753; display: flex; align-items: center; gap: 6px;">
                   ⚙️ <span>후기 작성 방식 설정</span>
                 </div>
               </div>
 
-              <p style="font-size: 12px; color: #475569; margin-bottom: 10px; line-height: 1.45;">
-                선생님들의 후기 작성 권한을 설정합니다.
-              </p>
-
-              <div style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
-                <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 700; color: #0e3753;">
-                  <input type="radio" name="review-auth-mode-radio" value="login_required" ${authMode === 'login_required' ? 'checked' : ''} style="margin-top: 2px; cursor: pointer;" />
-                  <div>
-                    <div>🔒 센스쿨 로그인 필수</div>
-                    <div style="font-size: 11.5px; font-weight: 500; color: #64748b; margin-top: 2px;">@senedu.kr 인증 교원만 작성 가능</div>
-                  </div>
+              <div style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 10px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13.5px; font-weight: 700; color: #0e3753;">
+                  <input type="radio" name="review-auth-mode-radio" value="login_required" ${authMode === 'login_required' ? 'checked' : ''} style="cursor: pointer;" />
+                  <span>🔒 센스쿨 로그인 필수</span>
                 </label>
 
                 <div style="height: 1px; background: #f1f5f9;"></div>
 
-                <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 700; color: #0e3753;">
-                  <input type="radio" name="review-auth-mode-radio" value="anonymous_allowed" ${authMode === 'anonymous_allowed' ? 'checked' : ''} style="margin-top: 2px; cursor: pointer;" />
-                  <div>
-                    <div>🔓 로그인 없이 작성 허용</div>
-                    <div style="font-size: 11.5px; font-weight: 500; color: #64748b; margin-top: 2px;">누구나 이름만 입력 후 즉시 작성</div>
-                  </div>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13.5px; font-weight: 700; color: #0e3753;">
+                  <input type="radio" name="review-auth-mode-radio" value="anonymous_allowed" ${authMode === 'anonymous_allowed' ? 'checked' : ''} style="cursor: pointer;" />
+                  <span>🔓 로그인 없이 작성 허용</span>
                 </label>
-              </div>
-
-              <div style="font-size: 11.5px; color: #0369a1; background: #e0f2fe; padding: 8px 10px; border-radius: 6px; line-height: 1.4;">
-                💡 실시간 동기화: 변경 즉시 모든 교원의 화면에 반영됩니다.
               </div>
             </div>
           ` : (!user && authMode === 'login_required') ? `
@@ -250,7 +238,9 @@ export function renderReviews(container, preselectedEventId = null) {
               </p>
             </div>
           ` : displayedReviews.map(rev => {
-            const cleanName = (rev.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim();
+            const cleanName = (rev.userEmail === "gogh9@senedu.kr" || rev.userName === "김*찬")
+              ? "김형찬"
+              : (rev.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim();
             const cleanTitle = (rev.eventTitle || "").replace(/^🎯\s*/, "");
             const isAuthor = user && user.email && rev.userEmail && (user.email.toLowerCase() === rev.userEmail.toLowerCase());
             const isApproved = rev.status !== "pending";
@@ -361,7 +351,8 @@ export function renderReviews(container, preselectedEventId = null) {
 
       if (user) {
         maskedName = user.name;
-        if (user.name.length >= 2 && !user.name.includes("*")) {
+        // 일반 교원 계정일 때만 가운데 글자 마스킹(*) 처리, 관리자 계정은 이름 전체 표시
+        if (!user.isAdmin && user.name.length >= 2 && !user.name.includes("*")) {
           maskedName = user.name[0] + "*" + (user.name.length > 2 ? user.name.slice(2) : "");
         }
         maskedName = maskedName.replace(/\s*(교사|실무사|선생님)$/, "").trim();
