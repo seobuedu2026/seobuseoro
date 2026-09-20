@@ -218,20 +218,18 @@ export function renderReviews(container, preselectedEventId = null, page = 1) {
                   <span style="font-size: 13px; font-weight: 600; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">(${user.email})</span>
                 </div>
               ` : `
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
-                  <div class="form-group" style="margin-bottom: 0;">
-                    <label for="review-author-input" style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 2px;">
-                      작성자 성함
-                    </label>
-                    <input type="text" id="review-author-input" class="m3-input" style="font-size: 13.5px; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff; outline: none;" />
-                  </div>
+                <div class="form-group" style="margin-bottom: 12px;">
+                  <label for="review-author-input" style="font-weight: 800; font-size: 13.5px; color: #0e3753; margin-bottom: 2px;">
+                    작성자 성함
+                  </label>
+                  <input type="text" id="review-author-input" class="m3-input" style="font-size: 14px; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff; outline: none;" />
+                </div>
 
-                  <div class="form-group" style="margin-bottom: 0;">
-                    <label for="review-password-input" style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 2px;">
-                      비밀번호
-                    </label>
-                    <input type="password" id="review-password-input" class="m3-input" required maxlength="20" style="font-size: 13.5px; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff; outline: none;" />
-                  </div>
+                <div class="form-group" style="margin-bottom: 12px;">
+                  <label for="review-password-input" style="font-weight: 800; font-size: 13.5px; color: #0e3753; margin-bottom: 2px;">
+                    비밀번호
+                  </label>
+                  <input type="password" id="review-password-input" class="m3-input" required maxlength="20" style="font-size: 14px; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff; outline: none;" />
                 </div>
               `}
 
