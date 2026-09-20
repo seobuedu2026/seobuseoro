@@ -196,7 +196,7 @@ export function renderReviews(container, preselectedEventId = null) {
 
               <div class="form-group" style="margin-bottom: 14px;">
                 <label for="review-text-input" style="font-weight: 800; font-size: 13.5px; color: #0e3753; margin-bottom: 2px;">소감 및 수업 적용 나눔</label>
-                <textarea id="review-text-input" class="m3-textarea" rows="4" placeholder="연수/행사에서 얻은 인사이트나 교실 실천 계획을 자유롭게 적어주세요." required style="resize: vertical;"></textarea>
+                <textarea id="review-text-input" class="m3-textarea" rows="4" placeholder="연수/행사에서 얻은 인사이트나 교실 실천 계획을 자유롭게 적어주세요." required style="resize: vertical; white-space: pre-wrap; line-height: 1.6;"></textarea>
               </div>
 
               <div style="display: flex; gap: 8px; align-items: center;">

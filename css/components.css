@@ -927,7 +927,8 @@
   font-size: 15.5px;
   color: #334155;
   line-height: 1.6;
-  word-break: keep-all;
+  white-space: pre-wrap;
+  word-break: break-word;
   overflow-wrap: break-word;
   margin-top: 4px;
   margin-bottom: 0;
