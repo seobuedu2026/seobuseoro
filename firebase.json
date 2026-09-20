@@ -4,6 +4,7 @@
     "ignore": [
       "firebase.json",
       ".firebaserc",
+      "firestore.rules",
       "**/.*",
       "**/node_modules/**",
       "*.pdf",
@@ -44,5 +45,8 @@
         "destination": "/index.html"
       }
     ]
+  },
+  "firestore": {
+    "rules": "firestore.rules"
   }
 }

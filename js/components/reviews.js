@@ -1,5 +1,6 @@
 import { getEvents, isEventPastOrToday } from "../data/events.js";
 import { GoogleAuthService } from "../auth/googleAuth.js";
+import { FirestoreReviewService } from "../data/firestoreService.js";
 
 const REVIEWS_STORAGE_KEY = "seobu_user_reviews_v7";
 const EXCLUDED_IDS = new Set(["rev-1", "rev-2", "rev-3"]);
@@ -23,7 +24,6 @@ const INITIAL_REVIEWS = [
 function getStoredReviews() {
   let data = localStorage.getItem(REVIEWS_STORAGE_KEY);
   
-  // v7에 데이터가 없으면 이전 버전(v6 등)에서 사용자 작성 후기 마이그레이션 시도
   if (!data) {
     const v6Data = localStorage.getItem("seobu_user_reviews_v6");
     if (v6Data) {
@@ -62,13 +62,32 @@ function getStoredReviews() {
   }
 }
 
-function saveReviews(reviews) {
+function saveReviews(reviews, shouldDispatch = true) {
   const cleanList = reviews.filter(r => !EXCLUDED_IDS.has(r.id));
   localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(cleanList));
-  window.dispatchEvent(new CustomEvent("reviews-updated", { detail: { reviews: cleanList } }));
+  if (shouldDispatch) {
+    window.dispatchEvent(new CustomEvent("reviews-updated", { detail: { reviews: cleanList } }));
+  }
 }
 
 let selectedRating = 5;
+
+// Firestore 실시간 리스너 전역 등록
+if (typeof window !== "undefined" && !window._firestoreReviewSubscribed) {
+  window._firestoreReviewSubscribed = true;
+  FirestoreReviewService.subscribeReviews((cloudReviews) => {
+    if (Array.isArray(cloudReviews) && cloudReviews.length > 0) {
+      const cleanCloud = cloudReviews.filter(r => !EXCLUDED_IDS.has(r.id));
+      if (cleanCloud.length > 0) {
+        saveReviews(cleanCloud, false);
+        const activeContainer = document.querySelector("#tab-content-mount");
+        if (activeContainer && activeContainer.querySelector(".reviews-view-wrapper")) {
+          renderReviews(activeContainer);
+        }
+      }
+    }
+  });
+}
 
 export function renderReviews(container, preselectedEventId = null) {
   const user = GoogleAuthService.getCurrentUser();
@@ -291,6 +310,9 @@ export function renderReviews(container, preselectedEventId = null) {
         const updated = [newReview, ...currentReviews];
         saveReviews(updated);
 
+        // 클라우드 Firestore 동기화 (비동기)
+        FirestoreReviewService.saveReview(newReview);
+
         alert("✅ 참여 후기가 성공적으로 등록되었습니다!");
         renderReviews(container, null);
       });
@@ -308,6 +330,7 @@ export function renderReviews(container, preselectedEventId = null) {
       if (target) {
         target.status = "approved";
         saveReviews(currentList);
+        FirestoreReviewService.updateReviewStatus(revId, "approved");
         alert("✅ 후기가 정상적으로 승인(공개)되었습니다.");
         renderReviews(container, preselectedEventId);
       }
@@ -325,6 +348,7 @@ export function renderReviews(container, preselectedEventId = null) {
       if (target) {
         target.status = "pending";
         saveReviews(currentList);
+        FirestoreReviewService.updateReviewStatus(revId, "pending");
         alert("🔒 후기 승인이 취소되었습니다.\n(일반 교원 및 방문자 화면에서 숨김 처리됩니다.)");
         renderReviews(container, preselectedEventId);
       }
@@ -341,6 +365,7 @@ export function renderReviews(container, preselectedEventId = null) {
         const currentList = getStoredReviews();
         const filtered = currentList.filter(r => r.id !== revId);
         saveReviews(filtered);
+        FirestoreReviewService.deleteReview(revId);
         alert("🗑️ 후기가 완전히 삭제되었습니다.");
         renderReviews(container, preselectedEventId);
       }
@@ -350,6 +375,7 @@ export function renderReviews(container, preselectedEventId = null) {
   // 공감 클릭
   container.querySelectorAll(".btn-like").forEach(btn => {
     btn.addEventListener("click", (e) => {
+      e.preventDefault();
       e.stopPropagation();
       const revId = btn.dataset.reviewId;
       const currentReviews = getStoredReviews();
@@ -357,6 +383,7 @@ export function renderReviews(container, preselectedEventId = null) {
       if (target) {
         target.likes = (target.likes || 0) + 1;
         saveReviews(currentReviews);
+        FirestoreReviewService.updateReviewLikes(revId, target.likes);
         renderReviews(container, preselectedEventId);
       }
     });
