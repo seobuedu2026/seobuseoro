@@ -9,9 +9,6 @@ export function renderFooter(container) {
     <footer class="site-footer">
       <div class="site-footer-inner">
         <div class="footer-top-info">
-          <div class="footer-org-name">
-            서울특별시서부교육지원청 초등교육지원과
-          </div>
           <p class="footer-notice-text">※ 세부 일정 및 장소는 학교 공문 및 신청 링크를 통해 확인하시기 바랍니다.</p>
         </div>
 
