@@ -1,31 +1,39 @@
-import { getEvents, isEventPastOrToday, getActiveMonths, getCategories, resolveApplyLink } from "../data/events.js?v=20260920_v69";
-import { GoogleAuthService } from "../auth/googleAuth.js?v=20260920_v69";
-import { openEventFormModal } from "./eventFormModal.js?v=20260920_v69";
-import { openCategoryManagerModal } from "./categoryManagerModal.js?v=20260920_v69";
+import { getEvents, isEventPastOrToday, getActiveMonths, getCategories, resolveApplyLink } from "../data/events.js?v=20260920_v70";
+import { GoogleAuthService } from "../auth/googleAuth.js?v=20260920_v70";
+import { openEventFormModal } from "./eventFormModal.js?v=20260920_v70";
+import { openCategoryManagerModal } from "./categoryManagerModal.js?v=20260920_v70";
 
 let selectedCategory = "all";
 let selectedMonth = "all";
+let searchQuery = "";
 
-export function renderPrograms(container, onSelectEventModal) {
-  const user = GoogleAuthService.getCurrentUser();
-  const isAdmin = !!(user && user.isAdmin);
-  const allEvents = getEvents();
+function escapeHtml(text) {
+  return String(text || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
 
-  const categories = [
-    { key: "all", label: "전체" },
-    ...getCategories()
-  ];
+// 검색어가 행사 정보와 맞는지 확인 (여러 단어는 모두 포함해야 함)
+function matchesSearch(ev, query) {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
 
-  const activeMonths = getActiveMonths();
-  const months = [
-    { key: "all", label: "전체" },
-    ...activeMonths.map(m => ({ key: String(m), label: `${m}월` }))
-  ];
+  const haystack = [
+    ev.title, ev.subtitle, ev.location, ev.target,
+    ev.description, ev.categoryLabel, ev.applyMethod,
+    `${ev.month}월`, `${ev.month}월 ${ev.day}일`
+  ].filter(Boolean).join(" ").toLowerCase();
 
-  const filteredEvents = allEvents.filter(ev => {
+  return q.split(/\s+/).filter(Boolean).every(term => haystack.includes(term));
+}
+
+function getFilteredEvents() {
+  return getEvents().filter(ev => {
     const matchCat = selectedCategory === "all" || ev.category === selectedCategory;
     const matchMonth = selectedMonth === "all" || String(ev.month) === selectedMonth;
-    return matchCat && matchMonth;
+    return matchCat && matchMonth && matchesSearch(ev, searchQuery);
   }).sort((a, b) => {
     const yearA = parseInt(a.year, 10) || 2026;
     const yearB = parseInt(b.year, 10) || 2026;
@@ -37,12 +45,108 @@ export function renderPrograms(container, onSelectEventModal) {
     const dayB = typeof b.day === "number" ? b.day : parseInt(String(b.day).replace(/\D/g, '') || '99', 10);
     return dayA - dayB;
   });
+}
+
+function buildCardsHTML(filteredEvents, isAdmin) {
+  if (filteredEvents.length === 0) {
+    const hasFilter = searchQuery.trim() || selectedCategory !== "all" || selectedMonth !== "all";
+    return `
+      <div class="prog-empty-state">
+        <div class="prog-empty-icon">🔍</div>
+        <p class="prog-empty-title">
+          ${searchQuery.trim()
+            ? `'${escapeHtml(searchQuery.trim())}'에 대한 검색 결과가 없습니다.`
+            : "해당 조건의 프로그램이 없습니다."}
+        </p>
+        ${hasFilter ? `<button type="button" class="btn-m3-outlined" id="btn-reset-empty">검색 조건 초기화</button>` : ""}
+      </div>
+    `;
+  }
+
+  return filteredEvents.map(ev => {
+    const catClass = ev.categoryClass || 'cat-workshop';
+    const catLabel = ev.categoryLabel || '연수·워크숍';
+    const evYear = ev.year || 2026;
+    const evTime = ev.time || '15:00 ~ 17:00';
+    const evLoc = ev.location || '서부교육지원청';
+    const evTarget = ev.target || '관내 초등희망교원';
+    const apply = resolveApplyLink(ev);
+    const evApplyMethod = apply.href
+      ? `<a href="${apply.href}" target="_blank" rel="noopener noreferrer" style="color: #0284c7; text-decoration: underline; font-weight: 800; display: inline-flex; align-items: center; gap: 4px;" onclick="event.stopPropagation();" title="신청 페이지로 이동">${apply.label} ↗</a>`
+      : apply.label;
+
+    return `
+      <div class="program-card clickable-program-card" data-card-id="${ev.id}" style="cursor: pointer;">
+        <div class="prog-card-top">
+          <span class="prog-category-badge ${catClass}">${catLabel}</span>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="prog-date-badge">${evYear}년 ${ev.month}월 ${ev.day}일</span>
+            ${isAdmin ? `
+              <button class="btn-edit-prog btn-admin-action" data-event-id="${ev.id}" title="프로그램 수정" onclick="event.stopPropagation();">
+                수정
+              </button>
+            ` : ''}
+            <span class="prog-chevron" style="margin-left: 4px;">▼</span>
+          </div>
+        </div>
+
+        <!-- 제목/부제목 영역 -->
+        <div class="prog-title-text-wrap" style="margin-bottom: 12px;">
+          <h3 class="prog-title">${ev.title || '프로그램'}</h3>
+          ${ev.subtitle ? `<div class="prog-subtitle">${ev.subtitle}</div>` : ''}
+        </div>
+
+        <!-- 아코디언 펼침 상세 내용 영역 -->
+        <div class="prog-accordion-content">
+          <!-- 캘린더 스타일과 동일한 정보 박스 -->
+          <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 12px;">
+            <div class="prog-info-list" style="margin-bottom: 0;">
+              <div class="prog-info-item">
+                <span class="prog-info-label">일시</span>
+                <span class="prog-datetime-val">
+                  <span class="prog-date-text">${evYear}년 ${ev.month}월 ${ev.day}일</span>
+                  <span class="prog-time-text">${evTime}</span>
+                </span>
+              </div>
+              <div class="prog-info-item">
+                <span class="prog-info-label">장소</span>
+                <span>${evLoc}</span>
+              </div>
+              <div class="prog-info-item">
+                <span class="prog-info-label">대상</span>
+                <span>${evTarget}</span>
+              </div>
+              <div class="prog-info-item">
+                <span class="prog-info-label">신청방법</span>
+                <span style="font-weight: 700;">${evApplyMethod}</span>
+              </div>
+            </div>
+          </div>
+
+          ${ev.description ? `
+            <div style="font-size: 16px; color: #475569; line-height: 1.6;">
+              ${ev.description}
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+export function renderPrograms(container, onSelectEventModal) {
+  const user = GoogleAuthService.getCurrentUser();
+  const isAdmin = !!(user && user.isAdmin);
+  const totalCount = getEvents().length;
+
+  const categories = getCategories();
+  const activeMonths = getActiveMonths();
 
   container.innerHTML = `
     <div class="programs-view-wrapper">
       <div class="tab-header-single-line" style="margin-bottom: 16px;">
         <h2 class="tab-header-title">프로그램 한눈에 보기</h2>
-        <p class="tab-header-desc">월과 유형으로 찾아보고, 카드를 눌러 상세 내용을 확인할 수 있습니다.</p>
+        <p class="tab-header-desc">행사명으로 검색하거나 월·유형으로 좁혀 찾을 수 있습니다.</p>
       </div>
 
       <!-- 새 프로그램 추가 및 유형 관리 버튼 (관리자 전용) -->
@@ -57,109 +161,138 @@ export function renderPrograms(container, onSelectEventModal) {
         </div>
       ` : ''}
 
-      <!-- 월 & 카테고리 필터 칩 바 -->
-      <div style="display: flex; justify-content: center; margin-bottom: 24px; width: 100%;">
-        <div style="display: inline-flex; flex-direction: column; gap: 10px; align-items: flex-start; max-width: 100%;">
-          <!-- 월 필터 -->
-          <div class="filter-chips-row" id="prog-month-filter" style="margin-bottom: 0; display: flex; align-items: center; justify-content: flex-start; gap: 8px; flex-wrap: wrap;">
-            ${months.map(m => `
-              <button class="m3-chip ${selectedMonth === m.key ? 'active' : ''}" data-month="${m.key}">
-                ${m.label}
-              </button>
-            `).join("")}
-          </div>
+      <!-- 검색 및 필터 바 -->
+      <div class="prog-search-bar">
+        <div class="prog-search-field">
+          <span class="prog-search-icon" aria-hidden="true">🔍</span>
+          <input type="search" id="prog-search-input" class="m3-input prog-search-input"
+                 placeholder="행사명, 장소, 대상으로 검색"
+                 aria-label="프로그램 검색" value="${escapeHtml(searchQuery)}" />
+          <button type="button" class="prog-search-clear" id="btn-clear-search"
+                  aria-label="검색어 지우기" ${searchQuery ? "" : "hidden"}>✕</button>
+        </div>
 
-          <!-- 카테고리 필터 -->
-          <div class="filter-chips-row" id="prog-cat-filter" style="margin-bottom: 0; display: flex; align-items: center; justify-content: flex-start; gap: 8px; flex-wrap: wrap;">
-            ${categories.map(cat => `
-              <button class="m3-chip ${selectedCategory === cat.key ? 'active' : ''}" data-cat="${cat.key}">
-                ${cat.label}
-              </button>
+        <div class="prog-filter-selects">
+          <select id="prog-month-select" class="m3-select" aria-label="월 선택">
+            <option value="all" ${selectedMonth === "all" ? "selected" : ""}>전체 기간</option>
+            ${activeMonths.map(m => `
+              <option value="${m}" ${selectedMonth === String(m) ? "selected" : ""}>${m}월</option>
             `).join("")}
-          </div>
+          </select>
+
+          <select id="prog-cat-select" class="m3-select" aria-label="유형 선택">
+            <option value="all" ${selectedCategory === "all" ? "selected" : ""}>전체 유형</option>
+            ${categories.map(cat => `
+              <option value="${cat.key}" ${selectedCategory === cat.key ? "selected" : ""}>${escapeHtml(cat.label)}</option>
+            `).join("")}
+          </select>
         </div>
       </div>
 
-      <!-- 프로그램 카드 그리드 -->
-      <div class="program-cards-grid">
-        ${filteredEvents.length === 0 ? `
-          <div style="grid-column: 1 / -1; text-align: center; padding: 60px; color: #94a3b8; background: #fff; border-radius: 18px; border: 1px dashed #cbd5e1;">
-            해당 조건의 프로그램이 없습니다.
-          </div>
-        ` : filteredEvents.map(ev => {
-          const catClass = ev.categoryClass || 'cat-workshop';
-          const catLabel = ev.categoryLabel || '연수·워크숍';
-          const evYear = ev.year || 2026;
-          const evTime = ev.time || '15:00 ~ 17:00';
-          const evLoc = ev.location || '서부교육지원청';
-          const evTarget = ev.target || '관내 초등희망교원';
-          const apply = resolveApplyLink(ev);
-          const evApplyMethod = apply.href
-            ? `<a href="${apply.href}" target="_blank" rel="noopener noreferrer" style="color: #0284c7; text-decoration: underline; font-weight: 800; display: inline-flex; align-items: center; gap: 4px;" onclick="event.stopPropagation();" title="신청 페이지로 이동">${apply.label} ↗</a>`
-            : apply.label;
-
-          const isPast = isEventPastOrToday(ev);
-
-          return `
-          <div class="program-card clickable-program-card" data-card-id="${ev.id}" style="cursor: pointer;">
-            <div class="prog-card-top">
-              <span class="prog-category-badge ${catClass}">${catLabel}</span>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span class="prog-date-badge">${evYear}년 ${ev.month}월 ${ev.day}일</span>
-                ${isAdmin ? `
-                  <button class="btn-edit-prog btn-admin-action" data-event-id="${ev.id}" title="프로그램 수정" onclick="event.stopPropagation();">
-                    수정
-                  </button>
-                ` : ''}
-                <span class="prog-chevron" style="margin-left: 4px;">▼</span>
-              </div>
-            </div>
-            
-            <!-- 제목/부제목 영역 -->
-            <div class="prog-title-text-wrap" style="margin-bottom: 12px;">
-              <h3 class="prog-title">${ev.title || '프로그램'}</h3>
-              ${ev.subtitle ? `<div class="prog-subtitle">${ev.subtitle}</div>` : ''}
-            </div>
-
-            <!-- 아코디언 펼침 상세 내용 영역 -->
-            <div class="prog-accordion-content">
-              <!-- 캘린더 스타일과 동일한 정보 박스 -->
-              <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 12px;">
-                <div class="prog-info-list" style="margin-bottom: 0;">
-                  <div class="prog-info-item">
-                    <span class="prog-info-label">일시</span>
-                    <span class="prog-datetime-val">
-                      <span class="prog-date-text">${evYear}년 ${ev.month}월 ${ev.day}일</span>
-                      <span class="prog-time-text">${evTime}</span>
-                    </span>
-                  </div>
-                  <div class="prog-info-item">
-                    <span class="prog-info-label">장소</span>
-                    <span>${evLoc}</span>
-                  </div>
-                  <div class="prog-info-item">
-                    <span class="prog-info-label">대상</span>
-                    <span>${evTarget}</span>
-                  </div>
-                  <div class="prog-info-item">
-                    <span class="prog-info-label">신청방법</span>
-                    <span style="font-weight: 700;">${evApplyMethod}</span>
-                  </div>
-                </div>
-              </div>
-
-              ${ev.description ? `
-                <div style="font-size: 16px; color: #475569; line-height: 1.6;">
-                  ${ev.description}
-                </div>
-              ` : ''}
-            </div>
-          </div>
-        `;
-        }).join("")}
+      <!-- 결과 요약 -->
+      <div class="prog-result-bar">
+        <p class="prog-result-count" id="prog-result-count" aria-live="polite"></p>
+        <button type="button" class="prog-reset-btn" id="btn-reset-filters" hidden>조건 초기화</button>
       </div>
+
+      <!-- 프로그램 카드 그리드 -->
+      <div class="program-cards-grid" id="prog-cards-grid"></div>
     </div>
   `;
+
+  const grid = container.querySelector("#prog-cards-grid");
+  const countEl = container.querySelector("#prog-result-count");
+  const resetBtn = container.querySelector("#btn-reset-filters");
+  const searchInput = container.querySelector("#prog-search-input");
+  const clearBtn = container.querySelector("#btn-clear-search");
+  const monthSelect = container.querySelector("#prog-month-select");
+  const catSelect = container.querySelector("#prog-cat-select");
+
+  // 카드 목록만 다시 그린다 (검색 입력 중 포커스를 잃지 않도록)
+  function refreshCards() {
+    const filtered = getFilteredEvents();
+    grid.innerHTML = buildCardsHTML(filtered, isAdmin);
+
+    const isFiltered = !!(searchQuery.trim() || selectedCategory !== "all" || selectedMonth !== "all");
+    countEl.textContent = isFiltered
+      ? `전체 ${totalCount}개 중 ${filtered.length}개`
+      : `전체 ${totalCount}개 프로그램`;
+    resetBtn.hidden = !isFiltered;
+    if (clearBtn) clearBtn.hidden = !searchQuery;
+
+    bindCardEvents();
+  }
+
+  function bindCardEvents() {
+    // 카드 클릭 시 아코디언 펼치기/접기 토글
+    grid.querySelectorAll(".clickable-program-card").forEach(card => {
+      card.addEventListener("click", (e) => {
+        if (e.target.closest("button") || e.target.closest("a") || e.target.closest("input")) return;
+        card.classList.toggle("expanded");
+      });
+    });
+
+    // 프로그램 수정 버튼 (관리자)
+    grid.querySelectorAll(".btn-edit-prog").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const eventId = btn.dataset.eventId;
+        const targetEv = getEvents().find(ev => ev.id === eventId);
+        if (targetEv) {
+          openEventFormModal(targetEv, null, () => renderPrograms(container, onSelectEventModal));
+        }
+      });
+    });
+
+    // 결과 없음 화면의 초기화 버튼
+    const emptyReset = grid.querySelector("#btn-reset-empty");
+    if (emptyReset) emptyReset.addEventListener("click", resetFilters);
+  }
+
+  function resetFilters() {
+    searchQuery = "";
+    selectedMonth = "all";
+    selectedCategory = "all";
+    if (searchInput) searchInput.value = "";
+    if (monthSelect) monthSelect.value = "all";
+    if (catSelect) catSelect.value = "all";
+    refreshCards();
+    if (searchInput) searchInput.focus();
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+      searchQuery = e.target.value;
+      refreshCards();
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      searchQuery = "";
+      if (searchInput) {
+        searchInput.value = "";
+        searchInput.focus();
+      }
+      refreshCards();
+    });
+  }
+
+  if (monthSelect) {
+    monthSelect.addEventListener("change", (e) => {
+      selectedMonth = e.target.value;
+      refreshCards();
+    });
+  }
+
+  if (catSelect) {
+    catSelect.addEventListener("change", (e) => {
+      selectedCategory = e.target.value;
+      refreshCards();
+    });
+  }
+
+  if (resetBtn) resetBtn.addEventListener("click", resetFilters);
 
   // 새 프로그램 추가 버튼 이벤트 바인딩
   const btnAddProg = container.querySelector("#btn-add-program");
@@ -177,61 +310,5 @@ export function renderPrograms(container, onSelectEventModal) {
     });
   }
 
-  // 프로그램 수정 버튼들
-  container.querySelectorAll(".btn-edit-prog").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const eventId = btn.dataset.eventId;
-      const currentList = getEvents();
-      const targetEv = currentList.find(ev => ev.id === eventId);
-      if (targetEv) {
-        openEventFormModal(targetEv, null, () => renderPrograms(container, onSelectEventModal));
-      }
-    });
-  });
-
-  // 월 필터 이벤트
-  container.querySelectorAll("#prog-month-filter .m3-chip").forEach(chip => {
-    chip.addEventListener("click", () => {
-      selectedMonth = chip.dataset.month;
-      renderPrograms(container, onSelectEventModal);
-    });
-  });
-
-  // 카테고리 필터 이벤트
-  container.querySelectorAll("#prog-cat-filter .m3-chip").forEach(chip => {
-    chip.addEventListener("click", () => {
-      selectedCategory = chip.dataset.cat;
-      renderPrograms(container, onSelectEventModal);
-    });
-  });
-
-  // 카드 클릭 시 아코디언 펼치기/접기 토글
-  container.querySelectorAll(".clickable-program-card").forEach(card => {
-    card.addEventListener("click", (e) => {
-      // 버튼 또는 링크 클릭 시 카드 접기/펼치기 방지
-      if (e.target.closest("button") || e.target.closest("a") || e.target.closest("input")) {
-        return;
-      }
-      card.classList.toggle("expanded");
-    });
-  });
-
-  // 후기 바로가기 버튼
-  container.querySelectorAll(".btn-review-shortcut").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const eventId = btn.dataset.eventId;
-      const allEvents = getEvents();
-      const targetEv = allEvents.find(e => e.id === eventId);
-      if (targetEv && !isEventPastOrToday(targetEv)) {
-        alert(`⚠️ [${targetEv.month}월 ${targetEv.day}일] 행사는 아직 진행 전입니다.\n후기 작성은 행사 진행 당일부터 가능합니다.`);
-        return;
-      }
-      window.dispatchEvent(new CustomEvent("navigate-tab", { 
-        detail: { tab: "reviews", selectedEventId: eventId } 
-      }));
-    });
-  });
+  refreshCards();
 }
-
