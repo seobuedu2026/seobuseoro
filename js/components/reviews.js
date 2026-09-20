@@ -72,19 +72,13 @@ function saveReviews(reviews, shouldDispatch = true) {
 
 let selectedRating = 5;
 
-// Firestore 실시간 리스너 전역 등록
-if (typeof window !== "undefined" && !window._firestoreReviewSubscribed) {
-  window._firestoreReviewSubscribed = true;
-  FirestoreReviewService.subscribeReviews((cloudReviews) => {
-    if (Array.isArray(cloudReviews) && cloudReviews.length > 0) {
-      const cleanCloud = cloudReviews.filter(r => !EXCLUDED_IDS.has(r.id));
-      if (cleanCloud.length > 0) {
-        saveReviews(cleanCloud, false);
-        const activeContainer = document.querySelector("#tab-content-mount");
-        if (activeContainer && activeContainer.querySelector(".reviews-view-wrapper")) {
-          renderReviews(activeContainer);
-        }
-      }
+// Firestore 설정 실시간 리스너 전역 등록
+if (typeof window !== "undefined" && !window._firestoreConfigSubscribed) {
+  window._firestoreConfigSubscribed = true;
+  FirestoreReviewService.subscribeReviewAuthMode((mode) => {
+    const activeContainer = document.querySelector("#tab-content-mount");
+    if (activeContainer && activeContainer.querySelector(".reviews-view-wrapper")) {
+      renderReviews(activeContainer);
     }
   });
 }
@@ -92,6 +86,7 @@ if (typeof window !== "undefined" && !window._firestoreReviewSubscribed) {
 export function renderReviews(container, preselectedEventId = null) {
   const user = GoogleAuthService.getCurrentUser();
   const isAdmin = !!(user && user.isAdmin);
+  const authMode = FirestoreReviewService.getReviewAuthMode(); // 'login_required' | 'anonymous_allowed'
   const allReviews = getStoredReviews();
 
   // 일반 사용자에게는 승인된 후기만 노출, 관리자에게는 전체 노출
@@ -105,7 +100,7 @@ export function renderReviews(container, preselectedEventId = null) {
       </div>
 
       <div class="review-layout">
-        <!-- 후기 작성 영역 (@senedu.kr 전용 로그인) -->
+        <!-- 후기 작성 영역 (@senedu.kr 전용 로그인 또는 비로그인 모드) -->
         <div class="review-form-card">
           <div style="text-align: center; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
             <h3 style="font-size: 16.5px; font-weight: 900; color: #0e3753; margin: 0; text-align: center;">
@@ -114,19 +109,45 @@ export function renderReviews(container, preselectedEventId = null) {
           </div>
 
           ${isAdmin ? `
-            <div style="background-color: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 20px 14px; text-align: center;">
-              <div style="font-size: 28px; margin-bottom: 8px;">🔒</div>
-              <p style="font-size: 14.5px; font-weight: 800; color: #0e3753; margin-bottom: 6px;">
-                관리자 계정 (작성 불가)
+            <div style="background-color: #f8fafc; border: 1.5px solid #0e3753; border-radius: 12px; padding: 16px 14px; text-align: left;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0;">
+                <div style="font-size: 14.5px; font-weight: 800; color: #0e3753; display: flex; align-items: center; gap: 6px;">
+                  ⚙️ <span>후기 작성 방식 설정</span>
+                </div>
+                <button type="button" id="btn-review-logout" class="btn-review-logout-inline" style="height: 32px; padding: 4px 10px; font-size: 12px;" title="관리자 모드 로그아웃">
+                  로그아웃
+                </button>
+              </div>
+
+              <p style="font-size: 12px; color: #475569; margin-bottom: 10px; line-height: 1.45;">
+                선생님들의 후기 작성 권한을 설정합니다.
               </p>
-              <p style="font-size: 12.5px; color: #64748b; line-height: 1.45; word-break: keep-all; margin-bottom: 12px;">
-                참여 후기는 행사에 참여하신 <strong>현장 교원(@senedu.kr)</strong> 전용으로 작성됩니다.
-              </p>
-              <button type="button" id="btn-review-logout" class="btn-review-logout-inline" title="로그아웃">
-                로그아웃
-              </button>
+
+              <div style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+                <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 700; color: #0e3753;">
+                  <input type="radio" name="review-auth-mode-radio" value="login_required" ${authMode === 'login_required' ? 'checked' : ''} style="margin-top: 2px; cursor: pointer;" />
+                  <div>
+                    <div>🔒 센스쿨 로그인 필수</div>
+                    <div style="font-size: 11.5px; font-weight: 500; color: #64748b; margin-top: 2px;">@senedu.kr 인증 교원만 작성 가능</div>
+                  </div>
+                </label>
+
+                <div style="height: 1px; background: #f1f5f9;"></div>
+
+                <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 700; color: #0e3753;">
+                  <input type="radio" name="review-auth-mode-radio" value="anonymous_allowed" ${authMode === 'anonymous_allowed' ? 'checked' : ''} style="margin-top: 2px; cursor: pointer;" />
+                  <div>
+                    <div>🔓 로그인 없이 작성 허용</div>
+                    <div style="font-size: 11.5px; font-weight: 500; color: #64748b; margin-top: 2px;">누구나 이름만 입력 후 즉시 작성</div>
+                  </div>
+                </label>
+              </div>
+
+              <div style="font-size: 11.5px; color: #0369a1; background: #e0f2fe; padding: 8px 10px; border-radius: 6px; line-height: 1.4;">
+                💡 실시간 동기화: 변경 즉시 모든 교원의 화면에 반영됩니다.
+              </div>
             </div>
-          ` : !user ? `
+          ` : (!user && authMode === 'login_required') ? `
             <div style="background-color: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 18px 12px; text-align: center;">
               <p style="font-size: 14px; font-weight: 800; color: #0e3753; margin-bottom: 6px; line-height: 1.45;">
                 후기 작성은 교원 로그인 후 가능합니다.
@@ -144,10 +165,19 @@ export function renderReviews(container, preselectedEventId = null) {
             </div>
           ` : `
             <form id="review-submit-form">
-              <div style="background: #f1f5f9; border: 1.5px solid #e2e8f0; padding: 9px 12px; border-radius: 10px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                <span style="font-weight: 800; color: #0e3753; font-size: 14.5px;">${user.name}</span>
-                <span style="font-size: 13px; font-weight: 600; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">(${user.email})</span>
-              </div>
+              ${user ? `
+                <div style="background: #f1f5f9; border: 1.5px solid #e2e8f0; padding: 9px 12px; border-radius: 10px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                  <span style="font-weight: 800; color: #0e3753; font-size: 14.5px;">${user.name}</span>
+                  <span style="font-size: 13px; font-weight: 600; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">(${user.email})</span>
+                </div>
+              ` : `
+                <div class="form-group" style="margin-bottom: 12px;">
+                  <label for="review-author-input" style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 2px;">
+                    작성자 성함
+                  </label>
+                  <input type="text" id="review-author-input" class="m3-input" placeholder="예: 홍길동 (미입력 시 '서부 교원'으로 등록)" style="font-size: 13.5px; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff; outline: none;" />
+                </div>
+              `}
 
               <div class="form-group" style="margin-bottom: 12px;">
                 <select id="review-event-select" class="m3-select" required>
@@ -169,9 +199,11 @@ export function renderReviews(container, preselectedEventId = null) {
                 <button type="submit" class="btn-m3-filled" style="flex: 1; height: 42px; border-radius: 10px; font-size: 14px; font-weight: 800; justify-content: center; padding: 0 16px;">
                   후기 등록하기
                 </button>
-                <button type="button" id="btn-review-logout" class="btn-review-logout-inline" title="로그아웃">
-                  로그아웃
-                </button>
+                ${user ? `
+                  <button type="button" id="btn-review-logout" class="btn-review-logout-inline" title="로그아웃">
+                    로그아웃
+                  </button>
+                ` : ''}
               </div>
             </form>
           `}
@@ -245,78 +277,104 @@ export function renderReviews(container, preselectedEventId = null) {
     </div>
   `;
 
-  // 미로그인 상태일 때 구글 로그인 버튼 바인딩
-  if (!user) {
-    const btnLogin = container.querySelector("#btn-custom-google-login");
-    if (btnLogin) {
-      btnLogin.addEventListener("click", () => {
-        GoogleAuthService.triggerGoogleLogin((user) => {
-          renderReviews(container, preselectedEventId);
-        });
-      });
-    }
-  } else {
-    // 로그아웃 버튼
-    const btnLogout = container.querySelector("#btn-review-logout");
-    if (btnLogout) {
-      btnLogout.addEventListener("click", () => {
-        GoogleAuthService.logout();
+  // 관리자 모드: 후기 작성 방식 라디오 버튼 변경 이벤트 바인딩
+  if (isAdmin) {
+    container.querySelectorAll("input[name='review-auth-mode-radio']").forEach(radio => {
+      radio.addEventListener("change", (e) => {
+        const newMode = e.target.value;
+        FirestoreReviewService.saveReviewAuthMode(newMode);
         renderReviews(container, preselectedEventId);
       });
-    }
+    });
+  }
 
-    // 후기 등록 폼
-    const form = container.querySelector("#review-submit-form");
-    if (form && !isAdmin) {
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        if (isAdmin) {
-          alert("⚠️ 관리자 계정은 후기 작성 대상이 아닙니다.");
-          return;
-        }
-        const select = container.querySelector("#review-event-select");
-        const text = container.querySelector("#review-text-input");
-        const eventId = select.value;
-        const content = text.value.trim();
+  // 로그아웃 버튼 바인딩 (관리자 또는 로그인 사용자)
+  const btnLogout = container.querySelector("#btn-review-logout");
+  if (btnLogout) {
+    btnLogout.addEventListener("click", () => {
+      GoogleAuthService.logout();
+      renderReviews(container, preselectedEventId);
+    });
+  }
 
-        if (!eventId || !content) return;
+  // 미로그인 상태일 때 구글 로그인 버튼 바인딩
+  const btnLogin = container.querySelector("#btn-custom-google-login");
+  if (btnLogin) {
+    btnLogin.addEventListener("click", () => {
+      GoogleAuthService.triggerGoogleLogin((user) => {
+        renderReviews(container, preselectedEventId);
+      });
+    });
+  }
 
-        const allEvents = getEvents();
-        const eventObj = allEvents.find(ev => ev.id === eventId);
-        const now = new Date();
-        const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  // 후기 등록 폼 바인딩
+  const form = container.querySelector("#review-submit-form");
+  if (form && !isAdmin) {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (isAdmin) {
+        alert("⚠️ 관리자 계정은 후기 작성 대상이 아닙니다.");
+        return;
+      }
+      const select = container.querySelector("#review-event-select");
+      const text = container.querySelector("#review-text-input");
+      const eventId = select ? select.value : "";
+      const content = text ? text.value.trim() : "";
 
-        let maskedName = user.name;
-        if (user.name.length >= 2 && !user.name.includes("*") && !isAdmin) {
+      if (!eventId || !content) return;
+
+      const allEvents = getEvents();
+      const eventObj = allEvents.find(ev => ev.id === eventId);
+      const now = new Date();
+      const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      let maskedName = "서부 교원";
+      let userEmail = "guest@senedu.kr";
+      let isSenedu = false;
+
+      if (user) {
+        maskedName = user.name;
+        if (user.name.length >= 2 && !user.name.includes("*")) {
           maskedName = user.name[0] + "*" + (user.name.length > 2 ? user.name.slice(2) : "");
         }
         maskedName = maskedName.replace(/\s*(교사|실무사|선생님)$/, "").trim();
+        userEmail = user.email;
+        isSenedu = true;
+      } else {
+        const authorInput = container.querySelector("#review-author-input");
+        const rawName = authorInput ? authorInput.value.trim() : "";
+        if (rawName) {
+          maskedName = rawName.replace(/\s*(교사|실무사|선생님)$/, "").trim();
+          if (maskedName.length >= 2 && !maskedName.includes("*")) {
+            maskedName = maskedName[0] + "*" + (maskedName.length > 2 ? maskedName.slice(2) : "");
+          }
+        }
+      }
 
-        const newReview = {
-          id: "rev-" + Date.now(),
-          eventId: eventId,
-          eventTitle: eventObj ? `${eventObj.title} ${eventObj.subtitle ? `(${eventObj.subtitle})` : ''}` : "서부 교육 프로그램",
-          userName: maskedName,
-          userEmail: user.email,
-          isSenedu: true,
-          rating: selectedRating,
-          content: content,
-          likes: 0,
-          createdAt: timeStr,
-          status: "approved" // 기본 승인 상태로 즉시 등록
-        };
+      const newReview = {
+        id: "rev-" + Date.now(),
+        eventId: eventId,
+        eventTitle: eventObj ? `${eventObj.title} ${eventObj.subtitle ? `(${eventObj.subtitle})` : ''}` : "서부 교육 프로그램",
+        userName: maskedName,
+        userEmail: userEmail,
+        isSenedu: isSenedu,
+        rating: selectedRating,
+        content: content,
+        likes: 0,
+        createdAt: timeStr,
+        status: "approved" // 기본 승인 상태로 즉시 등록
+      };
 
-        const currentReviews = getStoredReviews();
-        const updated = [newReview, ...currentReviews];
-        saveReviews(updated);
+      const currentReviews = getStoredReviews();
+      const updated = [newReview, ...currentReviews];
+      saveReviews(updated);
 
-        // 클라우드 Firestore 동기화 (비동기)
-        FirestoreReviewService.saveReview(newReview);
+      // 클라우드 Firestore 동기화 (비동기)
+      FirestoreReviewService.saveReview(newReview);
 
-        alert("✅ 참여 후기가 성공적으로 등록되었습니다!");
-        renderReviews(container, null);
-      });
-    }
+      alert("✅ 참여 후기가 성공적으로 등록되었습니다!");
+      renderReviews(container, null);
+    });
   }
 
   // 관리자 승인 버튼 바인딩 (확인창 없이 1클릭 즉시 승인)

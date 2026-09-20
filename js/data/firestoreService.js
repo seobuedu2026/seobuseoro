@@ -113,5 +113,45 @@ export const FirestoreReviewService = {
       console.warn("Firestore 후기 삭제 오류:", e);
       return false;
     }
+  },
+
+  // 후기 작성 방식 설정 조회
+  getReviewAuthMode() {
+    return localStorage.getItem("seobu_review_auth_mode") || "login_required"; // 'login_required' | 'anonymous_allowed'
+  },
+
+  // 후기 작성 방식 설정 저장
+  async saveReviewAuthMode(mode) {
+    localStorage.setItem("seobu_review_auth_mode", mode);
+    window.dispatchEvent(new CustomEvent("review-auth-mode-changed", { detail: { mode } }));
+    if (!db) return;
+    try {
+      const settingDoc = doc(db, "settings", "review_config");
+      await setDoc(settingDoc, { authMode: mode, updatedAt: new Date().toISOString() }, { merge: true });
+    } catch (e) {
+      console.warn("Firestore 설정 저장 오류:", e);
+    }
+  },
+
+  // 후기 작성 방식 설정 실시간 구독
+  subscribeReviewAuthMode(callback) {
+    if (!db) return () => {};
+    try {
+      const settingDoc = doc(db, "settings", "review_config");
+      const unsubscribe = onSnapshot(settingDoc, (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data && data.authMode) {
+            localStorage.setItem("seobu_review_auth_mode", data.authMode);
+            if (callback) callback(data.authMode);
+          }
+        }
+      }, (err) => {
+        console.warn("Firestore 설정 리스너 알림:", err);
+      });
+      return unsubscribe;
+    } catch (e) {
+      return () => {};
+    }
   }
 };
