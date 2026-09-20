@@ -103,12 +103,16 @@ export const FirestoreReviewService = {
     }
   },
 
-  // 후기 내용 수정
-  async updateReviewContent(reviewId, content) {
+  // 후기 내용 수정 (status가 주어지면 status도 함께 갱신)
+  async updateReviewContent(reviewId, content, status = null) {
     if (!db) return false;
     try {
       const revDoc = doc(db, REVIEWS_COLLECTION, reviewId);
-      await updateDoc(revDoc, { content, updatedAt: new Date().toISOString() });
+      const updateData = { content, updatedAt: new Date().toISOString() };
+      if (status) {
+        updateData.status = status;
+      }
+      await updateDoc(revDoc, updateData);
       return true;
     } catch (e) {
       console.warn("Firestore 내용 수정 오류:", e);

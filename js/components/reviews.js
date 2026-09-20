@@ -125,7 +125,7 @@ function formatAuthorDisplayName(rawName, isAdmin) {
   return clean[0] + "*".repeat(clean.length - 1);
 }
 
-export function renderReviews(container, preselectedEventId = null) {
+export function renderReviews(container, preselectedEventId = null, page = 1) {
   const user = GoogleAuthService.getCurrentUser();
   const isAdmin = !!(user && user.isAdmin);
   const authMode = FirestoreReviewService.getReviewAuthMode(); // 'login_required' | 'anonymous_allowed'
@@ -140,6 +140,14 @@ export function renderReviews(container, preselectedEventId = null) {
         const isMyReview = myReviewIds.includes(r.id) || (user && user.email && r.userEmail && user.email.toLowerCase() === r.userEmail.toLowerCase());
         return isMyReview;
       });
+
+  // 페이지네이션: 한 페이지당 10개씩 표시
+  const REVIEWS_PER_PAGE = 10;
+  const totalReviews = displayedReviews.length;
+  const totalPages = Math.ceil(totalReviews / REVIEWS_PER_PAGE) || 1;
+  let currentPage = Math.min(Math.max(1, page), totalPages);
+  const startIndex = (currentPage - 1) * REVIEWS_PER_PAGE;
+  const pagedReviews = displayedReviews.slice(startIndex, startIndex + REVIEWS_PER_PAGE);
 
   container.innerHTML = `
     <div class="reviews-view-wrapper">
@@ -268,14 +276,14 @@ export function renderReviews(container, preselectedEventId = null) {
         <!-- 등록된 후기 목록 -->
         <div class="review-feed-list" id="review-feed-container">
 
-          ${displayedReviews.length === 0 ? `
+          ${pagedReviews.length === 0 ? `
             <div style="background: #ffffff; border: 1.5px dashed #cbd5e1; border-radius: 18px; padding: 48px 20px; text-align: center; color: #64748b;">
               <div style="font-size: 36px; margin-bottom: 10px;">💬</div>
               <p style="font-size: 15px; font-weight: 700; color: #334155; margin: 0;">
                 등록된 참여 후기가 없습니다.
               </p>
             </div>
-          ` : displayedReviews.map(rev => {
+          ` : pagedReviews.map(rev => {
             const cleanName = formatAuthorDisplayName(rev.userName, isAdmin);
             const cleanTitle = (rev.eventTitle || "").replace(/^🎯\s*/, "");
             const isAuthor = myReviewIds.includes(rev.id) || (user && user.email && rev.userEmail && (user.email.toLowerCase() === rev.userEmail.toLowerCase()));
@@ -330,10 +338,42 @@ export function renderReviews(container, preselectedEventId = null) {
             </div>
           `;
           }).join("")}
+
+          ${totalPages > 1 ? `
+            <div class="reviews-pagination" style="display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 24px; flex-wrap: wrap;">
+              <button class="btn-page-nav" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled style="opacity: 0.4; cursor: not-allowed; padding: 6px 12px; border: 1.5px solid #cbd5e1; background: #ffffff; border-radius: 8px; font-weight: 700; font-size: 13px; color: #0e3753;"' : 'style="cursor: pointer; padding: 6px 12px; border: 1.5px solid #cbd5e1; background: #ffffff; border-radius: 8px; font-weight: 700; font-size: 13px; color: #0e3753;"'}>
+                ◀ 이전
+              </button>
+
+              ${Array.from({ length: totalPages }, (_, i) => i + 1).map(p => `
+                <button class="btn-page-num ${p === currentPage ? 'active' : ''}" data-page="${p}" style="padding: 6px 12px; border-radius: 8px; font-weight: 800; font-size: 13px; border: 1.5px solid ${p === currentPage ? '#0e3753' : '#cbd5e1'}; background: ${p === currentPage ? '#0e3753' : '#ffffff'}; color: ${p === currentPage ? '#ffffff' : '#0e3753'}; cursor: pointer;">
+                  ${p}
+                </button>
+              `).join("")}
+
+              <button class="btn-page-nav" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled style="opacity: 0.4; cursor: not-allowed; padding: 6px 12px; border: 1.5px solid #cbd5e1; background: #ffffff; border-radius: 8px; font-weight: 700; font-size: 13px; color: #0e3753;"' : 'style="cursor: pointer; padding: 6px 12px; border: 1.5px solid #cbd5e1; background: #ffffff; border-radius: 8px; font-weight: 700; font-size: 13px; color: #0e3753;"'}>
+                다음 ▶
+              </button>
+            </div>
+          ` : ''}
         </div>
       </div>
     </div>
   `;
+
+  // 페이지네이션 버튼 바인딩
+  container.querySelectorAll(".btn-page-num:not(.active), .btn-page-nav:not(:disabled)").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const targetPage = parseInt(btn.dataset.page, 10);
+      if (!isNaN(targetPage) && targetPage >= 1 && targetPage <= totalPages) {
+        renderReviews(container, preselectedEventId, targetPage);
+        const feedElem = container.querySelector("#review-feed-container");
+        if (feedElem) {
+          feedElem.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
+    });
+  });
 
   // 관리자 모드: 후기 작성 방식 라디오 버튼 변경 이벤트 바인딩
   if (isAdmin) {
@@ -718,12 +758,15 @@ function openReviewLookupModal(container, preselectedEventId) {
       const item = currentList.find(r => r.id === targetRev.id);
       if (item) {
         item.content = newText;
+        // 작성자가 수정하면 관리자가 다시 승인하도록 pending 상태로 전환
+        item.status = "pending";
         saveReviews(currentList);
-        FirestoreReviewService.updateReviewContent(targetRev.id, item.content);
+        FirestoreReviewService.updateReviewContent(targetRev.id, item.content, "pending");
       }
 
+      addMyReviewId(targetRev.id);
       closeModal();
-      alert("후기가 수정되었습니다.");
+      alert("후기가 수정되었습니다. 관리자의 재승인 후 공개됩니다.");
       renderReviews(container, preselectedEventId);
     });
 
