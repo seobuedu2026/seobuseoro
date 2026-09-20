@@ -35,6 +35,48 @@ try {
 }
 
 const REVIEWS_COLLECTION = "reviews";
+const CONTENT_COLLECTION = "settings";
+
+// 관리자가 수정하는 사이트 콘텐츠를 클라우드에 보관하여
+// 브라우저/기기가 달라도 동일한 내용이 보이도록 한다.
+export const FirestoreContentService = {
+  isAvailable() {
+    return !!db;
+  },
+
+  // 콘텐츠 문서 실시간 구독
+  subscribe(docId, onUpdate) {
+    if (!db) return () => {};
+    try {
+      const ref = doc(db, CONTENT_COLLECTION, docId);
+      return onSnapshot(ref, (snap) => {
+        if (!snap.exists()) {
+          if (onUpdate) onUpdate(null);
+          return;
+        }
+        if (onUpdate) onUpdate(snap.data() || null);
+      }, (err) => {
+        console.warn(`Firestore 콘텐츠(${docId}) 리스너 알림:`, err);
+      });
+    } catch (e) {
+      console.warn(`Firestore 콘텐츠(${docId}) 구독 실패:`, e);
+      return () => {};
+    }
+  },
+
+  // 콘텐츠 문서 저장
+  async save(docId, payload) {
+    if (!db) return false;
+    try {
+      const ref = doc(db, CONTENT_COLLECTION, docId);
+      await setDoc(ref, { ...payload, updatedAt: new Date().toISOString() }, { merge: true });
+      return true;
+    } catch (e) {
+      console.warn(`Firestore 콘텐츠(${docId}) 저장 오류:`, e);
+      return false;
+    }
+  }
+};
 
 export const FirestoreReviewService = {
   // 실시간 구독 (모든 기기/브라우저 실시간 동기화)

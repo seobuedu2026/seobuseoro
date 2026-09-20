@@ -1,4 +1,6 @@
 // 8개 수업나눔방 및 패들렛 링크 초기 데이터셋
+import { persist, clearPersisted } from "./siteSync.js";
+
 export const INITIAL_PADLET_ROOMS = [
   {
     id: "room-korean",
@@ -102,7 +104,7 @@ export function getPadletRooms() {
 // 수업나눔방 전체 목록 저장
 export function savePadletRooms(rooms) {
   if (!Array.isArray(rooms)) return;
-  localStorage.setItem(ROOMS_STORAGE_KEY, JSON.stringify(rooms));
+  persist(ROOMS_STORAGE_KEY, JSON.stringify(rooms));
   window.dispatchEvent(new CustomEvent("rooms-updated", { detail: { rooms } }));
 }
 
@@ -148,7 +150,7 @@ export function deletePadletRoom(roomId) {
 
 // 초기 기본값 복원
 export function resetPadletRooms() {
-  localStorage.removeItem(ROOMS_STORAGE_KEY);
+  clearPersisted(ROOMS_STORAGE_KEY);
   window.dispatchEvent(new CustomEvent("rooms-updated", { detail: { rooms: INITIAL_PADLET_ROOMS } }));
   return INITIAL_PADLET_ROOMS;
 }

@@ -1427,3 +1427,211 @@
 .excel-preview-table tr:hover {
   background-color: #f8fafc;
 }
+
+/* ==========================================================================
+   참여 이야기 (Participation Stories)
+   ========================================================================== */
+.stories-section {
+  margin-bottom: 32px;
+}
+
+.stories-head {
+  margin-bottom: 20px;
+}
+
+.stories-eyebrow {
+  font-size: 13px;
+  font-weight: 800;
+  color: #15803d;
+  letter-spacing: 0.06em;
+  margin: 0 0 6px 0;
+}
+
+.stories-title {
+  font-size: 30px;
+  font-weight: 900;
+  color: #0e3753;
+  margin: 0 0 10px 0;
+  line-height: 1.25;
+}
+
+.stories-desc {
+  font-size: 15px;
+  color: #475569;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.stories-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.story-card {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.story-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 14px rgba(14, 55, 83, 0.06);
+}
+
+.story-card-body {
+  padding: 20px 22px 16px 22px;
+}
+
+.story-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.story-date {
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.story-title {
+  font-size: 21px;
+  font-weight: 900;
+  color: #0e3753;
+  line-height: 1.32;
+  margin: 0 0 6px 0;
+}
+
+.story-subtitle {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #15803d;
+  margin: 0 0 10px 0;
+  line-height: 1.5;
+}
+
+.story-meta {
+  font-size: 13.5px;
+  color: #64748b;
+  margin: 0 0 14px 0;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f1f5f9;
+  line-height: 1.5;
+}
+
+.story-meta strong {
+  color: #0e3753;
+  font-weight: 800;
+  margin-left: 4px;
+}
+
+.story-desc {
+  font-size: 14.5px;
+  color: #475569;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.story-highlight {
+  background: #ecfdf5;
+  padding: 14px 22px;
+}
+
+.story-highlight-label {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #15803d;
+  letter-spacing: 0.04em;
+  margin: 0 0 6px 0;
+}
+
+.story-highlight-text {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #0e3753;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.story-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 15px 22px;
+  background: #ffffff;
+  border: none;
+  border-top: 1px solid #f1f5f9;
+  font-family: inherit;
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #0e3753;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.story-toggle:hover {
+  background: #f8fafc;
+}
+
+.story-toggle-icon {
+  font-size: 19px;
+  font-weight: 700;
+  color: #0e3753;
+  line-height: 1;
+}
+
+.story-detail {
+  padding: 4px 22px 20px 22px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.story-detail[hidden] {
+  display: none;
+}
+
+.story-detail-block + .story-detail-block {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.story-detail-head {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #15803d;
+  margin: 16px 0 10px 0;
+}
+
+.story-detail-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.story-detail-list li {
+  font-size: 14px;
+  color: #334155;
+  line-height: 1.6;
+}
+
+.stories-footnote {
+  font-size: 12.5px;
+  color: #94a3b8;
+  margin: 18px 0 0 0;
+  line-height: 1.5;
+}

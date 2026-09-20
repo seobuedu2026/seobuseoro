@@ -46,6 +46,14 @@
     grid-template-columns: 1fr;
   }
 
+  .stories-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stories-title {
+    font-size: 25px;
+  }
+
   .review-form-card {
     position: static;
   }

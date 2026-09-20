@@ -1,6 +1,7 @@
 import { getEvents, isEventPastOrToday } from "../data/events.js";
 import { GoogleAuthService } from "../auth/googleAuth.js";
 import { FirestoreReviewService } from "../data/firestoreService.js";
+import { renderParticipationStories, bindParticipationStories } from "./participationStories.js";
 
 const REVIEWS_STORAGE_KEY = "seobu_user_reviews_v8";
 const MY_REVIEWS_STORAGE_KEY = "seobu_my_review_ids_v1";
@@ -155,6 +156,8 @@ export function renderReviews(container, preselectedEventId = null, page = 1) {
         <h2 class="tab-header-title">참여후기</h2>
         <p class="tab-header-desc">행사에 참여하신 선생님들의 생생한 후기와 교실 수업 적용 사례를 자유롭게 공유해주세요.</p>
       </div>
+
+      ${renderParticipationStories(allReviews, getEvents())}
 
       <div class="review-layout">
         <!-- 후기 작성 영역 (@senedu.kr 전용 로그인 또는 비로그인 모드) -->
@@ -360,6 +363,9 @@ export function renderReviews(container, preselectedEventId = null, page = 1) {
       </div>
     </div>
   `;
+
+  // 참여 이야기 펼침 버튼 바인딩
+  bindParticipationStories(container);
 
   // 페이지네이션 버튼 바인딩
   container.querySelectorAll(".btn-page-num:not(.active), .btn-page-nav:not(:disabled)").forEach(btn => {

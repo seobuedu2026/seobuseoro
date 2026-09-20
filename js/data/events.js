@@ -1,4 +1,6 @@
 // 2026학년도 2학기 서부서로 수업성장 캘린더 기본 행사 데이터셋
+import { persist, clearPersisted } from "./siteSync.js";
+
 export const DEFAULT_EVENTS_DATA = [
   // ================= 9월 (수다박스의 달) =================
   {
@@ -672,7 +674,7 @@ export function saveMonthTheme(month, data) {
     ...all[month],
     ...data
   };
-  localStorage.setItem(MONTH_THEMES_STORAGE_KEY, JSON.stringify(all));
+  persist(MONTH_THEMES_STORAGE_KEY, JSON.stringify(all));
   window.dispatchEvent(new CustomEvent("events-updated"));
 }
 
@@ -695,7 +697,7 @@ export function getSelectedYear() {
 
 export function setSelectedYear(year) {
   const y = parseInt(year, 10) || 2026;
-  localStorage.setItem(SELECTED_YEAR_KEY, String(y));
+  persist(SELECTED_YEAR_KEY, String(y));
   window.dispatchEvent(new CustomEvent("year-changed", { detail: { year: y } }));
   window.dispatchEvent(new CustomEvent("events-updated"));
 }
@@ -808,7 +810,7 @@ export function getActiveMonths() {
 
 export function saveActiveMonths(months) {
   const sorted = Array.from(new Set(months.map(m => parseInt(m, 10)))).sort((a, b) => a - b);
-  localStorage.setItem(ACTIVE_MONTHS_KEY, JSON.stringify(sorted));
+  persist(ACTIVE_MONTHS_KEY, JSON.stringify(sorted));
   window.dispatchEvent(new CustomEvent("events-updated"));
 }
 
@@ -834,7 +836,7 @@ export function getOverviewMonths() {
 
 export function saveOverviewMonths(months) {
   const sorted = Array.from(new Set(months.map(m => parseInt(m, 10)))).sort((a, b) => a - b);
-  localStorage.setItem(OVERVIEW_MONTHS_KEY, JSON.stringify(sorted));
+  persist(OVERVIEW_MONTHS_KEY, JSON.stringify(sorted));
   window.dispatchEvent(new CustomEvent("events-updated"));
 }
 
@@ -894,13 +896,13 @@ export function getCategories() {
 }
 
 export function saveCategories(categoriesList) {
-  localStorage.setItem(CATEGORIES_KEY, JSON.stringify(categoriesList));
+  persist(CATEGORIES_KEY, JSON.stringify(categoriesList));
   window.dispatchEvent(new CustomEvent("categories-updated", { detail: { categories: categoriesList } }));
   window.dispatchEvent(new CustomEvent("events-updated"));
 }
 
 export function resetCategoriesToDefault() {
-  localStorage.removeItem(CATEGORIES_KEY);
+  clearPersisted(CATEGORIES_KEY);
   window.dispatchEvent(new CustomEvent("categories-updated", { detail: { categories: DEFAULT_CATEGORIES } }));
   window.dispatchEvent(new CustomEvent("events-updated"));
 }
@@ -944,14 +946,14 @@ export function getEvents() {
 
 // 이벤트 목록 저장
 export function saveEvents(eventsList) {
-  localStorage.setItem(CUSTOM_EVENTS_KEY, JSON.stringify(eventsList));
+  persist(CUSTOM_EVENTS_KEY, JSON.stringify(eventsList));
   window.dispatchEvent(new CustomEvent("events-updated", { detail: { events: eventsList } }));
 }
 
 // 기본 데이터로 초기화
 export function resetEventsToDefault() {
-  localStorage.removeItem(CUSTOM_EVENTS_KEY);
-  localStorage.removeItem(ACTIVE_MONTHS_KEY);
+  clearPersisted(CUSTOM_EVENTS_KEY);
+  clearPersisted(ACTIVE_MONTHS_KEY);
   window.dispatchEvent(new CustomEvent("events-updated", { detail: { events: DEFAULT_EVENTS_DATA } }));
 }
 

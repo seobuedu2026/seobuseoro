@@ -1,12 +1,13 @@
-import { renderHeader } from "./components/header.js?v=20260920_v63";
-import { renderFooter } from "./components/footer.js?v=20260920_v63";
-import { renderCalendar } from "./components/calendar.js?v=20260920_v63";
-import { renderPrograms } from "./components/programs.js?v=20260920_v63";
-import { renderReviews } from "./components/reviews.js?v=20260920_v63";
-import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v63";
-import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v63";
-import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v63";
-import { isEventPastOrToday } from "./data/events.js?v=20260920_v63";
+import { renderHeader } from "./components/header.js?v=20260920_v64";
+import { renderFooter } from "./components/footer.js?v=20260920_v64";
+import { renderCalendar } from "./components/calendar.js?v=20260920_v64";
+import { renderPrograms } from "./components/programs.js?v=20260920_v64";
+import { renderReviews } from "./components/reviews.js?v=20260920_v64";
+import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v64";
+import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v64";
+import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v64";
+import { isEventPastOrToday } from "./data/events.js?v=20260920_v64";
+import { initSiteSync } from "./data/siteSync.js";
 
 let activeTab = "calendar"; // 'calendar' | 'programs' | 'reviews' | 'padlet'
 
@@ -21,6 +22,9 @@ function initApp() {
     console.warn("DOM elements not ready yet, retrying...");
     return;
   }
+
+  // 관리자 수정 콘텐츠 클라우드 동기화 시작
+  initSiteSync();
 
   // 헤더 및 푸터 렌더링
   renderHeader(headerMount);

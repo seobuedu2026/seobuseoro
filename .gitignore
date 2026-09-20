@@ -11,3 +11,6 @@ desktop.ini
 # Temporary files
 *.tmp
 *.bak
+
+# Local editor/tooling config
+.claude/
