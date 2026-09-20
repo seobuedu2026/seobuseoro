@@ -219,11 +219,8 @@ export function renderReviews(container, preselectedEventId = null) {
           ${displayedReviews.length === 0 ? `
             <div style="background: #ffffff; border: 1.5px dashed #cbd5e1; border-radius: 18px; padding: 48px 20px; text-align: center; color: #64748b;">
               <div style="font-size: 36px; margin-bottom: 10px;">💬</div>
-              <p style="font-size: 15px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+              <p style="font-size: 15px; font-weight: 700; color: #334155; margin: 0;">
                 등록된 참여 후기가 없습니다.
-              </p>
-              <p style="font-size: 13px; color: #94a3b8;">
-                ${!user ? '센스쿨 구글 계정으로 로그인 후 첫 후기를 남겨보세요!' : '새로운 후기를 작성해보세요.'}
               </p>
             </div>
           ` : displayedReviews.map(rev => {
