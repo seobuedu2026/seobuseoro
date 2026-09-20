@@ -172,7 +172,7 @@ export function renderReviews(container, preselectedEventId = null) {
                   <label for="review-author-input" style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 2px;">
                     작성자 성함
                   </label>
-                  <input type="text" id="review-author-input" class="m3-input" placeholder="예: 홍길동 (미입력 시 '서부 교원'으로 등록)" style="font-size: 13.5px; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff; outline: none;" />
+                  <input type="text" id="review-author-input" class="m3-input" placeholder="홍길동 (미입력 시 '서부 교원'으로 등록)" style="font-size: 13.5px; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff; outline: none;" />
                 </div>
               `}
 
