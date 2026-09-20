@@ -1,7 +1,7 @@
 import { getEvents, isEventPastOrToday } from "../data/events.js";
 import { GoogleAuthService } from "../auth/googleAuth.js";
 
-const REVIEWS_STORAGE_KEY = "seobu_user_reviews";
+const REVIEWS_STORAGE_KEY = "seobu_user_reviews_v6";
 
 const INITIAL_REVIEWS = [
   {
@@ -60,34 +60,28 @@ const INITIAL_REVIEWS = [
 
 function getStoredReviews() {
   const data = localStorage.getItem(REVIEWS_STORAGE_KEY);
-  if (!data) {
+  if (data === null) {
     localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(INITIAL_REVIEWS));
     return INITIAL_REVIEWS;
   }
   try {
     const list = JSON.parse(data);
-    const existingIds = new Set(list.map(r => r.id));
-
-    // INITIAL_REVIEWS에 새로 추가된 후기가 기존 로컬 데이터에 없다면 자동으로 추가 병합
-    const mergedList = [...list];
-    INITIAL_REVIEWS.forEach(initRev => {
-      if (!existingIds.has(initRev.id)) {
-        mergedList.unshift(initRev);
-      }
-    });
-
-    return mergedList.map(r => ({
-      ...r,
-      userName: (r.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim(),
-      status: r.status || "approved"
-    }));
+    if (Array.isArray(list)) {
+      return list.map(r => ({
+        ...r,
+        userName: (r.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim(),
+        status: r.status === "pending" ? "pending" : "approved"
+      }));
+    }
+    return [];
   } catch (e) {
-    return INITIAL_REVIEWS;
+    return [];
   }
 }
 
 function saveReviews(reviews) {
   localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(reviews));
+  window.dispatchEvent(new CustomEvent("reviews-updated", { detail: { reviews } }));
 }
 
 let selectedRating = 5;
@@ -322,6 +316,7 @@ export function renderReviews(container, preselectedEventId = null) {
   // 관리자 승인 버튼 바인딩
   container.querySelectorAll(".btn-review-mod-approve").forEach(btn => {
     btn.addEventListener("click", (e) => {
+      e.preventDefault();
       e.stopPropagation();
       const revId = btn.dataset.reviewId;
       const currentList = getStoredReviews();
@@ -329,6 +324,7 @@ export function renderReviews(container, preselectedEventId = null) {
       if (target) {
         target.status = "approved";
         saveReviews(currentList);
+        alert("✅ 후기가 정상적으로 승인(공개)되었습니다.");
         renderReviews(container, preselectedEventId);
       }
     });
@@ -337,6 +333,7 @@ export function renderReviews(container, preselectedEventId = null) {
   // 관리자 승인 취소 버튼 바인딩
   container.querySelectorAll(".btn-review-mod-unapprove").forEach(btn => {
     btn.addEventListener("click", (e) => {
+      e.preventDefault();
       e.stopPropagation();
       const revId = btn.dataset.reviewId;
       const currentList = getStoredReviews();
@@ -344,6 +341,7 @@ export function renderReviews(container, preselectedEventId = null) {
       if (target) {
         target.status = "pending";
         saveReviews(currentList);
+        alert("🔒 후기 승인이 취소되었습니다.\n(일반 교원 및 방문자 화면에서 숨김 처리됩니다.)");
         renderReviews(container, preselectedEventId);
       }
     });
@@ -352,12 +350,14 @@ export function renderReviews(container, preselectedEventId = null) {
   // 삭제 버튼 바인딩 (관리자 또는 작성자)
   container.querySelectorAll(".btn-review-mod-delete").forEach(btn => {
     btn.addEventListener("click", (e) => {
+      e.preventDefault();
       e.stopPropagation();
       const revId = btn.dataset.reviewId;
-      if (confirm("정말 이 참여 후기를 삭제하시겠습니까? (삭제 후 복구 불가)")) {
+      if (confirm("정말 이 참여 후기를 삭제하시겠습니까?\n(삭제 후 복구할 수 없습니다.)")) {
         const currentList = getStoredReviews();
         const filtered = currentList.filter(r => r.id !== revId);
         saveReviews(filtered);
+        alert("🗑️ 후기가 완전히 삭제되었습니다.");
         renderReviews(container, preselectedEventId);
       }
     });
