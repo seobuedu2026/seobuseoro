@@ -190,7 +190,14 @@ export function renderReviews(container, preselectedEventId = null) {
                   <label for="review-author-input" style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 2px;">
                     작성자 성함
                   </label>
-                  <input type="text" id="review-author-input" class="m3-input" placeholder="홍길동 (미입력 시 '서부 교원'으로 등록)" style="font-size: 13.5px; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff; outline: none;" />
+                  <input type="text" id="review-author-input" class="m3-input" style="font-size: 13.5px; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff; outline: none;" />
+                </div>
+
+                <div class="form-group" style="margin-bottom: 12px;">
+                  <label for="review-password-input" style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 2px;">
+                    비밀번호 (수정/삭제용)
+                  </label>
+                  <input type="password" id="review-password-input" class="m3-input" required maxlength="20" style="font-size: 13.5px; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff; outline: none;" />
                 </div>
               `}
 
@@ -244,6 +251,7 @@ export function renderReviews(container, preselectedEventId = null) {
             const cleanTitle = (rev.eventTitle || "").replace(/^🎯\s*/, "");
             const isAuthor = user && user.email && rev.userEmail && (user.email.toLowerCase() === rev.userEmail.toLowerCase());
             const isApproved = rev.status !== "pending";
+            const isAnonymousReview = !rev.isSenedu || !!rev.password;
 
             return `
             <div class="review-feed-card ${!isApproved ? 'is-pending' : ''}" data-review-id="${rev.id}">
@@ -277,7 +285,10 @@ export function renderReviews(container, preselectedEventId = null) {
                     `}
                   ` : ''}
 
-                  ${(isAdmin || isAuthor) ? `
+                  ${(isAdmin || isAuthor || isAnonymousReview) ? `
+                    <button class="btn-review-mod-edit btn-admin-action" data-review-id="${rev.id}" style="padding: 3px 8px; font-size: 11.5px; color: #0284c7; border-color: #bae6fd;" title="후기 수정">
+                      수정
+                    </button>
                     <button class="btn-review-mod-delete btn-admin-action" data-review-id="${rev.id}" style="padding: 3px 8px; font-size: 11.5px; color: #ef4444; border-color: #fecdd3;" title="후기 삭제">
                       삭제
                     </button>
@@ -348,6 +359,7 @@ export function renderReviews(container, preselectedEventId = null) {
       let maskedName = "서부 교원";
       let userEmail = "guest@senedu.kr";
       let isSenedu = false;
+      let password = "";
 
       if (user) {
         maskedName = user.name;
@@ -360,7 +372,16 @@ export function renderReviews(container, preselectedEventId = null) {
         isSenedu = true;
       } else {
         const authorInput = container.querySelector("#review-author-input");
+        const pwInput = container.querySelector("#review-password-input");
         const rawName = authorInput ? authorInput.value.trim() : "";
+        password = pwInput ? pwInput.value.trim() : "";
+
+        if (!password) {
+          alert("⚠️ 후기 수정 및 삭제에 사용할 비밀번호를 입력해주세요.");
+          if (pwInput) pwInput.focus();
+          return;
+        }
+
         if (rawName) {
           maskedName = rawName.replace(/\s*(교사|실무사|선생님)$/, "").trim();
           if (maskedName.length >= 2 && !maskedName.includes("*")) {
@@ -380,7 +401,8 @@ export function renderReviews(container, preselectedEventId = null) {
         content: content,
         likes: 0,
         createdAt: timeStr,
-        status: "approved" // 기본 승인 상태로 즉시 등록
+        status: "approved",
+        password: password || ""
       };
 
       const currentReviews = getStoredReviews();
@@ -429,14 +451,70 @@ export function renderReviews(container, preselectedEventId = null) {
     });
   });
 
-  // 삭제 버튼 바인딩 (관리자 또는 작성자)
+  // 수정 버튼 바인딩 (관리자, 센스쿨 본인, 비밀번호 검증 비로그인 작성자)
+  container.querySelectorAll(".btn-review-mod-edit").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const revId = btn.dataset.reviewId;
+      const currentList = getStoredReviews();
+      const target = currentList.find(r => r.id === revId);
+      if (!target) return;
+
+      if (!isAdmin) {
+        if (target.password) {
+          const inputPw = prompt("후기 등록 시 설정한 비밀번호를 입력해주세요:");
+          if (inputPw === null) return;
+          if (inputPw !== target.password) {
+            alert("❌ 비밀번호가 일치하지 않습니다.");
+            return;
+          }
+        } else if (user && target.userEmail && user.email.toLowerCase() === target.userEmail.toLowerCase()) {
+          // 본인 작성 후기 통과
+        } else {
+          alert("⚠️ 수정 권한이 없습니다.");
+          return;
+        }
+      }
+
+      const newContent = prompt("수정할 후기 내용을 입력해주세요:", target.content);
+      if (newContent !== null && newContent.trim()) {
+        target.content = newContent.trim();
+        saveReviews(currentList);
+        FirestoreReviewService.updateReviewContent(revId, target.content);
+        alert("✅ 후기가 성공적으로 수정되었습니다.");
+        renderReviews(container, preselectedEventId);
+      }
+    });
+  });
+
+  // 삭제 버튼 바인딩 (관리자, 센스쿨 본인, 비밀번호 검증 비로그인 작성자)
   container.querySelectorAll(".btn-review-mod-delete").forEach(btn => {
     btn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
       const revId = btn.dataset.reviewId;
+      const currentList = getStoredReviews();
+      const target = currentList.find(r => r.id === revId);
+      if (!target) return;
+
+      if (!isAdmin) {
+        if (target.password) {
+          const inputPw = prompt("후기 등록 시 설정한 비밀번호를 입력해주세요:");
+          if (inputPw === null) return;
+          if (inputPw !== target.password) {
+            alert("❌ 비밀번호가 일치하지 않습니다.");
+            return;
+          }
+        } else if (user && target.userEmail && user.email.toLowerCase() === target.userEmail.toLowerCase()) {
+          // 본인 작성 후기 통과
+        } else {
+          alert("⚠️ 삭제 권한이 없습니다.");
+          return;
+        }
+      }
+
       if (confirm("정말 이 참여 후기를 삭제하시겠습니까?\n(삭제 후 복구할 수 없습니다.)")) {
-        const currentList = getStoredReviews();
         const filtered = currentList.filter(r => r.id !== revId);
         saveReviews(filtered);
         FirestoreReviewService.deleteReview(revId);

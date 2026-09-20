@@ -103,6 +103,19 @@ export const FirestoreReviewService = {
     }
   },
 
+  // 후기 내용 수정
+  async updateReviewContent(reviewId, content) {
+    if (!db) return false;
+    try {
+      const revDoc = doc(db, REVIEWS_COLLECTION, reviewId);
+      await updateDoc(revDoc, { content, updatedAt: new Date().toISOString() });
+      return true;
+    } catch (e) {
+      console.warn("Firestore 내용 수정 오류:", e);
+      return false;
+    }
+  },
+
   // 후기 영구 삭제
   async deleteReview(reviewId) {
     if (!db) return false;
