@@ -90,9 +90,9 @@ export function renderPrograms(container, onSelectEventModal) {
           const catClass = ev.categoryClass || 'cat-workshop';
           const catLabel = ev.categoryLabel || '연수·워크숍';
           const evYear = ev.year || 2026;
-          const evTime = ev.time || '14:00 ~ 17:00';
+          const evTime = ev.time || '15:00 ~ 17:00';
           const evLoc = ev.location || '서부교육지원청';
-          const evTarget = ev.target || '관내 교원';
+          const evTarget = ev.target || '관내 초등희망교원';
           const evApplyMethod = (ev.applyUrl && (ev.applyUrl.startsWith('http://') || ev.applyUrl.startsWith('https://'))) 
             ? (ev.applyMethod || '온라인 링크') 
             : '추후안내';
@@ -114,27 +114,10 @@ export function renderPrograms(container, onSelectEventModal) {
               </div>
             </div>
             
-            <!-- 제목/부제목 및 우측 액션 버튼 (날짜 아래, 제목/부제목과 동일 높이, 겹칠 때만 줄바꿈) -->
-            <div class="prog-title-action-row">
-              <div class="prog-title-text-wrap">
-                <h3 class="prog-title">${ev.title || '프로그램'}</h3>
-                ${ev.subtitle ? `<div class="prog-subtitle">${ev.subtitle}</div>` : ''}
-              </div>
-              <div class="prog-action-btn-wrap">
-                ${isPast ? `
-                  <button class="btn-m3-filled btn-review-shortcut" data-event-id="${ev.id}" style="font-size: 13px; font-weight: 800; border-radius: 9999px; padding: 7px 16px; cursor: pointer; border: none; background: #0e3753; color: #ffffff; white-space: nowrap; box-shadow: 0 2px 8px rgba(14, 55, 83, 0.2);" onclick="event.stopPropagation();">
-                    연수 후기 작성하기
-                  </button>
-                ` : (ev.applyUrl && (ev.applyUrl.startsWith('http://') || ev.applyUrl.startsWith('https://'))) ? `
-                  <a href="${ev.applyUrl}" target="_blank" class="btn-m3-filled" style="font-size: 13px; font-weight: 800; border-radius: 9999px; padding: 7px 16px; text-decoration: none; white-space: nowrap; box-shadow: 0 2px 8px rgba(14, 55, 83, 0.2);" onclick="event.stopPropagation();">
-                    참가 신청 바로가기
-                  </a>
-                ` : `
-                  <button class="btn-m3-outlined" disabled style="opacity: 0.75; cursor: default; background: #f8fafc; font-weight: 700; border-radius: 9999px; padding: 7px 16px; font-size: 12.5px; white-space: nowrap;" onclick="event.stopPropagation();">
-                    신청: 추후안내
-                  </button>
-                `}
-              </div>
+            <!-- 제목/부제목 영역 -->
+            <div class="prog-title-text-wrap" style="margin-bottom: 12px;">
+              <h3 class="prog-title">${ev.title || '프로그램'}</h3>
+              ${ev.subtitle ? `<div class="prog-subtitle">${ev.subtitle}</div>` : ''}
             </div>
 
             <!-- 아코디언 펼침 상세 내용 영역 -->

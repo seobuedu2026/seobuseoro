@@ -82,7 +82,7 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <div class="form-group">
               <label for="ef-time" style="font-weight: 800; font-size: 13px; color: #0e3753;">시간</label>
-              <input type="text" id="ef-time" class="m3-input" placeholder="예: 14:00 ~ 17:00" value="${eventObj?.time || '14:00 ~ 17:00'}" />
+              <input type="text" id="ef-time" class="m3-input" placeholder="예: 15:00 ~ 17:00" value="${eventObj?.time || '15:00 ~ 17:00'}" />
             </div>
 
             <div class="form-group">
@@ -95,7 +95,7 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <div class="form-group">
               <label for="ef-target" style="font-weight: 800; font-size: 13px; color: #0e3753;">대상</label>
-              <input type="text" id="ef-target" class="m3-input" placeholder="예: 관내 교원" value="${eventObj?.target || '관내 초·중·고 교원'}" />
+              <input type="text" id="ef-target" class="m3-input" placeholder="예: 관내 초등희망교원" value="${eventObj?.target || '관내 초등희망교원'}" />
             </div>
 
             <div class="form-group">
@@ -189,9 +189,9 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
     const rawDay = document.getElementById("ef-day").value.trim();
     const day = rawDay.includes("/") ? rawDay : (parseInt(rawDay, 10) || 1);
     const category = document.getElementById("ef-category").value;
-    const time = document.getElementById("ef-time").value.trim() || "14:00 ~ 17:00";
+    const time = document.getElementById("ef-time").value.trim() || "15:00 ~ 17:00";
     const location = document.getElementById("ef-location").value.trim() || "서부교육지원청";
-    const target = document.getElementById("ef-target").value.trim() || "관내 교원";
+    const target = document.getElementById("ef-target").value.trim() || "관내 초등희망교원";
     let applyUrl = document.getElementById("ef-apply-url").value.trim();
     if (applyUrl && !applyUrl.startsWith("http://") && !applyUrl.startsWith("https://")) {
       applyUrl = "https://" + applyUrl;

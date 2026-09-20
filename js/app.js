@@ -1,12 +1,12 @@
-import { renderHeader } from "./components/header.js?v=20260920_v57";
-import { renderFooter } from "./components/footer.js?v=20260920_v57";
-import { renderCalendar } from "./components/calendar.js?v=20260920_v57";
-import { renderPrograms } from "./components/programs.js?v=20260920_v57";
-import { renderReviews } from "./components/reviews.js?v=20260920_v57";
-import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v57";
-import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v57";
-import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v57";
-import { isEventPastOrToday } from "./data/events.js?v=20260920_v57";
+import { renderHeader } from "./components/header.js?v=20260920_v58";
+import { renderFooter } from "./components/footer.js?v=20260920_v58";
+import { renderCalendar } from "./components/calendar.js?v=20260920_v58";
+import { renderPrograms } from "./components/programs.js?v=20260920_v58";
+import { renderReviews } from "./components/reviews.js?v=20260920_v58";
+import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v58";
+import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v58";
+import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v58";
+import { isEventPastOrToday } from "./data/events.js?v=20260920_v58";
 
 let activeTab = "calendar"; // 'calendar' | 'programs' | 'reviews' | 'padlet'
 
@@ -44,31 +44,12 @@ function initApp() {
             <button class="modal-close-btn" id="btn-modal-close" aria-label="닫기">✕</button>
           </div>
 
-          <!-- 제목 및 부제목 & 신청 바로가기/후기작성 버튼 영역 -->
-          <div class="modal-title-action-row">
-            <div class="modal-title-text-wrap">
-              <h2 style="font-size:22px; font-weight:900; color:#0e3753; margin-bottom:4px; line-height:1.3; margin-top:0;">
-                ${eventObj.title}
-              </h2>
-              ${eventObj.subtitle ? `<div style="font-size:15px; font-weight:600; color:#475569;">${eventObj.subtitle}</div>` : ''}
-            </div>
-
-            <!-- 제목/설명 우측 버튼 (지난 연수는 후기 작성, 예정 연수는 참가 신청) -->
-            <div class="modal-action-btn-wrap">
-              ${isPast ? `
-                <button id="btn-modal-review-action" class="btn-m3-filled" style="white-space:nowrap; padding:9px 18px; font-size:13.5px; font-weight:800; background:#0e3753; color:#ffffff; border-radius:9999px; border:none; cursor:pointer; display:inline-flex; align-items:center; box-shadow:0 2px 8px rgba(14, 55, 83, 0.2);">
-                  연수 후기 작성하기
-                </button>
-              ` : (eventObj.applyUrl && (eventObj.applyUrl.startsWith('http://') || eventObj.applyUrl.startsWith('https://'))) ? `
-                <a href="${eventObj.applyUrl}" target="_blank" class="btn-m3-filled" style="white-space:nowrap; padding:9px 18px; font-size:13.5px; font-weight:800; background:#0e3753; color:#ffffff; border-radius:9999px; text-decoration:none; display:inline-flex; align-items:center; box-shadow:0 2px 8px rgba(14, 55, 83, 0.2);">
-                  참가 신청 바로가기
-                </a>
-              ` : `
-                <button class="btn-m3-outlined" disabled style="opacity:0.75; cursor:default; background:#f8fafc; font-weight:700; white-space:nowrap; padding:8px 16px; font-size:13px; border-radius:9999px; border-color:#cbd5e1; color:#64748b;">
-                  신청: 추후안내
-                </button>
-              `}
-            </div>
+          <!-- 제목 및 부제목 영역 -->
+          <div class="modal-title-text-wrap" style="margin-bottom: 14px;">
+            <h2 style="font-size:22px; font-weight:900; color:#0e3753; margin-bottom:4px; line-height:1.3; margin-top:0;">
+              ${eventObj.title}
+            </h2>
+            ${eventObj.subtitle ? `<div style="font-size:15px; font-weight:600; color:#475569;">${eventObj.subtitle}</div>` : ''}
           </div>
 
           <div style="background-color:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin-bottom:16px;">
