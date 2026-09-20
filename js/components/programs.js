@@ -1,7 +1,7 @@
-import { getEvents, isEventPastOrToday, getActiveMonths, getCategories, resolveApplyLink } from "../data/events.js?v=20260920_v72";
-import { GoogleAuthService } from "../auth/googleAuth.js?v=20260920_v72";
-import { openEventFormModal } from "./eventFormModal.js?v=20260920_v72";
-import { openCategoryManagerModal } from "./categoryManagerModal.js?v=20260920_v72";
+import { getEvents, isEventPastOrToday, getActiveMonths, getCategories, resolveApplyLink } from "../data/events.js?v=20260920_v75";
+import { GoogleAuthService } from "../auth/googleAuth.js?v=20260920_v75";
+import { openEventFormModal } from "./eventFormModal.js?v=20260920_v75";
+import { openCategoryManagerModal } from "./categoryManagerModal.js?v=20260920_v75";
 
 let selectedCategory = "all";
 let selectedMonth = "all";
@@ -190,7 +190,7 @@ export function renderPrograms(container, onSelectEventModal) {
   const activeMonths = getActiveMonths();
 
   container.innerHTML = `
-    <div class="programs-view-wrapper">
+    <div class="programs-view-wrapper cols-${viewPref.columns}">
       <div class="tab-header-single-line" style="margin-bottom: 16px;">
         <h2 class="tab-header-title">프로그램 한눈에 보기</h2>
         <p class="tab-header-desc">행사명으로 검색하거나 월·유형으로 좁혀 찾을 수 있습니다.</p>
@@ -379,8 +379,13 @@ export function renderPrograms(container, onSelectEventModal) {
       viewPref.columns = n;
       saveViewPref();
 
-      grid.classList.remove("cols-2", "cols-3", "cols-4");
-      grid.classList.add(`cols-${n}`);
+      // 그리드와 바깥 폭을 함께 바꿔 좌우로 고르게 넓어지도록 한다
+      const wrapper = container.querySelector(".programs-view-wrapper");
+      [grid, wrapper].forEach(el => {
+        if (!el) return;
+        el.classList.remove("cols-2", "cols-3", "cols-4");
+        el.classList.add(`cols-${n}`);
+      });
 
       container.querySelectorAll(".prog-col-btn").forEach(b => {
         const active = parseInt(b.dataset.columns, 10) === n;

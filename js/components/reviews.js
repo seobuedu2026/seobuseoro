@@ -76,6 +76,38 @@ function saveReviews(reviews, shouldDispatch = true) {
 
 let selectedRating = 5;
 
+// 후기 목록 보기 설정 (이 브라우저에만 저장)
+const REVIEW_VIEW_PREF_KEY = "seobu_reviews_view_pref_v1";
+
+const REVIEW_SORT_OPTIONS = [
+  { key: "recent", label: "최신순" },
+  { key: "oldest", label: "오래된순" },
+  { key: "likes", label: "공감 많은순" }
+];
+
+let reviewSort = (() => {
+  try {
+    const saved = localStorage.getItem(REVIEW_VIEW_PREF_KEY);
+    return REVIEW_SORT_OPTIONS.some(o => o.key === saved) ? saved : "recent";
+  } catch (e) {
+    return "recent";
+  }
+})();
+
+let reviewEventFilter = "all";
+
+function sortReviews(list) {
+  const copy = [...list];
+  switch (reviewSort) {
+    case "oldest":
+      return copy.sort((a, b) => String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
+    case "likes":
+      return copy.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+    default:
+      return copy.sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+  }
+}
+
 // Firestore 설정 및 후기 실시간 동기화 리스너 전역 등록
 if (typeof window !== "undefined") {
   // 초기 샘플 더미 후기 Firestore 완전 제거
@@ -144,13 +176,32 @@ export function renderReviews(container, preselectedEventId = null, page = 1) {
         return isMyReview;
       });
 
+  // 행사별 필터에 쓸 목록 (후기가 있는 행사만)
+  const eventOptions = [];
+  const seenEventIds = new Set();
+  displayedReviews.forEach(r => {
+    if (r.eventId && !seenEventIds.has(r.eventId)) {
+      seenEventIds.add(r.eventId);
+      eventOptions.push({ id: r.eventId, title: (r.eventTitle || "서부 교육 프로그램").replace(/^🎯\s*/, "") });
+    }
+  });
+  if (reviewEventFilter !== "all" && !seenEventIds.has(reviewEventFilter)) {
+    reviewEventFilter = "all";
+  }
+
+  const visibleReviews = sortReviews(
+    reviewEventFilter === "all"
+      ? displayedReviews
+      : displayedReviews.filter(r => r.eventId === reviewEventFilter)
+  );
+
   // 페이지네이션: 한 페이지당 10개씩 표시
   const REVIEWS_PER_PAGE = 10;
-  const totalReviews = displayedReviews.length;
+  const totalReviews = visibleReviews.length;
   const totalPages = Math.ceil(totalReviews / REVIEWS_PER_PAGE) || 1;
   let currentPage = Math.min(Math.max(1, page), totalPages);
   const startIndex = (currentPage - 1) * REVIEWS_PER_PAGE;
-  const pagedReviews = displayedReviews.slice(startIndex, startIndex + REVIEWS_PER_PAGE);
+  const pagedReviews = visibleReviews.slice(startIndex, startIndex + REVIEWS_PER_PAGE);
 
   container.innerHTML = `
     <div class="reviews-view-wrapper">
@@ -281,6 +332,33 @@ export function renderReviews(container, preselectedEventId = null, page = 1) {
         <!-- 등록된 후기 목록 -->
         <div class="review-feed-list" id="review-feed-container">
 
+          ${displayedReviews.length > 0 ? `
+            <div class="review-view-bar">
+              <p class="review-view-count">
+                ${reviewEventFilter === "all"
+                  ? `후기 ${totalReviews}건`
+                  : `전체 ${displayedReviews.length}건 중 ${totalReviews}건`}
+              </p>
+
+              <div class="review-view-controls">
+                ${eventOptions.length > 1 ? `
+                  <select id="review-event-filter" class="m3-select review-view-select" aria-label="행사별 보기">
+                    <option value="all" ${reviewEventFilter === "all" ? "selected" : ""}>전체 행사</option>
+                    ${eventOptions.map(o => `
+                      <option value="${o.id}" ${reviewEventFilter === o.id ? "selected" : ""}>${o.title}</option>
+                    `).join("")}
+                  </select>
+                ` : ""}
+
+                <select id="review-sort-select" class="m3-select review-view-select" aria-label="정렬 기준">
+                  ${REVIEW_SORT_OPTIONS.map(o => `
+                    <option value="${o.key}" ${reviewSort === o.key ? "selected" : ""}>${o.label}</option>
+                  `).join("")}
+                </select>
+              </div>
+            </div>
+          ` : ""}
+
           ${pagedReviews.length === 0 ? `
             <div style="background: #ffffff; border: 1.5px dashed #cbd5e1; border-radius: 18px; padding: 48px 20px; text-align: center; color: #64748b;">
               <div style="font-size: 36px; margin-bottom: 10px;">💬</div>
@@ -371,6 +449,29 @@ export function renderReviews(container, preselectedEventId = null, page = 1) {
 
   // 참여 이야기 펼침 버튼 바인딩
   bindParticipationStories(container);
+
+  // 후기 정렬 변경
+  const reviewSortSelect = container.querySelector("#review-sort-select");
+  if (reviewSortSelect) {
+    reviewSortSelect.addEventListener("change", (e) => {
+      reviewSort = e.target.value;
+      try {
+        localStorage.setItem(REVIEW_VIEW_PREF_KEY, reviewSort);
+      } catch (err) {
+        // 저장 실패해도 화면 동작에는 영향 없음
+      }
+      renderReviews(container, preselectedEventId, 1);
+    });
+  }
+
+  // 행사별 보기 변경
+  const reviewEventSelect = container.querySelector("#review-event-filter");
+  if (reviewEventSelect) {
+    reviewEventSelect.addEventListener("change", (e) => {
+      reviewEventFilter = e.target.value;
+      renderReviews(container, preselectedEventId, 1);
+    });
+  }
 
   // 페이지네이션 버튼 바인딩
   container.querySelectorAll(".btn-page-num:not(.active), .btn-page-nav:not(:disabled)").forEach(btn => {

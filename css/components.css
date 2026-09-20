@@ -531,9 +531,16 @@
   margin: 0 auto;
 }
 
+/* 열을 늘리면 카드가 좁아지는 대신 전체 폭이 좌우로 넓어진다.
+   margin: 0 auto 이므로 가운데를 기준으로 양쪽이 함께 늘어난다. */
+@media (min-width: 1200px) {
+  .programs-view-wrapper.cols-3 { max-width: 1300px; }
+  .programs-view-wrapper.cols-4 { max-width: 1616px; }
+}
+
 .program-cards-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
   width: 100%;
   align-items: start;
@@ -542,9 +549,9 @@
 /* 사용자가 고른 열 수는 넓은 화면에서만 적용하고,
    좁은 화면에서는 responsive.css의 기본 규칙을 따른다. */
 @media (min-width: 1200px) {
-  .program-cards-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
-  .program-cards-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
-  .program-cards-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .program-cards-grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .program-cards-grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .program-cards-grid.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
 .program-card {
@@ -574,15 +581,25 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
   margin-bottom: 12px;
+  /* 카드가 좁으면 날짜가 아랫줄로 내려가 배지가 깨지지 않는다 */
+  flex-wrap: wrap;
 }
 
 .prog-category-badge {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 800;
   padding: 4px 11px;
   border-radius: var(--shape-pill);
   border: 1px solid;
+  /* 유형 이름이 길어도 한 줄로 유지한다 */
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.5;
+  flex-shrink: 0;
 }
 
 .prog-date-badge {
@@ -2405,6 +2422,55 @@
   }
 
   .prog-filter-selects .m3-select {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
+/* ==========================================================================
+   참여후기 보기 설정 바
+   ========================================================================== */
+.review-view-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.review-view-count {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #64748b;
+  margin: 0;
+}
+
+.review-view-controls {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
+.review-view-select {
+  width: auto;
+  min-width: 120px;
+  max-width: 220px;
+  height: 36px;
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+@media (max-width: 767px) {
+  .review-view-controls {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .review-view-select {
     flex: 1 1 0;
     min-width: 0;
   }
