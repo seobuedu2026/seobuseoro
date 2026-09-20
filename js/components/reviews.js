@@ -164,11 +164,6 @@ export function renderReviews(container, preselectedEventId = null) {
 
         <!-- 등록된 후기 목록 -->
         <div class="review-feed-list" id="review-feed-container">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px;">
-            <span style="font-size: 14px; font-weight: 800; color: #0e3753;">
-              전체 후기 (${displayedReviews.length}개)
-            </span>
-          </div>
 
           ${displayedReviews.length === 0 ? `
             <div style="background: #ffffff; border: 1.5px dashed #cbd5e1; border-radius: 18px; padding: 48px 20px; text-align: center; color: #64748b;">
