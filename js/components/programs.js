@@ -114,13 +114,13 @@ export function renderPrograms(container, onSelectEventModal) {
               </div>
             </div>
             
-            <!-- 제목/부제목 및 우측 액션 버튼 (날짜 아래, 제목/부제목과 동일 높이) -->
-            <div class="prog-title-action-row" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 2px;">
-              <div class="prog-title-text-wrap" style="flex: 1; min-width: 0;">
-                <h3 class="prog-title" style="margin: 0;">${ev.title || '프로그램'}</h3>
-                ${ev.subtitle ? `<div class="prog-subtitle" style="margin-top: 4px;">${ev.subtitle}</div>` : ''}
+            <!-- 제목/부제목 및 우측 액션 버튼 (날짜 아래, 제목/부제목과 동일 높이, 겹칠 때만 줄바꿈) -->
+            <div class="prog-title-action-row">
+              <div class="prog-title-text-wrap">
+                <h3 class="prog-title">${ev.title || '프로그램'}</h3>
+                ${ev.subtitle ? `<div class="prog-subtitle">${ev.subtitle}</div>` : ''}
               </div>
-              <div class="prog-action-btn-wrap" style="flex-shrink: 0; display: flex; align-items: center; margin-left: auto;">
+              <div class="prog-action-btn-wrap">
                 ${isPast ? `
                   <button class="btn-m3-filled btn-review-shortcut" data-event-id="${ev.id}" style="font-size: 13px; font-weight: 800; border-radius: 9999px; padding: 7px 16px; cursor: pointer; border: none; background: #0e3753; color: #ffffff; white-space: nowrap; box-shadow: 0 2px 8px rgba(14, 55, 83, 0.2);" onclick="event.stopPropagation();">
                     연수 후기 작성하기

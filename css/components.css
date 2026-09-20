@@ -576,12 +576,34 @@
   color: #64748b;
 }
 
+.prog-title-action-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 2px;
+}
+
+.prog-title-text-wrap {
+  flex: 1 1 auto;
+  min-width: 180px;
+}
+
+.prog-action-btn-wrap {
+  flex-shrink: 0;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
 .prog-title {
   font-size: 18px;
   font-weight: 900;
   color: #0e3753;
   letter-spacing: -0.3px;
   line-height: 1.35;
+  margin: 0;
 }
 
 .prog-subtitle {

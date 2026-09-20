@@ -237,22 +237,28 @@
     grid-template-columns: 1fr;
   }
 
-  /* 프로그램 탭 제목 및 줄바꿈 시 우측 정렬 버튼 */
+  /* 프로그램 탭 제목 및 버튼: 기본적으로 한 줄에 나란히 배치, 텍스트가 길어 겹치는 경우에만 줄바꿈 후 우측 정렬 */
   .prog-title-action-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
     flex-wrap: wrap !important;
     gap: 8px !important;
   }
 
   .prog-title-text-wrap {
-    min-width: 0 !important;
-    width: 100% !important;
+    flex: 1 1 auto !important;
+    min-width: 130px !important;
+    width: auto !important;
   }
 
   .prog-action-btn-wrap {
+    flex-shrink: 0 !important;
     margin-left: auto !important;
+    width: auto !important;
     display: flex !important;
+    align-items: center !important;
     justify-content: flex-end !important;
-    width: 100% !important;
   }
 
   .prog-title {
