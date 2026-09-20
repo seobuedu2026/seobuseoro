@@ -1,4 +1,4 @@
-import { getEvents, saveEvents, getActiveMonths, getCategories, AVAILABLE_YEARS, getSelectedYear } from "../data/events.js?v=20260920_v75";
+import { getEvents, saveEvents, getActiveMonths, getCategories, AVAILABLE_YEARS, getSelectedYear } from "../data/events.js?v=20260920_v76";
 
 /**
  * 새 행사 추가 또는 기존 행사 수정 모달 열기

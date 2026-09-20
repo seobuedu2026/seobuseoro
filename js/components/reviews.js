@@ -19,6 +19,26 @@ function getMyReviewIds() {
   }
 }
 
+// 이미 공감한 후기 목록 (중복 공감 방지)
+const LIKED_REVIEWS_STORAGE_KEY = "seobu_liked_review_ids_v1";
+
+function getLikedReviewIds() {
+  try {
+    const list = JSON.parse(localStorage.getItem(LIKED_REVIEWS_STORAGE_KEY));
+    return Array.isArray(list) ? list : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function setLikedReviewIds(ids) {
+  try {
+    localStorage.setItem(LIKED_REVIEWS_STORAGE_KEY, JSON.stringify(ids));
+  } catch (e) {
+    // 저장 실패해도 화면 동작에는 영향 없음
+  }
+}
+
 function addMyReviewId(id) {
   const ids = getMyReviewIds();
   if (!ids.includes(id)) {
@@ -166,6 +186,7 @@ export function renderReviews(container, preselectedEventId = null, page = 1) {
   const authMode = FirestoreReviewService.getReviewAuthMode(); // 'login_required' | 'anonymous_allowed'
   const allReviews = getStoredReviews();
   const myReviewIds = getMyReviewIds();
+  const likedReviewIds = getLikedReviewIds();
 
   // 일반 사용자에게는 승인된 후기 + 본인이 작성하여 승인 대기 중인 후기 노출
   const displayedReviews = isAdmin 
@@ -399,8 +420,11 @@ export function renderReviews(container, preselectedEventId = null, page = 1) {
                 </div>
 
                 <div class="review-top-actions-group">
-                  <button class="btn-like-pill btn-like" data-review-id="${rev.id}" title="공감하기">
-                    ❤️ <span>공감</span> <strong>${rev.likes || 0}</strong>
+                  <button class="btn-like-pill btn-like ${likedReviewIds.includes(rev.id) ? 'liked' : ''}"
+                          data-review-id="${rev.id}"
+                          aria-pressed="${likedReviewIds.includes(rev.id)}"
+                          title="${likedReviewIds.includes(rev.id) ? '공감 취소' : '공감하기'}">
+                    ${likedReviewIds.includes(rev.id) ? '❤️' : '🤍'} <span>공감</span> <strong>${rev.likes || 0}</strong>
                   </button>
 
                   ${isAdmin ? `
@@ -683,20 +707,31 @@ export function renderReviews(container, preselectedEventId = null, page = 1) {
     });
   });
 
-  // 공감 클릭
+  // 공감 클릭 (한 사람이 후기 하나에 한 번만, 다시 누르면 취소)
   container.querySelectorAll(".btn-like").forEach(btn => {
     btn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
+
       const revId = btn.dataset.reviewId;
       const currentReviews = getStoredReviews();
       const target = currentReviews.find(r => r.id === revId);
-      if (target) {
+      if (!target) return;
+
+      const liked = getLikedReviewIds();
+      const alreadyLiked = liked.includes(revId);
+
+      if (alreadyLiked) {
+        target.likes = Math.max(0, (target.likes || 0) - 1);
+        setLikedReviewIds(liked.filter(id => id !== revId));
+      } else {
         target.likes = (target.likes || 0) + 1;
-        saveReviews(currentReviews);
-        FirestoreReviewService.updateReviewLikes(revId, target.likes);
-        renderReviews(container, preselectedEventId);
+        setLikedReviewIds([...liked, revId]);
       }
+
+      saveReviews(currentReviews);
+      FirestoreReviewService.updateReviewLikes(revId, target.likes);
+      renderReviews(container, preselectedEventId, currentPage);
     });
   });
 }

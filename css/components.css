@@ -964,6 +964,18 @@
   transform: scale(1.03);
 }
 
+/* 내가 이미 공감한 후기 */
+.btn-like-pill.liked {
+  background-color: #e11d48;
+  border-color: #e11d48;
+  color: #ffffff;
+}
+
+.btn-like-pill.liked:hover {
+  background-color: #be123c;
+  border-color: #be123c;
+}
+
 .review-event-tag {
   display: inline-flex;
   align-items: center;
