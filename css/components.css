@@ -1505,6 +1505,13 @@
   white-space: nowrap;
 }
 
+.story-kicker {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0 0 8px 0;
+}
+
 .story-title {
   font-size: 21px;
   font-weight: 900;
@@ -1525,15 +1532,7 @@
   font-size: 13.5px;
   color: #64748b;
   margin: 0 0 14px 0;
-  padding-bottom: 14px;
-  border-bottom: 1px solid #f1f5f9;
   line-height: 1.5;
-}
-
-.story-meta strong {
-  color: #0e3753;
-  font-weight: 800;
-  margin-left: 4px;
 }
 
 .story-desc {
@@ -1541,6 +1540,8 @@
   color: #475569;
   line-height: 1.65;
   margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid #f1f5f9;
 }
 
 .story-highlight {

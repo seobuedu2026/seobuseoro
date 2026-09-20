@@ -1,12 +1,12 @@
-import { renderHeader } from "./components/header.js?v=20260920_v64";
-import { renderFooter } from "./components/footer.js?v=20260920_v64";
-import { renderCalendar } from "./components/calendar.js?v=20260920_v64";
-import { renderPrograms } from "./components/programs.js?v=20260920_v64";
-import { renderReviews } from "./components/reviews.js?v=20260920_v64";
-import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v64";
-import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v64";
-import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v64";
-import { isEventPastOrToday } from "./data/events.js?v=20260920_v64";
+import { renderHeader } from "./components/header.js?v=20260920_v65";
+import { renderFooter } from "./components/footer.js?v=20260920_v65";
+import { renderCalendar } from "./components/calendar.js?v=20260920_v65";
+import { renderPrograms } from "./components/programs.js?v=20260920_v65";
+import { renderReviews } from "./components/reviews.js?v=20260920_v65";
+import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v65";
+import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v65";
+import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v65";
+import { isEventPastOrToday } from "./data/events.js?v=20260920_v65";
 import { initSiteSync } from "./data/siteSync.js";
 
 let activeTab = "calendar"; // 'calendar' | 'programs' | 'reviews' | 'padlet'
@@ -212,6 +212,13 @@ function initApp() {
   window.addEventListener("rooms-updated", () => {
     if (activeTab === "padlet") {
       renderPadletRooms(tabContentMount);
+    }
+  });
+
+  // 참여 이야기 갱신 리스너
+  window.addEventListener("stories-updated", () => {
+    if (activeTab === "reviews") {
+      switchTab("reviews");
     }
   });
 

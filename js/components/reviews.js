@@ -157,7 +157,7 @@ export function renderReviews(container, preselectedEventId = null, page = 1) {
         <p class="tab-header-desc">행사에 참여하신 선생님들의 생생한 후기와 교실 수업 적용 사례를 자유롭게 공유해주세요.</p>
       </div>
 
-      ${renderParticipationStories(allReviews, getEvents())}
+      ${renderParticipationStories()}
 
       <div class="review-layout">
         <!-- 후기 작성 영역 (@senedu.kr 전용 로그인 또는 비로그인 모드) -->

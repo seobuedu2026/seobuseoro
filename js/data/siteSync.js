@@ -13,11 +13,18 @@ export const SYNCED_KEYS = [
   "seobu_active_months_v2",
   "seobu_overview_months_v2",
   "seobu_month_themes_v3",
-  "seobu_selected_year_v1"
+  "seobu_selected_year_v1",
+  "seobu_participation_stories_v1"
 ];
 
 // 값이 지워진 상태(기본값 사용)를 나타내는 표식
 const CLEARED = "";
+
+// 항목이 바뀌었을 때 화면에 알릴 이벤트 (없으면 events-updated)
+const NOTIFY_EVENT = {
+  "seobu_padlet_rooms_custom_v1": "rooms-updated",
+  "seobu_participation_stories_v1": "stories-updated"
+};
 
 function isAdminMode() {
   return localStorage.getItem("seobu_admin_mode") === "true";
@@ -72,8 +79,7 @@ export function initSiteSync() {
     }
     if (!data) return;
 
-    let eventsChanged = false;
-    let roomsChanged = false;
+    const changedEvents = new Set();
 
     SYNCED_KEYS.forEach(key => {
       const remote = data[key];
@@ -88,18 +94,11 @@ export function initSiteSync() {
         localStorage.setItem(key, remote);
       }
 
-      if (key === "seobu_padlet_rooms_custom_v1") {
-        roomsChanged = true;
-      } else {
-        eventsChanged = true;
-      }
+      changedEvents.add(NOTIFY_EVENT[key] || "events-updated");
     });
 
-    if (eventsChanged) {
-      window.dispatchEvent(new CustomEvent("events-updated"));
-    }
-    if (roomsChanged) {
-      window.dispatchEvent(new CustomEvent("rooms-updated"));
-    }
+    changedEvents.forEach(name => {
+      window.dispatchEvent(new CustomEvent(name));
+    });
   });
 }
