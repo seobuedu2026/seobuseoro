@@ -110,34 +110,25 @@ button {
 
 .footer-top-info {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.footer-info-divider {
-  color: #94a3b8;
-  font-weight: 800;
-  font-size: 15px;
-  user-select: none;
+  gap: 6px;
 }
 
 .footer-org-name {
   font-size: 15.5px;
   font-weight: 800;
   color: #0e3753;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  text-align: center;
 }
 
 .footer-notice-text {
   font-size: 13.5px;
   color: #64748b;
   margin: 0;
+  text-align: center;
 }
 
 .footer-copyright-center {
