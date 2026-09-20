@@ -136,6 +136,14 @@
     box-sizing: border-box !important;
   }
 
+  /* 모바일에서 '수업나눔방(자료실)' ➔ '자료실' 간소화 표시 */
+  .tab-label-full {
+    display: none !important;
+  }
+  .tab-label-short {
+    display: inline !important;
+  }
+
   /* 3. 캘린더 선택 버튼(월 필터 칩)도 한 줄에 4개 배열 */
   .calendar-view-mode-bar {
     display: flex !important;
@@ -229,7 +237,24 @@
     grid-template-columns: 1fr;
   }
 
-  /* 프로그램 탭 내용 글씨 1포인트 추가 확대 (가독성 향상) */
+  /* 프로그램 탭 제목 및 줄바꿈 시 우측 정렬 버튼 */
+  .prog-title-action-row {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .prog-title-text-wrap {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .prog-action-btn-wrap {
+    margin-left: auto !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    width: 100% !important;
+  }
+
   .prog-title {
     font-size: 19.5px !important;
   }

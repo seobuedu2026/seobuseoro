@@ -40,10 +40,17 @@
 }
 
 .nav-tab-item.active {
-  background: #0e3753;
+  background-color: #0e3753;
   color: #ffffff;
   border-color: #0e3753;
-  box-shadow: 0 6px 16px rgba(14, 55, 83, 0.25);
+  box-shadow: 0 4px 12px rgba(14, 55, 83, 0.25);
+}
+
+.tab-label-short {
+  display: none;
+}
+.tab-label-full {
+  display: inline;
 }
 
 /* ==========================================================================
