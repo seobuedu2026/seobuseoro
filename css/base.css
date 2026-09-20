@@ -137,16 +137,18 @@ button {
   margin: 2px 0;
 }
 
-/* 하단 바 (저작권 문구 가운데 정렬, 관리자 버튼 우측 정렬) */
+/* 하단 바 (저작권 문구 가운데 정렬 및 톱니바퀴 관리자 버튼) */
 .footer-bottom-bar {
   position: relative;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   border-top: none;
   padding-top: 0;
   min-height: 32px;
+  flex-wrap: wrap;
 }
 
 .footer-copy {
@@ -156,12 +158,33 @@ button {
   text-align: center;
 }
 
+.footer-gear-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 3px 5px;
+  border-radius: 6px;
+  color: #94a3b8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 0.65;
+}
+
+.footer-gear-btn:hover {
+  opacity: 1;
+  color: #0e3753;
+  transform: rotate(60deg) scale(1.15);
+}
+
 .footer-admin-actions {
-  position: absolute;
-  right: 0;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
+  margin-left: 10px;
 }
 
 /* 관리자 모드 전용 네모(각진 상자) 형태의 통일된 액션 버튼 */

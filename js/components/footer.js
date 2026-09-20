@@ -8,25 +8,28 @@ export function renderFooter(container) {
   container.innerHTML = `
     <footer class="site-footer">
       <div class="site-footer-inner">
-        <!-- 하단 영역 (저작권 문구 가운데 정렬, 관리자 버튼 우측 정렬) -->
+        <!-- 하단 영역 (저작권 문구 및 톱니바퀴 관리자 로그인 버튼) -->
         <div class="footer-bottom-bar">
-          <div class="footer-copy">
+          <span class="footer-copy">
             © 2026 서울특별시서부교육지원청. All Rights Reserved.
-          </div>
-          <div class="footer-admin-actions">
-            ${isAdmin ? `
-              <button id="footer-btn-admin-account" class="btn-admin-action" title="관리자 ID 현황 조회, 추가/삭제 및 비밀번호(PW) 설정">
-                관리자 계정 관리
+          </span>
+          ${!isAdmin ? `
+            <button id="footer-btn-admin-verify" class="footer-gear-btn" title="관리자 로그인" aria-label="관리자 로그인">
+              ⚙️
+            </button>
+          ` : `
+            <div class="footer-admin-actions">
+              <span style="font-size: 11.5px; font-weight: 800; background: #0e3753; color: #ffffff; padding: 2px 8px; border-radius: 9999px;">
+                관리자
+              </span>
+              <button id="footer-btn-admin-account" class="btn-admin-action" style="font-size: 12px; padding: 3px 10px;" title="관리자 ID 현황 조회, 추가/삭제 및 비밀번호(PW) 설정">
+                계정 관리
               </button>
-              <button id="footer-btn-logout" class="btn-admin-action danger" title="관리자 모드 로그아웃">
+              <button id="footer-btn-logout" class="btn-admin-action danger" style="font-size: 12px; padding: 3px 10px;" title="관리자 모드 로그아웃">
                 로그아웃
               </button>
-            ` : `
-              <button id="footer-btn-admin-verify" class="btn-admin-action" title="관리자 로그인">
-                관리자 로그인
-              </button>
-            `}
-          </div>
+            </div>
+          `}
         </div>
       </div>
     </footer>
