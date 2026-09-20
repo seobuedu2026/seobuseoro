@@ -8,5 +8,12 @@ service cloud.firestore {
     match /settings/{docId} {
       allow read, write: if true;
     }
+    // 개인정보 수집·이용 동의 기록
+    // 기록 생성은 허용하되, 외부에서 조회·삭제할 수 없도록 제한한다.
+    match /consents/{docId} {
+      allow read: if false;
+      allow create, update: if true;
+      allow delete: if false;
+    }
   }
 }

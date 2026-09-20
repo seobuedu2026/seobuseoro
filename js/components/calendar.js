@@ -1,9 +1,9 @@
-import { getEvents, getMonthThemes, getActiveMonths, getOverviewMonths, getCategories, getHolidayName, saveEvents, getSelectedYear, setSelectedYear, AVAILABLE_YEARS } from "../data/events.js?v=20260920_v66";
-import { GoogleAuthService } from "../auth/googleAuth.js?v=20260920_v66";
-import { openEventFormModal } from "./eventFormModal.js?v=20260920_v66";
-import { openMonthManagerModal, openMonthThemeEditModal } from "./monthManagerModal.js?v=20260920_v66";
-import { openAdminExcelModal } from "./adminExcelModal.js?v=20260920_v66";
-import { openCategoryManagerModal } from "./categoryManagerModal.js?v=20260920_v66";
+import { getEvents, getMonthThemes, getActiveMonths, getOverviewMonths, getCategories, getHolidayName, saveEvents, getSelectedYear, setSelectedYear, AVAILABLE_YEARS } from "../data/events.js?v=20260920_v69";
+import { GoogleAuthService } from "../auth/googleAuth.js?v=20260920_v69";
+import { openEventFormModal } from "./eventFormModal.js?v=20260920_v69";
+import { openMonthManagerModal, openMonthThemeEditModal } from "./monthManagerModal.js?v=20260920_v69";
+import { openAdminExcelModal } from "./adminExcelModal.js?v=20260920_v69";
+import { openCategoryManagerModal } from "./categoryManagerModal.js?v=20260920_v69";
 
 let currentMonth = "all"; // 'all' (모아보기 모드) | 1 ~ 12
 

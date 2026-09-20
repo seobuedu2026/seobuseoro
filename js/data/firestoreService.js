@@ -36,6 +36,27 @@ try {
 
 const REVIEWS_COLLECTION = "reviews";
 const CONTENT_COLLECTION = "settings";
+const CONSENTS_COLLECTION = "consents";
+
+// 개인정보 수집·이용 동의 기록 보관
+export const FirestoreConsentService = {
+  // 이메일을 문서 ID로 쓸 수 있게 변환 ('/' 등 사용 불가 문자 제거)
+  toDocId(email) {
+    return String(email || "").trim().toLowerCase().replace(/[^a-z0-9._-]/g, "_");
+  },
+
+  async saveConsent(email, record) {
+    if (!db || !email) return false;
+    try {
+      const ref = doc(db, CONSENTS_COLLECTION, this.toDocId(email));
+      await setDoc(ref, { email, ...record }, { merge: true });
+      return true;
+    } catch (e) {
+      console.warn("동의 기록 저장 오류:", e);
+      return false;
+    }
+  }
+};
 
 // 관리자가 수정하는 사이트 콘텐츠를 클라우드에 보관하여
 // 브라우저/기기가 달라도 동일한 내용이 보이도록 한다.

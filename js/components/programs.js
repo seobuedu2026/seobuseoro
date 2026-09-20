@@ -1,7 +1,7 @@
-import { getEvents, isEventPastOrToday, getActiveMonths, getCategories, resolveApplyLink } from "../data/events.js?v=20260920_v66";
-import { GoogleAuthService } from "../auth/googleAuth.js?v=20260920_v66";
-import { openEventFormModal } from "./eventFormModal.js?v=20260920_v66";
-import { openCategoryManagerModal } from "./categoryManagerModal.js?v=20260920_v66";
+import { getEvents, isEventPastOrToday, getActiveMonths, getCategories, resolveApplyLink } from "../data/events.js?v=20260920_v69";
+import { GoogleAuthService } from "../auth/googleAuth.js?v=20260920_v69";
+import { openEventFormModal } from "./eventFormModal.js?v=20260920_v69";
+import { openCategoryManagerModal } from "./categoryManagerModal.js?v=20260920_v69";
 
 let selectedCategory = "all";
 let selectedMonth = "all";

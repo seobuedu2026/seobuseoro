@@ -1,4 +1,4 @@
-import { getEvents, saveEvents, getActiveMonths, getCategories, AVAILABLE_YEARS, getSelectedYear } from "../data/events.js?v=20260920_v66";
+import { getEvents, saveEvents, getActiveMonths, getCategories, AVAILABLE_YEARS, getSelectedYear } from "../data/events.js?v=20260920_v69";
 
 /**
  * 새 행사 추가 또는 기존 행사 수정 모달 열기
@@ -31,120 +31,156 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
     }
   }
 
+  // 캘린더에서 날짜를 눌러 들어온 경우 선택한 날짜를 안내한다
+  const pickedDateHint = (!isEdit && defaultDate && defaultDate.month)
+    ? `${defaultDate.year || currentYear}년 ${defaultDate.month}월 ${defaultDate.day}일에 등록합니다`
+    : "";
+
   mount.innerHTML = `
     <div class="m3-modal-backdrop open" id="event-form-backdrop">
-      <div class="m3-modal-dialog" style="max-width: 560px; max-height: 90vh; overflow-y: auto;">
-        <div class="modal-header">
-          <h3 style="font-size: 19px; font-weight: 900; color: #0e3753; display: flex; align-items: center; gap: 8px;">
-            <span>${isEdit ? '✏️ 행사(프로그램) 수정' : '➕ 새 행사(프로그램) 추가'}</span>
-            <span style="font-size: 11px; font-weight: 800; background: #0e3753; color: #ffffff; padding: 2px 8px; border-radius: 9999px;">
-              관리자 모드
-            </span>
-          </h3>
+      <div class="m3-modal-dialog efm-dialog">
+        <div class="efm-head">
+          <div class="efm-head-titles">
+            <p class="efm-eyebrow">관리자 모드</p>
+            <h3 class="efm-title">${isEdit ? '행사 수정' : '새 행사 등록'}</h3>
+            ${pickedDateHint ? `<p class="efm-datehint">${pickedDateHint}</p>` : ''}
+          </div>
           <button class="modal-close-btn" id="btn-close-event-form" aria-label="닫기">✕</button>
         </div>
 
-        <form id="event-edit-form" style="display: flex; flex-direction: column; gap: 14px; margin-top: 8px;">
-          <!-- 행사명 & 부제목 -->
-          <div class="form-group">
-            <label for="ef-title" style="font-weight: 800; font-size: 13px; color: #0e3753;">행사명 (주제) *</label>
-            <input type="text" id="ef-title" class="m3-input" placeholder="예: 과학실무사 연수" required value="${eventObj?.title || ''}" />
+        <form id="event-edit-form">
+          <div class="efm-body">
+            <!-- 기본 정보 -->
+            <div class="efm-section">
+              <p class="efm-section-title">기본 정보</p>
+
+              <div class="efm-row">
+                <div class="efm-field">
+                  <label class="efm-label" for="ef-title">행사명 <span class="efm-req">*</span></label>
+                  <input type="text" id="ef-title" class="m3-input" placeholder="예: 과학실무사 연수" required value="${eventObj?.title || ''}" />
+                </div>
+              </div>
+
+              <div class="efm-row">
+                <div class="efm-field">
+                  <label class="efm-label" for="ef-subtitle">부제목</label>
+                  <input type="text" id="ef-subtitle" class="m3-input" placeholder="예: 실험역량 강화" value="${eventObj?.subtitle || ''}" />
+                </div>
+              </div>
+            </div>
+
+            <!-- 일정 -->
+            <div class="efm-section">
+              <p class="efm-section-title">일정</p>
+
+              <div class="efm-row date">
+                <div class="efm-field">
+                  <label class="efm-label" for="ef-year">연도 <span class="efm-req">*</span></label>
+                  <select id="ef-year" class="m3-select" required>
+                    ${AVAILABLE_YEARS.map(y => `
+                      <option value="${y}" ${currentYear == y ? 'selected' : ''}>${y}년</option>
+                    `).join("")}
+                  </select>
+                </div>
+
+                <div class="efm-field">
+                  <label class="efm-label" for="ef-month">월 <span class="efm-req">*</span></label>
+                  <select id="ef-month" class="m3-select" required>
+                    ${activeMonths.map(m => `
+                      <option value="${m}" ${currentMonth == m ? 'selected' : ''}>${m}월</option>
+                    `).join("")}
+                  </select>
+                </div>
+
+                <div class="efm-field">
+                  <label class="efm-label" for="ef-day">일 <span class="efm-req">*</span></label>
+                  <input type="text" id="ef-day" class="m3-input" placeholder="18" required value="${currentDay}" />
+                </div>
+
+                <div class="efm-field">
+                  <label class="efm-label" for="ef-category">유형 <span class="efm-req">*</span></label>
+                  <select id="ef-category" class="m3-select" required>
+                    ${categories.map(cat => `
+                      <option value="${cat.key}" ${currentCat === cat.key ? 'selected' : ''}>${cat.label}</option>
+                    `).join("")}
+                  </select>
+                </div>
+              </div>
+
+              <div class="efm-row">
+                <div class="efm-field">
+                  <label class="efm-label" for="ef-time">시간</label>
+                  <input type="text" id="ef-time" class="m3-input" placeholder="15:00 ~ 17:00" value="${eventObj?.time || '15:00 ~ 17:00'}" />
+                </div>
+              </div>
+            </div>
+
+            <!-- 장소 및 대상 -->
+            <div class="efm-section">
+              <p class="efm-section-title">장소 및 대상</p>
+
+              <div class="efm-row cols-2">
+                <div class="efm-field">
+                  <label class="efm-label" for="ef-location">장소</label>
+                  <input type="text" id="ef-location" class="m3-input" placeholder="예: 서부과학교육센터" value="${eventObj?.location || '서부교육지원청'}" />
+                </div>
+
+                <div class="efm-field">
+                  <label class="efm-label" for="ef-target">대상</label>
+                  <input type="text" id="ef-target" class="m3-input" placeholder="예: 관내 초등희망교원" value="${eventObj?.target || '관내 초등희망교원'}" />
+                </div>
+              </div>
+            </div>
+
+            <!-- 신청 방법 -->
+            <div class="efm-section">
+              <p class="efm-section-title">신청 방법</p>
+
+              <div class="efm-row">
+                <div class="efm-field">
+                  <label class="efm-label" for="ef-apply-method">신청 경로</label>
+                  <select id="ef-apply-method" class="m3-select">
+                    <option value="교데통" ${currentApplyMethod === '교데통' ? 'selected' : ''}>교데통</option>
+                    <option value="URL 링크" ${currentApplyMethod === 'URL 링크' ? 'selected' : ''}>URL 링크</option>
+                    <option value="추후안내" ${currentApplyMethod === '추후안내' ? 'selected' : ''}>추후안내</option>
+                  </select>
+                  <p class="efm-hint" id="ef-apply-hint"></p>
+                </div>
+              </div>
+
+              <div class="efm-url-field" id="ef-url-group" ${currentApplyMethod === 'URL 링크' ? '' : 'hidden'}>
+                <div class="efm-field">
+                  <label class="efm-label" for="ef-apply-url">신청 주소</label>
+                  <input type="text" id="ef-apply-url" class="m3-input" placeholder="https://forms.gle/..." value="${eventObj?.applyUrl || ''}" />
+                  <p class="efm-hint">주소를 넣으면 신청방법에 바로가기 링크가 표시됩니다.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 안내 내용 -->
+            <div class="efm-section">
+              <p class="efm-section-title">안내 내용</p>
+
+              <div class="efm-row">
+                <div class="efm-field">
+                  <label class="efm-label" for="ef-desc">상세 설명</label>
+                  <textarea id="ef-desc" class="m3-textarea" rows="4" placeholder="프로그램 내용을 입력하세요.">${eventObj?.description || ''}</textarea>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div class="form-group">
-            <label for="ef-subtitle" style="font-weight: 800; font-size: 13px; color: #0e3753;">상세 부제목 (선택)</label>
-            <input type="text" id="ef-subtitle" class="m3-input" placeholder="예: 실험역량 강화" value="${eventObj?.subtitle || ''}" />
-          </div>
-
-          <!-- 일정 및 구분 (연도, 월, 일자, 구분) -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1.3fr; gap: 8px;">
-            <div class="form-group">
-              <label for="ef-year" style="font-weight: 800; font-size: 13px; color: #0e3753;">연도 *</label>
-              <select id="ef-year" class="m3-select" required>
-                ${AVAILABLE_YEARS.map(y => `
-                  <option value="${y}" ${currentYear == y ? 'selected' : ''}>${y}년</option>
-                `).join("")}
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="ef-month" style="font-weight: 800; font-size: 13px; color: #0e3753;">월 *</label>
-              <select id="ef-month" class="m3-select" required>
-                ${activeMonths.map(m => `
-                  <option value="${m}" ${currentMonth == m ? 'selected' : ''}>${m}월</option>
-                `).join("")}
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="ef-day" style="font-weight: 800; font-size: 13px; color: #0e3753;">일자 *</label>
-              <input type="text" id="ef-day" class="m3-input" placeholder="예: 18" required value="${currentDay}" />
-            </div>
-
-            <div class="form-group">
-              <label for="ef-category" style="font-weight: 800; font-size: 13px; color: #0e3753;">구분 *</label>
-              <select id="ef-category" class="m3-select" required>
-                ${categories.map(cat => `
-                  <option value="${cat.key}" ${currentCat === cat.key ? 'selected' : ''}>${cat.label}</option>
-                `).join("")}
-              </select>
-            </div>
-          </div>
-
-          <!-- 시간 & 장소 -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div class="form-group">
-              <label for="ef-time" style="font-weight: 800; font-size: 13px; color: #0e3753;">시간</label>
-              <input type="text" id="ef-time" class="m3-input" placeholder="예: 15:00 ~ 17:00" value="${eventObj?.time || '15:00 ~ 17:00'}" />
-            </div>
-
-            <div class="form-group">
-              <label for="ef-location" style="font-weight: 800; font-size: 13px; color: #0e3753;">장소</label>
-              <input type="text" id="ef-location" class="m3-input" placeholder="예: 서부과학교육센터" value="${eventObj?.location || '서부교육지원청'}" />
-            </div>
-          </div>
-
-          <!-- 대상 & 신청 방법 -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div class="form-group">
-              <label for="ef-target" style="font-weight: 800; font-size: 13px; color: #0e3753;">대상</label>
-              <input type="text" id="ef-target" class="m3-input" placeholder="예: 관내 초등희망교원" value="${eventObj?.target || '관내 초등희망교원'}" />
-            </div>
-
-            <div class="form-group">
-              <label for="ef-apply-method" style="font-weight: 800; font-size: 13px; color: #0e3753;">신청 방법</label>
-              <select id="ef-apply-method" class="m3-select">
-                <option value="교데통" ${currentApplyMethod === '교데통' ? 'selected' : ''}>교데통</option>
-                <option value="URL 링크" ${currentApplyMethod === 'URL 링크' ? 'selected' : ''}>URL 링크</option>
-                <option value="추후안내" ${currentApplyMethod === '추후안내' ? 'selected' : ''}>추후안내</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- URL 링크 선택 시 나타나는 URL 입력 필드 -->
-          <div class="form-group" id="ef-url-group" style="display: ${currentApplyMethod === 'URL 링크' ? 'block' : 'none'};">
-            <label for="ef-apply-url" style="font-weight: 800; font-size: 13px; color: #0e3753;">신청 URL 링크</label>
-            <input type="text" id="ef-apply-url" class="m3-input" placeholder="https://..." value="${eventObj?.applyUrl || ''}" />
-          </div>
-
-          <!-- 상세 설명 -->
-          <div class="form-group">
-            <label for="ef-desc" style="font-weight: 800; font-size: 13px; color: #0e3753;">상세 안내 및 개요</label>
-            <textarea id="ef-desc" class="m3-textarea" rows="3" placeholder="프로그램 상세 내용을 입력하세요.">${eventObj?.description || ''}</textarea>
-          </div>
-
-          <!-- 액션 버튼 바 -->
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 12px; border-top: 1px solid #e2e8f0;">
+          <div class="efm-foot">
             ${isEdit ? `
               <button type="button" id="btn-delete-event" class="btn-admin-action danger">
-                행사 삭제
+                삭제
               </button>
-            ` : '<div></div>'}
+            ` : ''}
 
-            <div style="display: flex; gap: 8px;">
+            <div class="efm-foot-right">
               <button type="button" id="btn-cancel-event-form" class="btn-admin-action">취소</button>
               <button type="submit" class="btn-admin-action filled">
-                ${isEdit ? '수정사항 저장' : '새 행사 등록'}
+                ${isEdit ? '저장' : '등록'}
               </button>
             </div>
           </div>
@@ -201,19 +237,35 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
     });
   }
 
-  // 신청방법 변경 시 URL 입력창 표시/숨김
+  // 신청방법 변경 시 URL 입력창 표시/숨김 및 안내 문구 갱신
   const applyMethodSelect = mount.querySelector("#ef-apply-method");
   const urlGroup = mount.querySelector("#ef-url-group");
   const applyUrlInput = mount.querySelector("#ef-apply-url");
+  const applyHint = mount.querySelector("#ef-apply-hint");
 
-  if (applyMethodSelect && urlGroup) {
-    applyMethodSelect.addEventListener("change", (e) => {
-      if (e.target.value === "URL 링크") {
-        urlGroup.style.display = "block";
-        if (applyUrlInput) applyUrlInput.focus();
+  const APPLY_HINTS = {
+    "교데통": "교데통(sen.edmgr.kr)으로 연결됩니다.",
+    "URL 링크": "아래에 입력한 주소로 연결됩니다.",
+    "추후안내": "링크 없이 '추후안내'로만 표시됩니다."
+  };
+
+  const syncApplyMethod = (value) => {
+    const isUrl = value === "URL 링크";
+    if (urlGroup) {
+      if (isUrl) {
+        urlGroup.removeAttribute("hidden");
       } else {
-        urlGroup.style.display = "none";
+        urlGroup.setAttribute("hidden", "");
       }
+    }
+    if (applyHint) applyHint.textContent = APPLY_HINTS[value] || "";
+  };
+
+  if (applyMethodSelect) {
+    syncApplyMethod(applyMethodSelect.value);
+    applyMethodSelect.addEventListener("change", (e) => {
+      syncApplyMethod(e.target.value);
+      if (e.target.value === "URL 링크" && applyUrlInput) applyUrlInput.focus();
     });
   }
 

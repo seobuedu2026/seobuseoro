@@ -1,13 +1,15 @@
-import { renderHeader } from "./components/header.js?v=20260920_v66";
-import { renderFooter } from "./components/footer.js?v=20260920_v66";
-import { renderCalendar } from "./components/calendar.js?v=20260920_v66";
-import { renderPrograms } from "./components/programs.js?v=20260920_v66";
-import { renderReviews } from "./components/reviews.js?v=20260920_v66";
-import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v66";
-import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v66";
-import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v66";
-import { isEventPastOrToday, resolveApplyLink } from "./data/events.js?v=20260920_v66";
+import { renderHeader } from "./components/header.js?v=20260920_v69";
+import { renderFooter } from "./components/footer.js?v=20260920_v69";
+import { renderCalendar } from "./components/calendar.js?v=20260920_v69";
+import { renderPrograms } from "./components/programs.js?v=20260920_v69";
+import { renderReviews } from "./components/reviews.js?v=20260920_v69";
+import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v69";
+import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v69";
+import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v69";
+import { isEventPastOrToday, resolveApplyLink } from "./data/events.js?v=20260920_v69";
 import { initSiteSync } from "./data/siteSync.js";
+import { openPrivacyConsentModal } from "./components/privacyConsentModal.js";
+import { hasConsented } from "./data/consent.js";
 
 let activeTab = "calendar"; // 'calendar' | 'programs' | 'reviews' | 'padlet'
 
@@ -25,6 +27,32 @@ function initApp() {
 
   // 관리자 수정 콘텐츠 클라우드 동기화 시작
   initSiteSync();
+
+  // 센스쿨 계정으로 로그인한 경우 개인정보 수집·이용 동의 여부를 확인한다.
+  // (관리자 비밀번호 모드는 실제 개인정보를 수집하지 않으므로 제외)
+  let consentPromptOpen = false;
+  function ensurePrivacyConsent() {
+    if (consentPromptOpen) return;
+    if (GoogleAuthService.isAdminModeActive()) return;
+
+    const currentUser = GoogleAuthService.getCurrentUser();
+    if (!currentUser || !currentUser.email) return;
+    if (hasConsented(currentUser.email)) return;
+
+    consentPromptOpen = true;
+    openPrivacyConsentModal({
+      email: currentUser.email,
+      onAgree: () => {
+        consentPromptOpen = false;
+        switchTab(activeTab);
+      },
+      onDecline: () => {
+        consentPromptOpen = false;
+        GoogleAuthService.logout();
+        alert("개인정보 수집·이용에 동의하지 않아 로그아웃되었습니다.\n후기 작성 등 기능은 동의 후 이용하실 수 있습니다.");
+      }
+    });
+  }
 
   // 헤더 및 푸터 렌더링
   renderHeader(headerMount);
@@ -204,6 +232,7 @@ function initApp() {
     renderHeader(headerMount);
     renderFooter(footerMount);
     switchTab(activeTab);
+    ensurePrivacyConsent();
   });
 
   // 행사 데이터 갱신 리스너 (엑셀 업로드/초기화 시)
@@ -227,6 +256,9 @@ function initApp() {
 
   // 초기 화면 렌더링 (첫 화면: 캘린더)
   switchTab("calendar");
+
+  // 이미 로그인된 상태에서 동의 기록이 없으면 다시 안내한다
+  ensurePrivacyConsent();
 }
 
 if (document.readyState === "loading") {

@@ -2,6 +2,8 @@ import { getEvents, isEventPastOrToday } from "../data/events.js";
 import { GoogleAuthService } from "../auth/googleAuth.js";
 import { FirestoreReviewService } from "../data/firestoreService.js";
 import { renderParticipationStories, bindParticipationStories } from "./participationStories.js";
+import { openPrivacyConsentModal } from "./privacyConsentModal.js";
+import { hasConsented } from "../data/consent.js";
 
 const REVIEWS_STORAGE_KEY = "seobu_user_reviews_v8";
 const MY_REVIEWS_STORAGE_KEY = "seobu_my_review_ids_v1";
@@ -408,7 +410,20 @@ export function renderReviews(container, preselectedEventId = null, page = 1) {
   const btnLogin = container.querySelector("#btn-custom-google-login");
   if (btnLogin) {
     btnLogin.addEventListener("click", () => {
-      GoogleAuthService.triggerGoogleLogin((user) => {
+      GoogleAuthService.triggerGoogleLogin((loggedInUser) => {
+        // 로그인 직후 개인정보 수집·이용 동의 여부 확인
+        if (loggedInUser && !hasConsented(loggedInUser.email)) {
+          openPrivacyConsentModal({
+            email: loggedInUser.email,
+            onAgree: () => renderReviews(container, preselectedEventId),
+            onDecline: () => {
+              GoogleAuthService.logout();
+              alert("개인정보 수집·이용에 동의하지 않아 로그아웃되었습니다.\n후기 작성 등 기능은 동의 후 이용하실 수 있습니다.");
+              renderReviews(container, preselectedEventId);
+            }
+          });
+          return;
+        }
         renderReviews(container, preselectedEventId);
       });
     });
@@ -430,6 +445,21 @@ export function renderReviews(container, preselectedEventId = null, page = 1) {
         alert("⚠️ 관리자 계정은 후기 작성 대상이 아닙니다.");
         return;
       }
+      // 로그인 사용자는 개인정보 동의가 있어야 후기를 작성할 수 있다
+      if (user && !hasConsented(user.email)) {
+        openPrivacyConsentModal({
+          email: user.email,
+          reason: "후기를 작성하시려면 개인정보 수집·이용 동의가 필요합니다.",
+          onAgree: () => renderReviews(container, preselectedEventId),
+          onDecline: () => {
+            GoogleAuthService.logout();
+            alert("개인정보 수집·이용에 동의하지 않아 로그아웃되었습니다.");
+            renderReviews(container, preselectedEventId);
+          }
+        });
+        return;
+      }
+
       const select = container.querySelector("#review-event-select");
       const text = container.querySelector("#review-text-input");
       const eventId = select ? select.value : "";
