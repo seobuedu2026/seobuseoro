@@ -1,12 +1,12 @@
-import { renderHeader } from "./components/header.js?v=20260920_v24";
-import { renderFooter } from "./components/footer.js?v=20260920_v24";
-import { renderCalendar } from "./components/calendar.js?v=20260920_v24";
-import { renderPrograms } from "./components/programs.js?v=20260920_v24";
-import { renderReviews } from "./components/reviews.js?v=20260920_v24";
-import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v24";
-import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v24";
-import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v24";
-import { isEventPastOrToday } from "./data/events.js?v=20260920_v24";
+import { renderHeader } from "./components/header.js?v=20260920_v25";
+import { renderFooter } from "./components/footer.js?v=20260920_v25";
+import { renderCalendar } from "./components/calendar.js?v=20260920_v25";
+import { renderPrograms } from "./components/programs.js?v=20260920_v25";
+import { renderReviews } from "./components/reviews.js?v=20260920_v25";
+import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v25";
+import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v25";
+import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v25";
+import { isEventPastOrToday } from "./data/events.js?v=20260920_v25";
 
 let activeTab = "calendar"; // 'calendar' | 'programs' | 'reviews' | 'padlet'
 

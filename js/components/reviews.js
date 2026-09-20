@@ -110,11 +110,10 @@ export function renderReviews(container, preselectedEventId = null) {
       <div class="review-layout">
         <!-- 후기 작성 영역 (@senedu.kr 전용 로그인) -->
         <div class="review-form-card">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
-            <h3 style="font-size: 16.5px; font-weight: 900; color: #0e3753; margin: 0;">
+          <div style="text-align: center; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
+            <h3 style="font-size: 16.5px; font-weight: 900; color: #0e3753; margin: 0; text-align: center;">
               참여 후기 등록
             </h3>
-            ${user ? `<button id="btn-review-logout" class="footer-link-btn" style="font-size: 12px; font-weight: 700; color: #dc2626; padding: 3px 8px; border-radius: 6px; background: #fee2e2; border: 1px solid #fecdd3; cursor: pointer;">로그아웃</button>` : ''}
           </div>
 
           ${isAdmin ? `
@@ -123,9 +122,12 @@ export function renderReviews(container, preselectedEventId = null) {
               <p style="font-size: 14.5px; font-weight: 800; color: #0e3753; margin-bottom: 6px;">
                 관리자 계정 (작성 불가)
               </p>
-              <p style="font-size: 12.5px; color: #64748b; line-height: 1.45; word-break: keep-all;">
+              <p style="font-size: 12.5px; color: #64748b; line-height: 1.45; word-break: keep-all; margin-bottom: 12px;">
                 참여 후기는 행사에 참여하신 <strong>현장 교원(@senedu.kr)</strong> 전용으로 작성됩니다.
               </p>
+              <button type="button" id="btn-review-logout" style="padding: 6px 14px; font-size: 12.5px; font-weight: 700; border-radius: 6px; background: #fee2e2; color: #dc2626; border: 1px solid #fecdd3; cursor: pointer;">
+                로그아웃
+              </button>
             </div>
           ` : !user ? `
             <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 12px; text-align: center;">
@@ -169,9 +171,14 @@ export function renderReviews(container, preselectedEventId = null) {
                 <textarea id="review-text-input" class="m3-textarea" rows="4" placeholder="연수/행사에서 얻은 인사이트나 교실 실천 계획을 자유롭게 적어주세요." required></textarea>
               </div>
 
-              <button type="submit" class="btn-m3-filled" style="width: 100%; padding: 12px; font-size: 14px; font-weight: 800;">
-                후기 등록하기
-              </button>
+              <div style="display: flex; gap: 8px; align-items: center; margin-top: 6px;">
+                <button type="submit" class="btn-m3-filled" style="flex: 1; padding: 11px 16px; font-size: 14px; font-weight: 800; justify-content: center;">
+                  후기 등록하기
+                </button>
+                <button type="button" id="btn-review-logout" style="padding: 10px 14px; font-size: 13px; font-weight: 700; border-radius: 8px; white-space: nowrap; height: 42px; display: inline-flex; align-items: center; justify-content: center; background: #fee2e2; color: #dc2626; border: 1px solid #fecdd3; cursor: pointer;" title="로그아웃">
+                  로그아웃
+                </button>
+              </div>
             </form>
           `}
         </div>

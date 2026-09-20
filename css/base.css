@@ -94,7 +94,7 @@ button {
   margin-top: 16px;
   background-color: #f8fafc;
   border-top: 1px solid #e2e8f0;
-  padding: 24px 20px 28px 20px;
+  padding: 14px 20px 16px 20px;
   color: #64748b;
   font-size: 14px;
   width: 100%;
@@ -105,7 +105,7 @@ button {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 6px;
 }
 
 .footer-top-info {
@@ -114,7 +114,7 @@ button {
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .footer-org-name {
@@ -134,7 +134,7 @@ button {
 .footer-copyright-center {
   width: 100%;
   text-align: center;
-  margin: 4px 0 2px 0;
+  margin: 2px 0;
 }
 
 /* 하단 바 (저작권 문구 가운데 정렬, 관리자 버튼 우측 정렬) */
@@ -144,9 +144,9 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-top: 1px solid #e2e8f0;
-  padding-top: 16px;
-  min-height: 40px;
+  border-top: none;
+  padding-top: 0;
+  min-height: 32px;
 }
 
 .footer-copy {
