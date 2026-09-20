@@ -3,9 +3,26 @@ import { GoogleAuthService } from "../auth/googleAuth.js";
 import { FirestoreReviewService } from "../data/firestoreService.js";
 
 const REVIEWS_STORAGE_KEY = "seobu_user_reviews_v8";
+const MY_REVIEWS_STORAGE_KEY = "seobu_my_review_ids_v1";
 const EXCLUDED_IDS = new Set(["rev-1", "rev-2", "rev-3", "rev-4"]);
 
 const INITIAL_REVIEWS = [];
+
+function getMyReviewIds() {
+  try {
+    return JSON.parse(localStorage.getItem(MY_REVIEWS_STORAGE_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function addMyReviewId(id) {
+  const ids = getMyReviewIds();
+  if (!ids.includes(id)) {
+    ids.push(id);
+    localStorage.setItem(MY_REVIEWS_STORAGE_KEY, JSON.stringify(ids));
+  }
+}
 
 function getStoredReviews() {
   let data = localStorage.getItem(REVIEWS_STORAGE_KEY);
@@ -99,9 +116,16 @@ export function renderReviews(container, preselectedEventId = null) {
   const isAdmin = !!(user && user.isAdmin);
   const authMode = FirestoreReviewService.getReviewAuthMode(); // 'login_required' | 'anonymous_allowed'
   const allReviews = getStoredReviews();
+  const myReviewIds = getMyReviewIds();
 
-  // 일반 사용자에게는 승인된 후기만 노출, 관리자에게는 전체 노출
-  const displayedReviews = isAdmin ? allReviews : allReviews.filter(r => r.status === "approved");
+  // 일반 사용자에게는 승인된 후기 + 본인이 작성하여 승인 대기 중인 후기 노출
+  const displayedReviews = isAdmin 
+    ? allReviews 
+    : allReviews.filter(r => {
+        if (r.status === "approved") return true;
+        const isMyReview = myReviewIds.includes(r.id) || (user && user.email && r.userEmail && user.email.toLowerCase() === r.userEmail.toLowerCase());
+        return isMyReview;
+      });
 
   container.innerHTML = `
     <div class="reviews-view-wrapper">
@@ -226,12 +250,19 @@ export function renderReviews(container, preselectedEventId = null) {
           ` : displayedReviews.map(rev => {
             const cleanName = (rev.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim();
             const cleanTitle = (rev.eventTitle || "").replace(/^🎯\s*/, "");
-            const isAuthor = user && user.email && rev.userEmail && (user.email.toLowerCase() === rev.userEmail.toLowerCase());
+            const isAuthor = myReviewIds.includes(rev.id) || (user && user.email && rev.userEmail && (user.email.toLowerCase() === rev.userEmail.toLowerCase()));
             const isApproved = rev.status !== "pending";
             const isAnonymousReview = !rev.isSenedu || !!rev.password;
 
             return `
             <div class="review-feed-card ${!isApproved ? 'is-pending' : ''}" data-review-id="${rev.id}">
+              ${(!isApproved && !isAdmin && isAuthor) ? `
+                <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 10px; padding: 9px 13px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #b45309; line-height: 1.45;">
+                  <span style="font-size: 16px;">⏳</span>
+                  <span>작성하신 후기는 관리자의 승인을 기다리고 있습니다. (승인 후 모든 사용자에게 공개됩니다)</span>
+                </div>
+              ` : ''}
+
               <!-- 상단 바: 연수 종류 태그 + 작성자 이름 + 작성일시 | 공감 및 관리 버튼 -->
               <div class="review-card-top-row">
                 <div class="review-user-name">
@@ -241,6 +272,10 @@ export function renderReviews(container, preselectedEventId = null) {
                   ${isAdmin ? `
                     <span style="font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 4px; ${isApproved ? 'background:#dcfce7; color:#166534;' : 'background:#fef3c7; color:#b45309;'}">
                       ${isApproved ? '승인됨' : '승인대기'}
+                    </span>
+                  ` : (!isApproved && isAuthor) ? `
+                    <span style="font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 4px; background:#fef3c7; color:#b45309;">
+                      승인대기
                     </span>
                   ` : ''}
                 </div>
@@ -378,9 +413,11 @@ export function renderReviews(container, preselectedEventId = null) {
         content: content,
         likes: 0,
         createdAt: timeStr,
-        status: "approved",
+        status: "pending", // 관리자 승인 대기 상태로 등록
         password: password || ""
       };
+
+      addMyReviewId(newReview.id);
 
       const currentReviews = getStoredReviews();
       const updated = [newReview, ...currentReviews];
@@ -389,7 +426,7 @@ export function renderReviews(container, preselectedEventId = null) {
       // 클라우드 Firestore 동기화 (비동기)
       FirestoreReviewService.saveReview(newReview);
 
-      alert("✅ 참여 후기가 성공적으로 등록되었습니다!");
+      alert("✅ 참여 후기가 성공적으로 등록되었습니다!\n관리자의 승인을 기다리는 중이며, 승인 완료 후 모든 교원에게 공개됩니다.");
       renderReviews(container, null);
     });
   }
