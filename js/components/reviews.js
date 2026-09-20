@@ -74,6 +74,9 @@ export function renderReviews(container, preselectedEventId = null) {
   const isAdmin = !!(user && user.isAdmin);
   const allReviews = getStoredReviews();
 
+  // 일반 사용자에게는 승인된 후기만 노출, 관리자에게는 전체 노출
+  const displayedReviews = isAdmin ? allReviews : allReviews.filter(r => r.status === "approved");
+
   container.innerHTML = `
     <div class="reviews-view-wrapper">
       <div class="tab-header-single-line" style="margin-bottom: 24px;">
@@ -163,11 +166,11 @@ export function renderReviews(container, preselectedEventId = null) {
         <div class="review-feed-list" id="review-feed-container">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px;">
             <span style="font-size: 14px; font-weight: 800; color: #0e3753;">
-              전체 후기 (${allReviews.length}개)
+              전체 후기 (${displayedReviews.length}개)
             </span>
           </div>
 
-          ${allReviews.length === 0 ? `
+          ${displayedReviews.length === 0 ? `
             <div style="background: #ffffff; border: 1.5px dashed #cbd5e1; border-radius: 18px; padding: 48px 20px; text-align: center; color: #64748b;">
               <div style="font-size: 36px; margin-bottom: 10px;">💬</div>
               <p style="font-size: 15px; font-weight: 700; color: #334155; margin-bottom: 6px;">
@@ -177,26 +180,44 @@ export function renderReviews(container, preselectedEventId = null) {
                 ${!user ? '센스쿨 구글 계정으로 로그인 후 첫 후기를 남겨보세요!' : '새로운 후기를 작성해보세요.'}
               </p>
             </div>
-          ` : allReviews.map(rev => {
+          ` : displayedReviews.map(rev => {
             const cleanName = (rev.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim();
             const isAuthor = user && user.email && rev.userEmail && (user.email.toLowerCase() === rev.userEmail.toLowerCase());
-            const canDelete = isAdmin || isAuthor;
+            const isApproved = rev.status !== "pending";
 
             return `
-            <div class="review-feed-card" data-review-id="${rev.id}">
-              <!-- 상단 바: 연수 종류 태그 + 작성자 이름 + 작성일시 | 공감 버튼 -->
+            <div class="review-feed-card ${!isApproved ? 'is-pending' : ''}" data-review-id="${rev.id}">
+              <!-- 상단 바: 연수 종류 태그 + 작성자 이름 + 작성일시 | 공감 및 관리 버튼 -->
               <div class="review-card-top-row">
                 <div class="review-user-name">
                   <span class="review-event-tag">🎯 ${rev.eventTitle}</span>
                   <span class="user-display-name">${cleanName}</span>
                   <span class="review-date-text">${rev.createdAt}</span>
+                  ${isAdmin ? `
+                    <span style="font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 4px; ${isApproved ? 'background:#dcfce7; color:#166534;' : 'background:#fef3c7; color:#b45309;'}">
+                      ${isApproved ? '승인됨' : '승인대기'}
+                    </span>
+                  ` : ''}
                 </div>
 
                 <div class="review-top-actions-group">
                   <button class="btn-like-pill btn-like" data-review-id="${rev.id}" title="공감하기">
                     ❤️ <span>공감</span> <strong>${rev.likes || 0}</strong>
                   </button>
-                  ${canDelete ? `
+
+                  ${isAdmin ? `
+                    ${isApproved ? `
+                      <button class="btn-review-mod-unapprove btn-admin-action" data-review-id="${rev.id}" style="padding: 3px 8px; font-size: 11.5px; color: #b45309; border-color: #fde68a;" title="승인 취소 (일반 교원 화면에서 숨김)">
+                        승인취소
+                      </button>
+                    ` : `
+                      <button class="btn-review-mod-approve btn-admin-action filled" data-review-id="${rev.id}" style="padding: 3px 8px; font-size: 11.5px; background: #166534; border-color: #166534; color: #ffffff;" title="후기 승인 (홈페이지에 공개)">
+                        승인
+                      </button>
+                    `}
+                  ` : ''}
+
+                  ${(isAdmin || isAuthor) ? `
                     <button class="btn-review-mod-delete btn-admin-action" data-review-id="${rev.id}" style="padding: 3px 8px; font-size: 11.5px; color: #ef4444; border-color: #fecdd3;" title="후기 삭제">
                       삭제
                     </button>
@@ -271,7 +292,7 @@ export function renderReviews(container, preselectedEventId = null) {
           content: content,
           likes: 0,
           createdAt: timeStr,
-          status: "approved" // 승인 절차 없이 즉시 등록 및 공개
+          status: "approved" // 기본 승인 상태로 즉시 등록
         };
 
         const currentReviews = getStoredReviews();
@@ -283,6 +304,36 @@ export function renderReviews(container, preselectedEventId = null) {
       });
     }
   }
+
+  // 관리자 승인 버튼 바인딩
+  container.querySelectorAll(".btn-review-mod-approve").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const revId = btn.dataset.reviewId;
+      const currentList = getStoredReviews();
+      const target = currentList.find(r => r.id === revId);
+      if (target) {
+        target.status = "approved";
+        saveReviews(currentList);
+        renderReviews(container, preselectedEventId);
+      }
+    });
+  });
+
+  // 관리자 승인 취소 버튼 바인딩
+  container.querySelectorAll(".btn-review-mod-unapprove").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const revId = btn.dataset.reviewId;
+      const currentList = getStoredReviews();
+      const target = currentList.find(r => r.id === revId);
+      if (target) {
+        target.status = "pending";
+        saveReviews(currentList);
+        renderReviews(container, preselectedEventId);
+      }
+    });
+  });
 
   // 삭제 버튼 바인딩 (관리자 또는 작성자)
   container.querySelectorAll(".btn-review-mod-delete").forEach(btn => {
