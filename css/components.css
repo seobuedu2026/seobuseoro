@@ -318,7 +318,7 @@
 /* 캘린더 그리드 */
 .cal-grid-head {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   text-align: center;
   font-weight: 800;
   font-size: 14px;
@@ -331,7 +331,7 @@
 
 .cal-grid-days {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   grid-auto-rows: minmax(88px, auto);
   flex-grow: 1;
 }
@@ -345,6 +345,9 @@
   gap: 3px;
   background-color: #ffffff;
   min-height: 88px;
+  min-width: 0;
+  overflow: hidden;
+  box-sizing: border-box;
   transition: background-color 0.15s ease;
 }
 .cal-cell:nth-child(7n) { border-right: none; }
@@ -426,7 +429,11 @@
   user-select: none;
   text-align: center;
   transition: all 0.15s ease;
-  word-break: keep-all;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   border: 1px solid transparent;
   display: flex;
   flex-direction: column;

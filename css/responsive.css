@@ -311,33 +311,107 @@
     font-size: 14px !important;
   }
 
-  .cal-grid-head {
-    font-size: 12px;
-    padding: 6px 0;
+  /* 캘린더 모바일 최적화 (7개 요일 균등 분할 및 텍스트 자동 줄바꿈, 잘림 방지) */
+  .single-month-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 14px !important;
   }
 
-  .cal-grid-days {
-    grid-auto-rows: minmax(78px, auto);
+  .single-month-card.focus-month-view {
+    max-width: 100% !important;
   }
 
-  .cal-cell {
-    padding: 3px 2px;
-    min-height: 78px;
+  .single-month-card.focus-month-view .month-card-header,
+  .month-card-header {
+    padding: 12px 14px !important;
   }
 
-  .cal-cell-daynum {
-    font-size: 12px;
+  .single-month-card.focus-month-view .month-big-num,
+  .month-big-num {
+    font-size: 24px !important;
   }
 
-  /* 캘린더 행사 글씨 가독성 향상 */
-  .cal-event-pill {
+  .single-month-card.focus-month-view .month-subtitle-pill,
+  .month-subtitle-pill {
+    font-size: 13px !important;
+    padding: 4px 10px !important;
+  }
+
+  .single-month-card.focus-month-view .week-highlight-ribbon,
+  .week-highlight-ribbon {
     font-size: 12.5px !important;
-    padding: 4px 3px !important;
-    line-height: 1.35 !important;
+    padding: 7px 10px !important;
+  }
+
+  .single-month-card.focus-month-view .cal-grid-head,
+  .cal-grid-head {
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    font-size: 12.5px !important;
+    font-weight: 800 !important;
+    padding: 7px 0 !important;
+  }
+
+  .single-month-card.focus-month-view .cal-grid-days,
+  .cal-grid-days {
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    grid-auto-rows: minmax(72px, auto) !important;
+    width: 100% !important;
+  }
+
+  .single-month-card.focus-month-view .cal-cell,
+  .cal-cell {
+    padding: 3px 1.5px !important;
+    min-height: 72px !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    gap: 2px !important;
+  }
+
+  .single-month-card.focus-month-view .cal-cell-daynum,
+  .cal-cell-daynum {
+    font-size: 11.5px !important;
+    margin-bottom: 0 !important;
+    padding: 0 1px !important;
+  }
+
+  .single-month-card.focus-month-view .cal-holiday-name,
+  .cal-holiday-name {
+    font-size: 9px !important;
+    padding: 0 2px !important;
+    letter-spacing: -0.6px !important;
+    max-width: calc(100% - 14px) !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  /* 캘린더 행사 글씨 가독성 향상 및 자동 줄바꿈으로 잘림 방지 */
+  .single-month-card.focus-month-view .cal-event-pill,
+  .cal-event-pill {
+    font-size: 10.5px !important;
+    padding: 3px 2px !important;
+    line-height: 1.25 !important;
+    letter-spacing: -0.5px !important;
+    word-break: break-all !important;
+    overflow-wrap: anywhere !important;
+    border-radius: 4px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .cal-event-pill .pill-sub {
-    display: none; /* 모바일에서는 제목만 간결하게 */
+    display: none !important; /* 모바일에서는 제목만 간결하게 */
+  }
+
+  .admin-cell-quick-add {
+    width: 13px !important;
+    height: 13px !important;
+    font-size: 10px !important;
   }
 
   .brochure-legend-container {
@@ -386,5 +460,17 @@
   .calendar-view-mode-bar .btn-m3-outlined {
     padding: 5px 8px !important;
     font-size: 12px !important;
+  }
+
+  .single-month-card.focus-month-view .cal-event-pill,
+  .cal-event-pill {
+    font-size: 9.5px !important;
+    padding: 2px 1px !important;
+    line-height: 1.2 !important;
+  }
+
+  .single-month-card.focus-month-view .cal-cell-daynum,
+  .cal-cell-daynum {
+    font-size: 10.5px !important;
   }
 }
