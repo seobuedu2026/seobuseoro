@@ -72,15 +72,45 @@ function saveReviews(reviews, shouldDispatch = true) {
 
 let selectedRating = 5;
 
-// Firestore 설정 실시간 리스너 전역 등록
-if (typeof window !== "undefined" && !window._firestoreConfigSubscribed) {
-  window._firestoreConfigSubscribed = true;
-  FirestoreReviewService.subscribeReviewAuthMode((mode) => {
-    const activeContainer = document.querySelector("#tab-content-mount");
-    if (activeContainer && activeContainer.querySelector(".reviews-view-wrapper")) {
-      renderReviews(activeContainer);
-    }
-  });
+// Firestore 설정 및 후기 실시간 동기화 리스너 전역 등록
+if (typeof window !== "undefined") {
+  if (!window._firestoreConfigSubscribed) {
+    window._firestoreConfigSubscribed = true;
+    FirestoreReviewService.subscribeReviewAuthMode((mode) => {
+      const activeContainer = document.querySelector("#tab-content-mount");
+      if (activeContainer && activeContainer.querySelector(".reviews-view-wrapper")) {
+        renderReviews(activeContainer);
+      }
+    });
+  }
+
+  if (!window._firestoreReviewsSubscribed) {
+    window._firestoreReviewsSubscribed = true;
+    FirestoreReviewService.subscribeReviews((remoteReviews) => {
+      if (Array.isArray(remoteReviews)) {
+        const cleanRemote = remoteReviews
+          .filter(r => !EXCLUDED_IDS.has(r.id))
+          .map(r => ({
+            ...r,
+            userName: (r.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim(),
+            status: r.status === "pending" ? "pending" : "approved"
+          }));
+
+        if (cleanRemote.length > 0) {
+          saveReviews(cleanRemote, false);
+        } else {
+          // Firestore 컬렉션이 비어있는 경우 초기 데이터 등록
+          INITIAL_REVIEWS.forEach(r => FirestoreReviewService.saveReview(r));
+          saveReviews(INITIAL_REVIEWS, false);
+        }
+
+        const activeContainer = document.querySelector("#tab-content-mount");
+        if (activeContainer && activeContainer.querySelector(".reviews-view-wrapper")) {
+          renderReviews(activeContainer);
+        }
+      }
+    });
+  }
 }
 
 export function renderReviews(container, preselectedEventId = null) {

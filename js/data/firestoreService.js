@@ -42,12 +42,13 @@ export const FirestoreReviewService = {
     if (!db) return () => {};
 
     try {
-      const q = query(collection(db, REVIEWS_COLLECTION), orderBy("createdAt", "desc"));
-      const unsubscribe = onSnapshot(q, (snapshot) => {
+      const colRef = collection(db, REVIEWS_COLLECTION);
+      const unsubscribe = onSnapshot(colRef, (snapshot) => {
         const reviews = [];
         snapshot.forEach((docSnap) => {
           reviews.push({ id: docSnap.id, ...docSnap.data() });
         });
+        reviews.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
         if (onUpdate) onUpdate(reviews);
       }, (err) => {
         console.warn("Firestore 실시간 리스너 오류 (로컬 모드 유지):", err);
