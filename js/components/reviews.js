@@ -202,6 +202,9 @@ export function renderReviews(container, preselectedEventId = null) {
               `}
 
               <div class="form-group" style="margin-bottom: 12px;">
+                <label for="review-event-select" style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 2px;">
+                  후기를 작성할 행사 선택
+                </label>
                 <select id="review-event-select" class="m3-select" required>
                   <option value="">참여한 행사를 선택하세요</option>
                   ${getEvents().filter(isEventPastOrToday).map(ev => `
