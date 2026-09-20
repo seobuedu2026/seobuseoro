@@ -91,10 +91,20 @@ export function renderReviews(container, preselectedEventId = null) {
             ${user ? `<button id="btn-review-logout" class="footer-link-btn" style="position: absolute; right: 0; top: 2px; font-size: 12px; font-weight: 600; color: #64748b;">[로그아웃]</button>` : ''}
           </div>
 
-          ${!user ? `
+          ${isAdmin ? `
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px 14px; text-align: center;">
+              <div style="font-size: 28px; margin-bottom: 8px;">🔒</div>
+              <p style="font-size: 14.5px; font-weight: 800; color: #0e3753; margin-bottom: 6px;">
+                관리자 계정 (작성 불가)
+              </p>
+              <p style="font-size: 12.5px; color: #64748b; line-height: 1.45; word-break: keep-all;">
+                참여 후기는 행사에 참여하신 <strong>현장 교원(@senedu.kr)</strong> 전용으로 작성됩니다.
+              </p>
+            </div>
+          ` : !user ? `
             <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 12px; text-align: center;">
               <p style="font-size: 14px; font-weight: 800; color: #0e3753; margin-bottom: 6px; line-height: 1.45;">
-                후기 작성은 로그인 후 가능합니다.
+                후기 작성은 교원 로그인 후 가능합니다.
               </p>
               <p style="font-size: 12.5px; color: #0284c7; font-weight: 700; margin-bottom: 14px;">
                 (센스쿨 구글 계정 @senedu.kr)
@@ -103,7 +113,7 @@ export function renderReviews(container, preselectedEventId = null) {
               <!-- 센스쿨 구글 계정 로그인 버튼 (컴팩트 사이즈) -->
               <div style="display: flex; justify-content: center;">
                 <button id="btn-custom-google-login" class="btn-m3-filled" style="padding: 6px 22px; font-size: 13px; font-weight: 800; border-radius: var(--shape-pill); justify-content: center; box-shadow: 0 2px 8px rgba(14, 55, 83, 0.15);">
-                  로그인
+                  교원 로그인
                 </button>
               </div>
             </div>
@@ -114,8 +124,8 @@ export function renderReviews(container, preselectedEventId = null) {
                 <div style="display: flex; align-items: center; justify-content: space-between; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 8px 12px; border-radius: 10px;">
                   <div style="display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 700; color: #166534;">
                     <span>👤 ${user.name}</span>
-                    <span style="font-size: 11px; font-weight: 800; background: ${isAdmin ? '#0e3753' : '#0284c7'}; color: #ffffff; padding: 2px 8px; border-radius: 9999px;">
-                      ${isAdmin ? '관리자' : '@senedu.kr 인증'}
+                    <span style="font-size: 11px; font-weight: 800; background: #0284c7; color: #ffffff; padding: 2px 8px; border-radius: 9999px;">
+                      @senedu.kr 인증
                     </span>
                   </div>
                   <span style="font-size: 11px; color: #15803d; font-weight: 600;">${user.email}</span>
@@ -225,9 +235,13 @@ export function renderReviews(container, preselectedEventId = null) {
 
     // 후기 등록 폼
     const form = container.querySelector("#review-submit-form");
-    if (form) {
+    if (form && !isAdmin) {
       form.addEventListener("submit", (e) => {
         e.preventDefault();
+        if (isAdmin) {
+          alert("⚠️ 관리자 계정은 후기 작성 대상이 아닙니다.");
+          return;
+        }
         const select = container.querySelector("#review-event-select");
         const text = container.querySelector("#review-text-input");
         const eventId = select.value;
