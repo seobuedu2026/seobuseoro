@@ -40,9 +40,13 @@ export function renderPrograms(container, onSelectEventModal) {
 
   container.innerHTML = `
     <div class="programs-view-wrapper">
-      <div class="tab-header-single-line" style="margin-bottom: 22px;">
+      <div class="tab-header-single-line" style="margin-bottom: 12px;">
         <h2 class="tab-header-title">프로그램 한눈에 보기</h2>
         <p class="tab-header-desc">월과 유형으로 찾아보고, 카드를 눌러 상세 내용을 확인할 수 있습니다.</p>
+      </div>
+
+      <div style="text-align: center; margin-bottom: 20px; font-size: 13.5px; font-weight: 700; color: #475569;">
+        ※ 세부 일정 및 장소는 학교 공문 및 신청 링크를 통해 확인하시기 바랍니다.
       </div>
 
       <!-- 새 프로그램 추가 및 유형 관리 버튼 (관리자 전용) -->

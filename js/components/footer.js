@@ -8,10 +8,6 @@ export function renderFooter(container) {
   container.innerHTML = `
     <footer class="site-footer">
       <div class="site-footer-inner">
-        <div class="footer-top-info">
-          <p class="footer-notice-text">※ 세부 일정 및 장소는 학교 공문 및 신청 링크를 통해 확인하시기 바랍니다.</p>
-        </div>
-
         <!-- 하단 영역 (저작권 문구 가운데 정렬, 관리자 버튼 우측 정렬) -->
         <div class="footer-bottom-bar">
           <div class="footer-copy">

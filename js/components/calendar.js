@@ -24,6 +24,10 @@ export function renderCalendar(container, onSelectEventModal) {
 
   container.innerHTML = `
     <div class="calendar-view-wrapper ${isSingleMonth ? 'is-single-month-view' : 'is-poster-view'}">
+      <div style="text-align: center; margin-bottom: 16px; font-size: 13.5px; font-weight: 700; color: #475569;">
+        ※ 세부 일정 및 장소는 학교 공문 및 신청 링크를 통해 확인하시기 바랍니다.
+      </div>
+
       <!-- 상단 연도/월 및 뷰 모드 전환 바 (중앙: 연도+월 칩 / 우측: 달력추가+엑셀등록) -->
       <div class="calendar-view-mode-bar">
         <!-- 화면 정가운데: 월 칩 목록 -->
