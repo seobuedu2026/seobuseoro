@@ -457,7 +457,7 @@ export function renderReviews(container, preselectedEventId = null) {
     });
   });
 
-  // 수정 버튼 바인딩 (관리자, 센스쿨 본인, 비밀번호 검증 비로그인 작성자)
+  // 수정 버튼 바인딩 (모달 창을 띄워 줄바꿈을 완벽히 보존하며 수정)
   container.querySelectorAll(".btn-review-mod-edit").forEach(btn => {
     btn.addEventListener("click", (e) => {
       e.preventDefault();
@@ -468,33 +468,23 @@ export function renderReviews(container, preselectedEventId = null) {
       if (!target) return;
 
       if (!isAdmin) {
-        if (target.password) {
-          const inputPw = prompt("후기 등록 시 설정한 비밀번호를 입력해주세요:");
-          if (inputPw === null) return;
-          if (inputPw !== target.password) {
-            alert("❌ 비밀번호가 일치하지 않습니다.");
-            return;
-          }
-        } else if (user && target.userEmail && user.email.toLowerCase() === target.userEmail.toLowerCase()) {
-          // 본인 작성 후기 통과
-        } else {
+        if (!target.password && !(user && target.userEmail && user.email.toLowerCase() === target.userEmail.toLowerCase())) {
           alert("⚠️ 수정 권한이 없습니다.");
           return;
         }
       }
 
-      const newContent = prompt("수정할 후기 내용을 입력해주세요:", target.content);
-      if (newContent !== null && newContent.trim()) {
-        target.content = newContent.trim();
+      openReviewEditModal(target, isAdmin, user, (newContent) => {
+        target.content = newContent;
         saveReviews(currentList);
         FirestoreReviewService.updateReviewContent(revId, target.content);
         alert("✅ 후기가 성공적으로 수정되었습니다.");
         renderReviews(container, preselectedEventId);
-      }
+      });
     });
   });
 
-  // 삭제 버튼 바인딩 (관리자, 센스쿨 본인, 비밀번호 검증 비로그인 작성자)
+  // 삭제 버튼 바인딩 (모달 창을 통해 비밀번호 확인 및 삭제)
   container.querySelectorAll(".btn-review-mod-delete").forEach(btn => {
     btn.addEventListener("click", (e) => {
       e.preventDefault();
@@ -505,28 +495,19 @@ export function renderReviews(container, preselectedEventId = null) {
       if (!target) return;
 
       if (!isAdmin) {
-        if (target.password) {
-          const inputPw = prompt("후기 등록 시 설정한 비밀번호를 입력해주세요:");
-          if (inputPw === null) return;
-          if (inputPw !== target.password) {
-            alert("❌ 비밀번호가 일치하지 않습니다.");
-            return;
-          }
-        } else if (user && target.userEmail && user.email.toLowerCase() === target.userEmail.toLowerCase()) {
-          // 본인 작성 후기 통과
-        } else {
+        if (!target.password && !(user && target.userEmail && user.email.toLowerCase() === target.userEmail.toLowerCase())) {
           alert("⚠️ 삭제 권한이 없습니다.");
           return;
         }
       }
 
-      if (confirm("정말 이 참여 후기를 삭제하시겠습니까?\n(삭제 후 복구할 수 없습니다.)")) {
+      openReviewDeleteModal(target, isAdmin, user, () => {
         const filtered = currentList.filter(r => r.id !== revId);
         saveReviews(filtered);
         FirestoreReviewService.deleteReview(revId);
         alert("🗑️ 후기가 완전히 삭제되었습니다.");
         renderReviews(container, preselectedEventId);
-      }
+      });
     });
   });
 
@@ -547,4 +528,210 @@ export function renderReviews(container, preselectedEventId = null) {
     });
   });
 }
+
+/**
+ * 후기 수정 커스텀 모달 (줄바꿈이 온전히 지원되는 textarea 및 비밀번호 확인)
+ */
+function openReviewEditModal(rev, isAdmin, user, onUpdated) {
+  const mount = document.getElementById("modal-mount");
+  if (!mount) return;
+
+  const requiresPassword = !isAdmin && !!rev.password;
+
+  mount.innerHTML = `
+    <div class="m3-modal-backdrop open" id="review-edit-backdrop">
+      <div class="m3-modal-dialog" style="max-width: 540px; width: 92%; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-header" style="padding-bottom: 12px; border-bottom: 1.5px solid #f1f5f9;">
+          <h3 style="font-size: 18px; font-weight: 900; color: #0e3753; display: flex; align-items: center; gap: 8px; margin: 0;">
+            <span>✏️ 참여 후기 수정</span>
+            ${isAdmin ? `<span style="font-size: 11px; font-weight: 800; background: #0e3753; color: #ffffff; padding: 2px 8px; border-radius: 9999px;">관리자</span>` : ''}
+          </h3>
+          <button class="modal-close-btn" id="btn-close-review-edit" aria-label="닫기">✕</button>
+        </div>
+
+        <form id="review-edit-form" style="display: flex; flex-direction: column; gap: 14px; margin-top: 14px;">
+          <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 10px 14px;">
+            <div style="font-size: 12px; font-weight: 800; color: #0284c7; margin-bottom: 3px;">
+              ${rev.eventTitle || "서부 교육 프로그램"}
+            </div>
+            <div style="font-size: 13.5px; font-weight: 700; color: #334155;">
+              작성자: <span style="font-weight: 800; color: #0e3753;">${rev.userName || "서부 교원"}</span>
+            </div>
+          </div>
+
+          ${requiresPassword ? `
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="review-edit-pw-input" style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 4px; display: block;">
+                비밀번호 확인 *
+              </label>
+              <input type="password" id="review-edit-pw-input" class="m3-input" placeholder="등록 시 설정한 비밀번호 입력" required style="font-size: 13.5px; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff;" />
+            </div>
+          ` : ''}
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="review-edit-content-input" style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 4px; display: block;">
+              후기 내용 (줄바꿈 자유롭게 수정 가능) *
+            </label>
+            <textarea id="review-edit-content-input" class="m3-textarea" rows="6" placeholder="수정할 후기 내용을 입력해주세요." required style="resize: vertical; white-space: pre-wrap; line-height: 1.6; font-size: 14px; padding: 12px; width: 100%; box-sizing: border-box; border: 1.5px solid #cbd5e1; border-radius: 10px; background: #ffffff;"></textarea>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;">
+            <button type="button" id="btn-cancel-review-edit" class="btn-m3-outlined" style="padding: 8px 18px; font-size: 13.5px; font-weight: 700; border-radius: 10px; cursor: pointer;">
+              취소
+            </button>
+            <button type="submit" class="btn-m3-filled" style="padding: 8px 22px; font-size: 13.5px; font-weight: 800; border-radius: 10px; cursor: pointer; background: #0e3753; color: #ffffff;">
+              수정 완료
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+
+  const textarea = mount.querySelector("#review-edit-content-input");
+  if (textarea) {
+    textarea.value = rev.content || "";
+  }
+
+  const closeModal = () => {
+    mount.innerHTML = "";
+  };
+
+  mount.querySelector("#btn-close-review-edit")?.addEventListener("click", closeModal);
+  mount.querySelector("#btn-cancel-review-edit")?.addEventListener("click", closeModal);
+  mount.querySelector("#review-edit-backdrop")?.addEventListener("click", (e) => {
+    if (e.target.id === "review-edit-backdrop") closeModal();
+  });
+
+  const form = mount.querySelector("#review-edit-form");
+  form?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (requiresPassword) {
+      const pwInput = mount.querySelector("#review-edit-pw-input");
+      if (!pwInput || pwInput.value.trim() !== rev.password) {
+        alert("❌ 비밀번호가 일치하지 않습니다.");
+        if (pwInput) pwInput.focus();
+        return;
+      }
+    }
+
+    const newContent = textarea ? textarea.value.trim() : "";
+    if (!newContent) {
+      alert("⚠️ 수정할 후기 내용을 입력해주세요.");
+      if (textarea) textarea.focus();
+      return;
+    }
+
+    closeModal();
+    if (onUpdated) onUpdated(newContent);
+  });
+
+  // Ctrl+Enter로 빠른 제출 지원
+  textarea?.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      e.preventDefault();
+      form?.dispatchEvent(new Event("submit"));
+    }
+  });
+
+  // 포커스 이동
+  setTimeout(() => {
+    if (requiresPassword) {
+      mount.querySelector("#review-edit-pw-input")?.focus();
+    } else if (textarea) {
+      textarea.focus();
+      textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+    }
+  }, 50);
+}
+
+/**
+ * 후기 삭제 커스텀 모달 (비밀번호 확인 및 확인 절차)
+ */
+function openReviewDeleteModal(rev, isAdmin, user, onDeleted) {
+  const mount = document.getElementById("modal-mount");
+  if (!mount) return;
+
+  const requiresPassword = !isAdmin && !!rev.password;
+
+  mount.innerHTML = `
+    <div class="m3-modal-backdrop open" id="review-delete-backdrop">
+      <div class="m3-modal-dialog" style="max-width: 460px; width: 92%;">
+        <div class="modal-header" style="padding-bottom: 12px; border-bottom: 1.5px solid #f1f5f9;">
+          <h3 style="font-size: 18px; font-weight: 900; color: #ef4444; display: flex; align-items: center; gap: 8px; margin: 0;">
+            <span>🗑️ 참여 후기 삭제</span>
+          </h3>
+          <button class="modal-close-btn" id="btn-close-review-del" aria-label="닫기">✕</button>
+        </div>
+
+        <form id="review-delete-form" style="display: flex; flex-direction: column; gap: 14px; margin-top: 14px;">
+          <p style="font-size: 14.5px; font-weight: 700; color: #334155; margin: 0; line-height: 1.5;">
+            정말 이 참여 후기를 삭제하시겠습니까?<br>
+            <span style="font-size: 12.5px; color: #ef4444; font-weight: 600;">(삭제된 후기는 복구할 수 없습니다.)</span>
+          </p>
+
+          <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 10px 14px;">
+            <div style="font-size: 12px; font-weight: 800; color: #0284c7; margin-bottom: 3px;">
+              ${rev.eventTitle || "서부 교육 프로그램"}
+            </div>
+            <div style="font-size: 13px; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              "${(rev.content || "").replace(/\n/g, ' ')}"
+            </div>
+          </div>
+
+          ${requiresPassword ? `
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="review-del-pw-input" style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 4px; display: block;">
+                비밀번호 확인 *
+              </label>
+              <input type="password" id="review-del-pw-input" class="m3-input" placeholder="등록 시 설정한 비밀번호 입력" required style="font-size: 13.5px; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff;" />
+            </div>
+          ` : ''}
+
+          <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;">
+            <button type="button" id="btn-cancel-review-del" class="btn-m3-outlined" style="padding: 8px 18px; font-size: 13.5px; font-weight: 700; border-radius: 10px; cursor: pointer;">
+              취소
+            </button>
+            <button type="submit" class="btn-m3-filled" style="padding: 8px 20px; font-size: 13.5px; font-weight: 800; border-radius: 10px; cursor: pointer; background: #ef4444; color: #ffffff; border: none;">
+              삭제하기
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+
+  const closeModal = () => {
+    mount.innerHTML = "";
+  };
+
+  mount.querySelector("#btn-close-review-del")?.addEventListener("click", closeModal);
+  mount.querySelector("#btn-cancel-review-del")?.addEventListener("click", closeModal);
+  mount.querySelector("#review-delete-backdrop")?.addEventListener("click", (e) => {
+    if (e.target.id === "review-delete-backdrop") closeModal();
+  });
+
+  const form = mount.querySelector("#review-delete-form");
+  form?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (requiresPassword) {
+      const pwInput = mount.querySelector("#review-del-pw-input");
+      if (!pwInput || pwInput.value.trim() !== rev.password) {
+        alert("❌ 비밀번호가 일치하지 않습니다.");
+        if (pwInput) pwInput.focus();
+        return;
+      }
+    }
+
+    closeModal();
+    if (onDeleted) onDeleted();
+  });
+
+  setTimeout(() => {
+    if (requiresPassword) {
+      mount.querySelector("#review-del-pw-input")?.focus();
+    }
+  }, 50);
+}
+
 
