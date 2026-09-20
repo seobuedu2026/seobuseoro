@@ -53,7 +53,7 @@ function getStoredReviews() {
         .filter(r => !EXCLUDED_IDS.has(r.id))
         .map(r => ({
           ...r,
-          userName: (r.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim(),
+          userName: (r.userName === "김형찬" || r.userName === "김*찬") ? "김세찬" : (r.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim(),
           status: r.status === "pending" ? "pending" : "approved"
         }));
     }
@@ -96,7 +96,7 @@ if (typeof window !== "undefined") {
           .filter(r => !EXCLUDED_IDS.has(r.id))
           .map(r => ({
             ...r,
-            userName: (r.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim(),
+            userName: (r.userName === "김형찬" || r.userName === "김*찬") ? "김세찬" : (r.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim(),
             status: r.status === "pending" ? "pending" : "approved"
           }));
 
@@ -374,12 +374,7 @@ export function renderReviews(container, preselectedEventId = null) {
       let password = "";
 
       if (user) {
-        maskedName = user.name;
-        // 일반 교원 계정일 때만 가운데 글자 마스킹(*) 처리, 관리자 계정은 이름 전체 표시
-        if (!user.isAdmin && user.name.length >= 2 && !user.name.includes("*")) {
-          maskedName = user.name[0] + "*" + (user.name.length > 2 ? user.name.slice(2) : "");
-        }
-        maskedName = maskedName.replace(/\s*(교사|실무사|선생님)$/, "").trim();
+        maskedName = (user.name || "서부 교원").replace(/\s*(교사|실무사|선생님)$/, "").trim();
         userEmail = user.email;
         isSenedu = true;
       } else {
@@ -396,9 +391,6 @@ export function renderReviews(container, preselectedEventId = null) {
 
         if (rawName) {
           maskedName = rawName.replace(/\s*(교사|실무사|선생님)$/, "").trim();
-          if (maskedName.length >= 2 && !maskedName.includes("*")) {
-            maskedName = maskedName[0] + "*" + (maskedName.length > 2 ? maskedName.slice(2) : "");
-          }
         }
       }
 
