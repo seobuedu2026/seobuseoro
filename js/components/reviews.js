@@ -319,7 +319,7 @@ export function renderReviews(container, preselectedEventId = null) {
     }
   }
 
-  // 관리자 승인 버튼 바인딩
+  // 관리자 승인 버튼 바인딩 (확인창 없이 1클릭 즉시 승인)
   container.querySelectorAll(".btn-review-mod-approve").forEach(btn => {
     btn.addEventListener("click", (e) => {
       e.preventDefault();
@@ -331,13 +331,12 @@ export function renderReviews(container, preselectedEventId = null) {
         target.status = "approved";
         saveReviews(currentList);
         FirestoreReviewService.updateReviewStatus(revId, "approved");
-        alert("✅ 후기가 정상적으로 승인(공개)되었습니다.");
         renderReviews(container, preselectedEventId);
       }
     });
   });
 
-  // 관리자 승인 취소 버튼 바인딩
+  // 관리자 승인 취소 버튼 바인딩 (확인창 없이 1클릭 즉시 취소)
   container.querySelectorAll(".btn-review-mod-unapprove").forEach(btn => {
     btn.addEventListener("click", (e) => {
       e.preventDefault();
@@ -349,7 +348,6 @@ export function renderReviews(container, preselectedEventId = null) {
         target.status = "pending";
         saveReviews(currentList);
         FirestoreReviewService.updateReviewStatus(revId, "pending");
-        alert("🔒 후기 승인이 취소되었습니다.\n(일반 교원 및 방문자 화면에서 숨김 처리됩니다.)");
         renderReviews(container, preselectedEventId);
       }
     });
