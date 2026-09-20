@@ -114,8 +114,28 @@ export function renderPrograms(container, onSelectEventModal) {
               </div>
             </div>
             
-            <h3 class="prog-title">${ev.title || '프로그램'}</h3>
-            ${ev.subtitle ? `<div class="prog-subtitle">${ev.subtitle}</div>` : ''}
+            <!-- 제목/부제목 및 우측 액션 버튼 (날짜 아래, 제목/부제목과 동일 높이) -->
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 2px;">
+              <div style="flex: 1; min-width: 0;">
+                <h3 class="prog-title" style="margin: 0;">${ev.title || '프로그램'}</h3>
+                ${ev.subtitle ? `<div class="prog-subtitle" style="margin-top: 4px;">${ev.subtitle}</div>` : ''}
+              </div>
+              <div style="flex-shrink: 0; display: flex; align-items: center;">
+                ${isPast ? `
+                  <button class="btn-m3-filled btn-review-shortcut" data-event-id="${ev.id}" style="font-size: 13px; font-weight: 800; border-radius: 9999px; padding: 7px 16px; cursor: pointer; border: none; background: #0e3753; color: #ffffff; white-space: nowrap; box-shadow: 0 2px 8px rgba(14, 55, 83, 0.2);" onclick="event.stopPropagation();">
+                    연수 후기 작성하기
+                  </button>
+                ` : (ev.applyUrl && (ev.applyUrl.startsWith('http://') || ev.applyUrl.startsWith('https://'))) ? `
+                  <a href="${ev.applyUrl}" target="_blank" class="btn-m3-filled" style="font-size: 13px; font-weight: 800; border-radius: 9999px; padding: 7px 16px; text-decoration: none; white-space: nowrap; box-shadow: 0 2px 8px rgba(14, 55, 83, 0.2);" onclick="event.stopPropagation();">
+                    참가 신청 바로가기
+                  </a>
+                ` : `
+                  <button class="btn-m3-outlined" disabled style="opacity: 0.75; cursor: default; background: #f8fafc; font-weight: 700; border-radius: 9999px; padding: 7px 16px; font-size: 12.5px; white-space: nowrap;" onclick="event.stopPropagation();">
+                    신청: 추후안내
+                  </button>
+                `}
+              </div>
+            </div>
 
             <!-- 아코디언 펼침 상세 내용 영역 -->
             <div class="prog-accordion-content">
@@ -142,27 +162,10 @@ export function renderPrograms(container, onSelectEventModal) {
               </div>
 
               ${ev.description ? `
-                <div style="font-size: 13.5px; color: #475569; line-height: 1.5; margin-bottom: 14px;">
+                <div style="font-size: 13.5px; color: #475569; line-height: 1.5;">
                   ${ev.description}
                 </div>
               ` : ''}
-
-              <!-- 하단 액션 버튼 바 (우측 정렬) -->
-              <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center; padding-top: 4px;">
-                ${isPast ? `
-                  <button class="btn-m3-filled btn-review-shortcut" data-event-id="${ev.id}" style="font-size: 13.5px; font-weight: 800; border-radius: 9999px; padding: 8px 18px; cursor: pointer; border: none; background: #0e3753; color: #ffffff; box-shadow: 0 2px 8px rgba(14, 55, 83, 0.2);" onclick="event.stopPropagation();">
-                    연수 후기 작성하기
-                  </button>
-                ` : (ev.applyUrl && (ev.applyUrl.startsWith('http://') || ev.applyUrl.startsWith('https://'))) ? `
-                  <a href="${ev.applyUrl}" target="_blank" class="btn-m3-filled" style="font-size: 13.5px; font-weight: 800; border-radius: 9999px; padding: 8px 18px; text-decoration: none; box-shadow: 0 2px 8px rgba(14, 55, 83, 0.2);" onclick="event.stopPropagation();">
-                    참가 신청 바로가기
-                  </a>
-                ` : `
-                  <button class="btn-m3-outlined" disabled style="opacity: 0.75; cursor: default; background: #f8fafc; font-weight: 700; border-radius: 9999px; padding: 8px 18px; font-size: 13px;" onclick="event.stopPropagation();">
-                    신청: 추후안내
-                  </button>
-                `}
-              </div>
             </div>
           </div>
         `;
