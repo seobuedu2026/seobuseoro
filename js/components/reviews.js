@@ -117,7 +117,7 @@ export function renderReviews(container, preselectedEventId = null) {
           </div>
 
           ${isAdmin ? `
-            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px 14px; text-align: center;">
+            <div style="background-color: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 20px 14px; text-align: center;">
               <div style="font-size: 28px; margin-bottom: 8px;">🔒</div>
               <p style="font-size: 14.5px; font-weight: 800; color: #0e3753; margin-bottom: 6px;">
                 관리자 계정 (작성 불가)
@@ -125,12 +125,12 @@ export function renderReviews(container, preselectedEventId = null) {
               <p style="font-size: 12.5px; color: #64748b; line-height: 1.45; word-break: keep-all; margin-bottom: 12px;">
                 참여 후기는 행사에 참여하신 <strong>현장 교원(@senedu.kr)</strong> 전용으로 작성됩니다.
               </p>
-              <button type="button" id="btn-review-logout" style="padding: 6px 14px; font-size: 12.5px; font-weight: 700; border-radius: 6px; background: #fee2e2; color: #dc2626; border: 1px solid #fecdd3; cursor: pointer;">
+              <button type="button" id="btn-review-logout" class="btn-review-logout-inline" title="로그아웃">
                 로그아웃
               </button>
             </div>
           ` : !user ? `
-            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 12px; text-align: center;">
+            <div style="background-color: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 18px 12px; text-align: center;">
               <p style="font-size: 14px; font-weight: 800; color: #0e3753; margin-bottom: 6px; line-height: 1.45;">
                 후기 작성은 교원 로그인 후 가능합니다.
               </p>
@@ -140,20 +140,20 @@ export function renderReviews(container, preselectedEventId = null) {
 
               <!-- 센스쿨 구글 계정 로그인 버튼 (컴팩트 사이즈) -->
               <div style="display: flex; justify-content: center;">
-                <button id="btn-custom-google-login" class="btn-m3-filled" style="padding: 6px 22px; font-size: 13px; font-weight: 800; border-radius: var(--shape-pill); justify-content: center; box-shadow: 0 2px 8px rgba(14, 55, 83, 0.15);">
+                <button id="btn-custom-google-login" class="btn-m3-filled" style="padding: 8px 24px; font-size: 13.5px; font-weight: 800; border-radius: 10px; justify-content: center; box-shadow: 0 2px 8px rgba(14, 55, 83, 0.15);">
                   교원 로그인
                 </button>
               </div>
             </div>
           ` : `
             <form id="review-submit-form">
-              <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 10px 12px; border-radius: 10px; margin-bottom: 12px; font-size: 15px; font-weight: 700; color: #166534; display: flex; align-items: center; justify-content: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                <span style="font-weight: 800; color: #166534; font-size: 15px;">${user.name}</span>
-                <span style="font-size: 14px; font-weight: 600; color: #15803d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">(${user.email})</span>
+              <div style="background: #f1f5f9; border: 1.5px solid #e2e8f0; padding: 9px 12px; border-radius: 10px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                <span style="font-weight: 800; color: #0e3753; font-size: 14.5px;">${user.name}</span>
+                <span style="font-size: 13px; font-weight: 600; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">(${user.email})</span>
               </div>
 
-              <div class="form-group" style="margin-bottom: 14px;">
-                <select id="review-event-select" class="m3-select" required style="text-align: left; text-align-last: left; font-size: 13.5px; padding: 10px 12px;">
+              <div class="form-group" style="margin-bottom: 12px;">
+                <select id="review-event-select" class="m3-select" required>
                   <option value="">참여한 행사를 선택하세요</option>
                   ${getEvents().filter(isEventPastOrToday).map(ev => `
                     <option value="${ev.id}" ${preselectedEventId === ev.id ? 'selected' : ''}>
@@ -163,16 +163,16 @@ export function renderReviews(container, preselectedEventId = null) {
                 </select>
               </div>
 
-              <div class="form-group">
-                <label for="review-text-input" style="font-weight: 800; font-size: 13px; color: #0e3753;">소감 및 수업 적용 나눔</label>
-                <textarea id="review-text-input" class="m3-textarea" rows="4" placeholder="연수/행사에서 얻은 인사이트나 교실 실천 계획을 자유롭게 적어주세요." required></textarea>
+              <div class="form-group" style="margin-bottom: 14px;">
+                <label for="review-text-input" style="font-weight: 800; font-size: 13.5px; color: #0e3753; margin-bottom: 2px;">소감 및 수업 적용 나눔</label>
+                <textarea id="review-text-input" class="m3-textarea" rows="4" placeholder="연수/행사에서 얻은 인사이트나 교실 실천 계획을 자유롭게 적어주세요." required style="resize: vertical;"></textarea>
               </div>
 
-              <div style="display: flex; gap: 8px; align-items: center; margin-top: 6px;">
-                <button type="submit" class="btn-m3-filled" style="flex: 1; padding: 11px 16px; font-size: 14px; font-weight: 800; justify-content: center;">
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <button type="submit" class="btn-m3-filled" style="flex: 1; height: 42px; border-radius: 10px; font-size: 14px; font-weight: 800; justify-content: center; padding: 0 16px;">
                   후기 등록하기
                 </button>
-                <button type="button" id="btn-review-logout" style="padding: 10px 14px; font-size: 13px; font-weight: 700; border-radius: 8px; white-space: nowrap; height: 42px; display: inline-flex; align-items: center; justify-content: center; background: #fee2e2; color: #dc2626; border: 1px solid #fecdd3; cursor: pointer;" title="로그아웃">
+                <button type="button" id="btn-review-logout" class="btn-review-logout-inline" title="로그아웃">
                   로그아웃
                 </button>
               </div>
