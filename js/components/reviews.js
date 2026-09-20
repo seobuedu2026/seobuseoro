@@ -230,7 +230,7 @@ export function renderReviews(container, preselectedEventId = null) {
                   후기를 작성할 행사 선택
                 </label>
                 <select id="review-event-select" class="m3-select" required>
-                  <option value="">참여한 행사를 선택하세요</option>
+                  <option value="">행사 선택</option>
                   ${getEvents().filter(isEventPastOrToday).map(ev => `
                     <option value="${ev.id}" ${preselectedEventId === ev.id ? 'selected' : ''}>
                       [${ev.month}월 ${ev.day}일] ${ev.title} ${ev.subtitle ? `(${ev.subtitle})` : ''}
