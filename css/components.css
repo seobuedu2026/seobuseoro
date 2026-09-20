@@ -1299,6 +1299,27 @@
   margin-bottom: 16px;
 }
 
+.modal-title-action-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.modal-title-text-wrap {
+  flex: 1 1 auto;
+  min-width: 140px;
+}
+
+.modal-action-btn-wrap {
+  flex-shrink: 0;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
 .modal-close-btn {
   font-size: 20px;
   color: #64748b;

@@ -237,8 +237,9 @@
     grid-template-columns: 1fr;
   }
 
-  /* 프로그램 탭 제목 및 버튼: 기본적으로 한 줄에 나란히 배치, 텍스트가 길어 겹치는 경우에만 줄바꿈 후 우측 정렬 */
-  .prog-title-action-row {
+  /* 프로그램 탭 및 캘린더 팝업 모달 제목 및 버튼: 기본적으로 한 줄에 나란히 배치, 텍스트가 길어 겹치는 경우에만 줄바꿈 후 우측 정렬 */
+  .prog-title-action-row,
+  .modal-title-action-row {
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
@@ -246,13 +247,15 @@
     gap: 8px !important;
   }
 
-  .prog-title-text-wrap {
+  .prog-title-text-wrap,
+  .modal-title-text-wrap {
     flex: 1 1 auto !important;
     min-width: 130px !important;
     width: auto !important;
   }
 
-  .prog-action-btn-wrap {
+  .prog-action-btn-wrap,
+  .modal-action-btn-wrap {
     flex-shrink: 0 !important;
     margin-left: auto !important;
     width: auto !important;
