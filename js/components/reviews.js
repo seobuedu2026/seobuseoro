@@ -153,7 +153,7 @@ export function renderReviews(container, preselectedEventId = null) {
               </div>
 
               <div class="form-group" style="margin-bottom: 14px;">
-                <select id="review-event-select" class="m3-select" required style="text-align: center; text-align-last: center; font-size: 13.5px; padding: 10px 8px;">
+                <select id="review-event-select" class="m3-select" required style="text-align: left; text-align-last: left; font-size: 13.5px; padding: 10px 12px;">
                   <option value="">참여한 행사를 선택하세요</option>
                   ${getEvents().filter(isEventPastOrToday).map(ev => `
                     <option value="${ev.id}" ${preselectedEventId === ev.id ? 'selected' : ''}>
@@ -161,13 +161,10 @@ export function renderReviews(container, preselectedEventId = null) {
                     </option>
                   `).join("")}
                 </select>
-                <div style="font-size: 11.5px; color: #64748b; margin-top: 4px; text-align: center;">
-                  * 후기 작성은 행사 진행 당일부터 가능합니다.
-                </div>
               </div>
 
               <div class="form-group">
-                <label for="review-text-input" style="font-weight: 800; font-size: 13px; color: #0e3753;">소감 및 수업 적용 나눔 *</label>
+                <label for="review-text-input" style="font-weight: 800; font-size: 13px; color: #0e3753;">소감 및 수업 적용 나눔</label>
                 <textarea id="review-text-input" class="m3-textarea" rows="4" placeholder="연수/행사에서 얻은 인사이트나 교실 실천 계획을 자유롭게 적어주세요." required></textarea>
               </div>
 
