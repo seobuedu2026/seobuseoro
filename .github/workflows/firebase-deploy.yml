@@ -1,7 +1,12 @@
-name: Firebase 배포
+name: Firebase Hosting 배포
 
 # main 브랜치에 push하면 사이트에 자동 반영된다.
 # 필요할 때 Actions 탭에서 수동 실행도 가능하다.
+#
+# Firestore 보안 규칙(firestore.rules)은 여기서 배포하지 않는다.
+# Hosting 배포용 서비스 계정에는 Firestore 관련 권한이 없어 실패하기 때문이다.
+# 규칙을 바꾼 경우에는 로컬에서 아래 명령을 한 번 실행한다.
+#   firebase deploy --only firestore:rules
 on:
   push:
     branches:
@@ -30,24 +35,3 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           projectId: seobuseoro
           channelId: live
-
-      - name: Node 준비
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: 서비스 계정 키 파일 준비
-        env:
-          SA_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        run: printf '%s' "$SA_JSON" > "$RUNNER_TEMP/firebase-sa.json"
-
-      - name: Firestore 보안 규칙 배포
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-sa.json
-        run: |
-          npm install -g firebase-tools
-          firebase deploy --only firestore:rules --project seobuseoro --non-interactive
-
-      - name: 서비스 계정 키 파일 삭제
-        if: always()
-        run: rm -f "$RUNNER_TEMP/firebase-sa.json"
