@@ -641,6 +641,21 @@
   font-size: 16px;
 }
 
+.prog-datetime-val {
+  display: inline-flex;
+  flex-wrap: wrap;
+  column-gap: 8px;
+  row-gap: 2px;
+}
+
+.prog-date-text {
+  white-space: nowrap;
+}
+
+.prog-time-text {
+  white-space: nowrap;
+}
+
 .prog-action-buttons {
   margin-top: 16px;
   display: flex;

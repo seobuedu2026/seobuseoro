@@ -144,7 +144,10 @@ export function renderPrograms(container, onSelectEventModal) {
                 <div class="prog-info-list" style="margin-bottom: 0;">
                   <div class="prog-info-item">
                     <span class="prog-info-label">일시</span>
-                    <span>${evYear}년 ${ev.month}월 ${ev.day}일 ${evTime}</span>
+                    <span class="prog-datetime-val">
+                      <span class="prog-date-text">${evYear}년 ${ev.month}월 ${ev.day}일</span>
+                      <span class="prog-time-text">${evTime}</span>
+                    </span>
                   </div>
                   <div class="prog-info-item">
                     <span class="prog-info-label">장소</span>

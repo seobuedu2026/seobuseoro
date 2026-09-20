@@ -1,12 +1,12 @@
-import { renderHeader } from "./components/header.js?v=20260920_v9";
-import { renderFooter } from "./components/footer.js?v=20260920_v9";
-import { renderCalendar } from "./components/calendar.js?v=20260920_v9";
-import { renderPrograms } from "./components/programs.js?v=20260920_v9";
-import { renderReviews } from "./components/reviews.js?v=20260920_v9";
-import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v9";
-import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v9";
-import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v9";
-import { isEventPastOrToday } from "./data/events.js?v=20260920_v9";
+import { renderHeader } from "./components/header.js?v=20260920_v10";
+import { renderFooter } from "./components/footer.js?v=20260920_v10";
+import { renderCalendar } from "./components/calendar.js?v=20260920_v10";
+import { renderPrograms } from "./components/programs.js?v=20260920_v10";
+import { renderReviews } from "./components/reviews.js?v=20260920_v10";
+import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v10";
+import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v10";
+import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v10";
+import { isEventPastOrToday } from "./data/events.js?v=20260920_v10";
 
 let activeTab = "calendar"; // 'calendar' | 'programs' | 'reviews' | 'padlet'
 
@@ -70,7 +70,10 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="prog-info-list">
               <div class="prog-info-item">
                 <span class="prog-info-label">일시</span>
-                <span>${eventObj.year || 2026}년 ${eventObj.month}월 ${eventObj.day}일 ${eventObj.time}</span>
+                <span class="prog-datetime-val">
+                  <span class="prog-date-text">${eventObj.year || 2026}년 ${eventObj.month}월 ${eventObj.day}일</span>
+                  <span class="prog-time-text">${eventObj.time}</span>
+                </span>
               </div>
               <div class="prog-info-item">
                 <span class="prog-info-label">장소</span>
