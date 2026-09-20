@@ -1,12 +1,12 @@
-import { renderHeader } from "./components/header.js?v=20260920_v58";
-import { renderFooter } from "./components/footer.js?v=20260920_v58";
-import { renderCalendar } from "./components/calendar.js?v=20260920_v58";
-import { renderPrograms } from "./components/programs.js?v=20260920_v58";
-import { renderReviews } from "./components/reviews.js?v=20260920_v58";
-import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v58";
-import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v58";
-import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v58";
-import { isEventPastOrToday } from "./data/events.js?v=20260920_v58";
+import { renderHeader } from "./components/header.js?v=20260920_v59";
+import { renderFooter } from "./components/footer.js?v=20260920_v59";
+import { renderCalendar } from "./components/calendar.js?v=20260920_v59";
+import { renderPrograms } from "./components/programs.js?v=20260920_v59";
+import { renderReviews } from "./components/reviews.js?v=20260920_v59";
+import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v59";
+import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v59";
+import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v59";
+import { isEventPastOrToday } from "./data/events.js?v=20260920_v59";
 
 let activeTab = "calendar"; // 'calendar' | 'programs' | 'reviews' | 'padlet'
 
@@ -71,7 +71,11 @@ function initApp() {
               </div>
               <div class="prog-info-item">
                 <span class="prog-info-label">신청방법</span>
-                <span style="font-weight:700;">${(eventObj.applyUrl && (eventObj.applyUrl.startsWith('http://') || eventObj.applyUrl.startsWith('https://'))) ? (eventObj.applyMethod || '온라인 링크') : '추후안내'}</span>
+                <span style="font-weight:700;">
+                  ${(eventObj.applyUrl && (eventObj.applyUrl.startsWith('http://') || eventObj.applyUrl.startsWith('https://'))) 
+                    ? `<a href="${eventObj.applyUrl}" target="_blank" rel="noopener noreferrer" style="color:#0284c7; text-decoration:underline; font-weight:800; display:inline-flex; align-items:center; gap:4px;" title="신청 링크 바로가기">${eventObj.applyMethod === 'URL 링크' ? 'URL 링크 ↗' : (eventObj.applyMethod || 'URL 링크') + ' ↗'}</a>` 
+                    : (eventObj.applyMethod || '추후안내')}
+                </span>
               </div>
             </div>
           </div>

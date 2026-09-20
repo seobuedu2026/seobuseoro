@@ -94,8 +94,8 @@ export function renderPrograms(container, onSelectEventModal) {
           const evLoc = ev.location || '서부교육지원청';
           const evTarget = ev.target || '관내 초등희망교원';
           const evApplyMethod = (ev.applyUrl && (ev.applyUrl.startsWith('http://') || ev.applyUrl.startsWith('https://'))) 
-            ? (ev.applyMethod || '온라인 링크') 
-            : '추후안내';
+            ? `<a href="${ev.applyUrl}" target="_blank" rel="noopener noreferrer" style="color: #0284c7; text-decoration: underline; font-weight: 800; display: inline-flex; align-items: center; gap: 4px;" onclick="event.stopPropagation();" title="신청 링크 바로가기">${ev.applyMethod === 'URL 링크' ? 'URL 링크 ↗' : (ev.applyMethod || 'URL 링크') + ' ↗'}</a>` 
+            : (ev.applyMethod || '추후안내');
 
           const isPast = isEventPastOrToday(ev);
 

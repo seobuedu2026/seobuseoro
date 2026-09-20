@@ -18,6 +18,19 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
   const categories = getCategories();
   const currentCat = eventObj ? (eventObj.category || "workshop") : "workshop";
 
+  let currentApplyMethod = "교데통";
+  if (eventObj) {
+    if (eventObj.applyMethod === "교데통" || eventObj.applyMethod === "공문통") {
+      currentApplyMethod = "교데통";
+    } else if (eventObj.applyMethod === "추후안내") {
+      currentApplyMethod = "추후안내";
+    } else if (eventObj.applyMethod === "URL 링크" || eventObj.applyUrl) {
+      currentApplyMethod = "URL 링크";
+    } else if (eventObj.applyMethod) {
+      currentApplyMethod = eventObj.applyMethod;
+    }
+  }
+
   mount.innerHTML = `
     <div class="m3-modal-backdrop open" id="event-form-backdrop">
       <div class="m3-modal-dialog" style="max-width: 560px; max-height: 90vh; overflow-y: auto;">
@@ -91,7 +104,7 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
             </div>
           </div>
 
-          <!-- 대상 & 신청 링크 -->
+          <!-- 대상 & 신청 방법 -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <div class="form-group">
               <label for="ef-target" style="font-weight: 800; font-size: 13px; color: #0e3753;">대상</label>
@@ -99,9 +112,19 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
             </div>
 
             <div class="form-group">
-              <label for="ef-apply-url" style="font-weight: 800; font-size: 13px; color: #0e3753;">신청 링크 URL (선택)</label>
-              <input type="text" id="ef-apply-url" class="m3-input" placeholder="https://... (미입력 시 '신청: 추후안내'로 표시)" value="${eventObj?.applyUrl || ''}" />
+              <label for="ef-apply-method" style="font-weight: 800; font-size: 13px; color: #0e3753;">신청 방법</label>
+              <select id="ef-apply-method" class="m3-select">
+                <option value="교데통" ${currentApplyMethod === '교데통' ? 'selected' : ''}>교데통</option>
+                <option value="URL 링크" ${currentApplyMethod === 'URL 링크' ? 'selected' : ''}>URL 링크</option>
+                <option value="추후안내" ${currentApplyMethod === '추후안내' ? 'selected' : ''}>추후안내</option>
+              </select>
             </div>
+          </div>
+
+          <!-- URL 링크 선택 시 나타나는 URL 입력 필드 -->
+          <div class="form-group" id="ef-url-group" style="display: ${currentApplyMethod === 'URL 링크' ? 'block' : 'none'};">
+            <label for="ef-apply-url" style="font-weight: 800; font-size: 13px; color: #0e3753;">신청 URL 링크</label>
+            <input type="text" id="ef-apply-url" class="m3-input" placeholder="https://..." value="${eventObj?.applyUrl || ''}" />
           </div>
 
           <!-- 상세 설명 -->
@@ -178,6 +201,22 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
     });
   }
 
+  // 신청방법 변경 시 URL 입력창 표시/숨김
+  const applyMethodSelect = mount.querySelector("#ef-apply-method");
+  const urlGroup = mount.querySelector("#ef-url-group");
+  const applyUrlInput = mount.querySelector("#ef-apply-url");
+
+  if (applyMethodSelect && urlGroup) {
+    applyMethodSelect.addEventListener("change", (e) => {
+      if (e.target.value === "URL 링크") {
+        urlGroup.style.display = "block";
+        if (applyUrlInput) applyUrlInput.focus();
+      } else {
+        urlGroup.style.display = "none";
+      }
+    });
+  }
+
   // 저장/추가 처리
   form.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -192,11 +231,16 @@ export function openEventFormModal(eventObj = null, defaultDate = null, onSaved 
     const time = document.getElementById("ef-time").value.trim() || "15:00 ~ 17:00";
     const location = document.getElementById("ef-location").value.trim() || "서부교육지원청";
     const target = document.getElementById("ef-target").value.trim() || "관내 초등희망교원";
-    let applyUrl = document.getElementById("ef-apply-url").value.trim();
-    if (applyUrl && !applyUrl.startsWith("http://") && !applyUrl.startsWith("https://")) {
-      applyUrl = "https://" + applyUrl;
+    
+    const applyMethod = document.getElementById("ef-apply-method") ? document.getElementById("ef-apply-method").value : "교데통";
+    let applyUrl = "";
+    if (applyMethod === "URL 링크") {
+      applyUrl = document.getElementById("ef-apply-url") ? document.getElementById("ef-apply-url").value.trim() : "";
+      if (applyUrl && !applyUrl.startsWith("http://") && !applyUrl.startsWith("https://")) {
+        applyUrl = "https://" + applyUrl;
+      }
     }
-    const applyMethod = applyUrl ? "온라인 링크" : "추후안내";
+
     const description = document.getElementById("ef-desc").value.trim() || `${title} 행사입니다.`;
 
     const currentCats = getCategories();

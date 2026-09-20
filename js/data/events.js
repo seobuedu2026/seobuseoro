@@ -1116,7 +1116,7 @@ export function parseExcelRowToEvent(row, index) {
     location: location || "추후 안내",
     target: target || "관내 초등희망교원",
     description: description || "상세 일정은 공문을 통해 확인하시기 바랍니다.",
-    applyMethod: applyMethod || "온라인 링크",
-    applyUrl: applyMethod.includes("링크") || applyMethod.includes("유레카") ? "https://senedu.kr" : ""
+    applyMethod: applyMethod || "교데통",
+    applyUrl: (applyMethod && (applyMethod.includes("링크") || applyMethod.includes("URL") || applyMethod.includes("유레카"))) ? "https://senedu.kr" : ""
   };
 }
