@@ -97,6 +97,8 @@ export function renderPrograms(container, onSelectEventModal) {
             ? (ev.applyMethod || '온라인 링크') 
             : '추후안내';
 
+          const isPast = isEventPastOrToday(ev);
+
           return `
           <div class="program-card clickable-program-card" data-card-id="${ev.id}" style="cursor: pointer;">
             <div class="prog-card-top">
@@ -147,15 +149,16 @@ export function renderPrograms(container, onSelectEventModal) {
 
               <!-- 하단 액션 버튼 바 (우측 정렬) -->
               <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center; padding-top: 4px;">
-                <button class="btn-m3-outlined btn-review-shortcut" data-event-id="${ev.id}" onclick="event.stopPropagation();">
-                  후기 남기기
-                </button>
-                ${ev.applyUrl && (ev.applyUrl.startsWith('http://') || ev.applyUrl.startsWith('https://')) ? `
-                  <a href="${ev.applyUrl}" target="_blank" class="btn-m3-filled" onclick="event.stopPropagation();">
+                ${isPast ? `
+                  <button class="btn-m3-filled btn-review-shortcut" data-event-id="${ev.id}" style="font-size: 13.5px; font-weight: 800; border-radius: 9999px; padding: 8px 18px; cursor: pointer; border: none; background: #0e3753; color: #ffffff; box-shadow: 0 2px 8px rgba(14, 55, 83, 0.2);" onclick="event.stopPropagation();">
+                    연수 후기 작성하기
+                  </button>
+                ` : (ev.applyUrl && (ev.applyUrl.startsWith('http://') || ev.applyUrl.startsWith('https://'))) ? `
+                  <a href="${ev.applyUrl}" target="_blank" class="btn-m3-filled" style="font-size: 13.5px; font-weight: 800; border-radius: 9999px; padding: 8px 18px; text-decoration: none; box-shadow: 0 2px 8px rgba(14, 55, 83, 0.2);" onclick="event.stopPropagation();">
                     참가 신청 바로가기
                   </a>
                 ` : `
-                  <button class="btn-m3-outlined" disabled style="opacity: 0.75; cursor: default; background: #f8fafc; font-weight: 700;" onclick="event.stopPropagation();">
+                  <button class="btn-m3-outlined" disabled style="opacity: 0.75; cursor: default; background: #f8fafc; font-weight: 700; border-radius: 9999px; padding: 8px 18px; font-size: 13px;" onclick="event.stopPropagation();">
                     신청: 추후안내
                   </button>
                 `}

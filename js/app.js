@@ -1,12 +1,12 @@
-import { renderHeader } from "./components/header.js?v=20260920_v4";
-import { renderFooter } from "./components/footer.js?v=20260920_v4";
-import { renderCalendar } from "./components/calendar.js?v=20260920_v4";
-import { renderPrograms } from "./components/programs.js?v=20260920_v4";
-import { renderReviews } from "./components/reviews.js?v=20260920_v4";
-import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v4";
-import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v4";
-import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v4";
-import { isEventPastOrToday } from "./data/events.js?v=20260920_v4";
+import { renderHeader } from "./components/header.js?v=20260920_v5";
+import { renderFooter } from "./components/footer.js?v=20260920_v5";
+import { renderCalendar } from "./components/calendar.js?v=20260920_v5";
+import { renderPrograms } from "./components/programs.js?v=20260920_v5";
+import { renderReviews } from "./components/reviews.js?v=20260920_v5";
+import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v5";
+import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v5";
+import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v5";
+import { isEventPastOrToday } from "./data/events.js?v=20260920_v5";
 
 let activeTab = "calendar"; // 'calendar' | 'programs' | 'reviews' | 'padlet'
 
@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function showEventModal(eventObj) {
     const user = GoogleAuthService.getCurrentUser();
     const isAdmin = !!(user && user.isAdmin);
+    const isPast = isEventPastOrToday(eventObj);
 
     modalMount.innerHTML = `
       <div class="m3-modal-backdrop open" id="modal-backdrop">
@@ -38,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <button class="modal-close-btn" id="btn-modal-close" aria-label="닫기">✕</button>
           </div>
 
-          <!-- 제목 및 부제목 & 신청 바로가기 버튼 영역 -->
+          <!-- 제목 및 부제목 & 신청 바로가기/후기작성 버튼 영역 -->
           <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:18px; flex-wrap:wrap;">
             <div style="flex:1; min-width:240px;">
               <h2 style="font-size:22px; font-weight:900; color:#0e3753; margin-bottom:4px; line-height:1.3;">
@@ -47,9 +48,13 @@ document.addEventListener("DOMContentLoaded", () => {
               ${eventObj.subtitle ? `<div style="font-size:15px; font-weight:600; color:#475569;">${eventObj.subtitle}</div>` : ''}
             </div>
 
-            <!-- 제목/설명 우측 신청 바로가기 버튼 -->
+            <!-- 제목/설명 우측 버튼 (지난 연수는 후기 작성, 예정 연수는 참가 신청) -->
             <div style="flex-shrink:0; display:flex; align-items:center;">
-              ${(eventObj.applyUrl && (eventObj.applyUrl.startsWith('http://') || eventObj.applyUrl.startsWith('https://'))) ? `
+              ${isPast ? `
+                <button id="btn-modal-review-action" class="btn-m3-filled" style="white-space:nowrap; padding:9px 18px; font-size:13.5px; font-weight:800; background:#0e3753; color:#ffffff; border-radius:9999px; border:none; cursor:pointer; display:inline-flex; align-items:center; box-shadow:0 2px 8px rgba(14, 55, 83, 0.2);">
+                  연수 후기 작성하기
+                </button>
+              ` : (eventObj.applyUrl && (eventObj.applyUrl.startsWith('http://') || eventObj.applyUrl.startsWith('https://'))) ? `
                 <a href="${eventObj.applyUrl}" target="_blank" class="btn-m3-filled" style="white-space:nowrap; padding:9px 18px; font-size:13.5px; font-weight:800; background:#0e3753; color:#ffffff; border-radius:9999px; text-decoration:none; display:inline-flex; align-items:center; box-shadow:0 2px 8px rgba(14, 55, 83, 0.2);">
                   참가 신청 바로가기
                 </a>
@@ -102,6 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const backdrop = modalMount.querySelector("#modal-backdrop");
     const closeBtn = modalMount.querySelector("#btn-modal-close");
     const editBtn = modalMount.querySelector("#btn-modal-edit");
+    const reviewActionBtn = modalMount.querySelector("#btn-modal-review-action");
 
     const closeModal = () => {
       backdrop.classList.remove("open");
@@ -143,6 +149,14 @@ document.addEventListener("DOMContentLoaded", () => {
         e.stopPropagation();
         modalMount.innerHTML = "";
         openEventFormModal(eventObj, null, () => switchTab(activeTab));
+      });
+    }
+
+    if (reviewActionBtn) {
+      reviewActionBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        closeModal();
+        switchTab("reviews", eventObj.id);
       });
     }
   }
