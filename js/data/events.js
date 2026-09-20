@@ -812,6 +812,32 @@ export function saveActiveMonths(months) {
   window.dispatchEvent(new CustomEvent("events-updated"));
 }
 
+// 3개월(다중 월) 모아보기에 포함할 월 관리
+const OVERVIEW_MONTHS_KEY = "seobu_overview_months_v2";
+const DEFAULT_OVERVIEW_MONTHS = [9, 10, 11];
+
+export function getOverviewMonths() {
+  const saved = localStorage.getItem(OVERVIEW_MONTHS_KEY);
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map(m => parseInt(m, 10)).sort((a, b) => a - b);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  const active = getActiveMonths();
+  return active.slice(0, 3);
+}
+
+export function saveOverviewMonths(months) {
+  const sorted = Array.from(new Set(months.map(m => parseInt(m, 10)))).sort((a, b) => a - b);
+  localStorage.setItem(OVERVIEW_MONTHS_KEY, JSON.stringify(sorted));
+  window.dispatchEvent(new CustomEvent("events-updated"));
+}
+
 // ============================================================================
 // 카테고리(유형/범례) 관리
 // ============================================================================

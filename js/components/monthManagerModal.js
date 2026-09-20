@@ -1,4 +1,4 @@
-import { getActiveMonths, saveActiveMonths, getMonthThemes, saveMonthTheme, getSelectedYear, setSelectedYear, AVAILABLE_YEARS } from "../data/events.js";
+import { getActiveMonths, saveActiveMonths, getOverviewMonths, saveOverviewMonths, getMonthThemes, saveMonthTheme, getSelectedYear, setSelectedYear, AVAILABLE_YEARS } from "../data/events.js";
 
 /**
  * 관리자용 캘린더 연도 및 월 추가/관리 모달
@@ -10,13 +10,14 @@ export function openMonthManagerModal(onSaved) {
 
   const currentYear = getSelectedYear();
   const currentActive = getActiveMonths();
+  const currentOverview = getOverviewMonths();
   const monthThemes = getMonthThemes();
   const allMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
   const yearsList = AVAILABLE_YEARS.filter(y => y >= 2025 && y <= 2030);
 
   mount.innerHTML = `
     <div class="m3-modal-backdrop open" id="month-manager-backdrop">
-      <div class="m3-modal-dialog" style="max-width: 500px;">
+      <div class="m3-modal-dialog" style="max-width: 520px; max-height: 90vh; overflow-y: auto;">
         <div class="modal-header">
           <h3 style="font-size: 19px; font-weight: 900; color: #0e3753; display: flex; align-items: center; gap: 8px;">
             <span>🗓️ 캘린더 연도 및 월(Month) 관리</span>
@@ -28,11 +29,11 @@ export function openMonthManagerModal(onSaved) {
         </div>
 
         <p style="font-size: 13.5px; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
-          캘린더 기준 연도와 상단에 노출할 월을 선택하세요.
+          캘린더 기준 연도, 상단 노출 월, 모아보기에 포함할 월을 선택하세요.
         </p>
 
         <form id="month-mgr-form">
-          <!-- 연도 선택 영역 (2025~2028년 이상 계속 활용 가능) -->
+          <!-- 연도 선택 영역 -->
           <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; margin-bottom: 16px;">
             <div style="display: flex; align-items: center; justify-content: space-between;">
               <label for="month-mgr-year-select" style="font-weight: 800; font-size: 14px; color: #0e3753;">
@@ -49,23 +50,45 @@ export function openMonthManagerModal(onSaved) {
             </div>
           </div>
 
-          <!-- 월 선택 영역 안내 -->
+          <!-- 1. 상단 탭에 노출할 월 선택 -->
           <div style="margin-bottom: 8px;">
-            <span style="font-weight: 800; font-size: 13.5px; color: #0e3753;">노출할 월(Month) 선택</span>
-            <span style="font-size: 11.5px; color: #64748b; margin-left: 6px;">(체크된 월만 캘린더에 표시됩니다)</span>
+            <span style="font-weight: 800; font-size: 13.5px; color: #0e3753;">상단 탭에 노출할 월(Month) 선택</span>
+            <span style="font-size: 11.5px; color: #64748b; margin-left: 6px;">(체크된 월이 상단 탭에 표시됩니다)</span>
           </div>
 
-          <!-- 1~12월 깔끔한 선택 그리드 -->
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px;">
+          <!-- 1~12월 상단 탭 선택 그리드 -->
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 18px;">
             ${allMonths.map(m => {
               const isChecked = currentActive.includes(m);
               return `
-                <label class="month-chip-select-item" style="display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 4px; background: ${isChecked ? '#f0fdf4' : '#f8fafc'}; border: 1.5px solid ${isChecked ? '#16a34a' : '#e2e8f0'}; border-radius: 12px; cursor: pointer; transition: all 0.15s ease;">
+                <label class="month-chip-select-item" style="display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 4px; background: ${isChecked ? '#f0fdf4' : '#f8fafc'}; border: 1.5px solid ${isChecked ? '#16a34a' : '#e2e8f0'}; border-radius: 10px; cursor: pointer; transition: all 0.15s ease;">
                   <input type="checkbox" name="active_month" value="${m}" ${isChecked ? 'checked' : ''} style="width: 15px; height: 15px; accent-color: #0e3753; cursor: pointer;" />
-                  <span style="font-size: 14.5px; font-weight: 800; color: #0e3753;">${m}월</span>
+                  <span style="font-size: 14px; font-weight: 800; color: #0e3753;">${m}월</span>
                 </label>
               `;
             }).join("")}
+          </div>
+
+          <!-- 2. 3개월 모아보기에 포함할 월 선택 -->
+          <div style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 12px; padding: 12px 14px; margin-bottom: 20px;">
+            <div style="margin-bottom: 8px;">
+              <span style="font-weight: 800; font-size: 13.5px; color: #1e40af;">✨ 3개월(다중 월) 모아보기에 포함할 월 선택</span>
+              <div style="font-size: 11.5px; color: #3b82f6; margin-top: 2px;">
+                * 체크된 월이 '모아보기' 화면에 그리드로 한눈에 표시됩니다.
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+              ${allMonths.map(m => {
+                const isChecked = currentOverview.includes(m);
+                return `
+                  <label class="overview-chip-select-item" style="display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 4px; background: ${isChecked ? '#ffffff' : '#f8fafc'}; border: 1.5px solid ${isChecked ? '#2563eb' : '#dbeafe'}; border-radius: 10px; cursor: pointer; transition: all 0.15s ease;">
+                    <input type="checkbox" name="overview_month" value="${m}" ${isChecked ? 'checked' : ''} style="width: 15px; height: 15px; accent-color: #2563eb; cursor: pointer;" />
+                    <span style="font-size: 13.5px; font-weight: 800; color: #1e3a8a;">${m}월</span>
+                  </label>
+                `;
+              }).join("")}
+            </div>
           </div>
 
           <div style="display: flex; justify-content: flex-end; gap: 8px;">
@@ -105,7 +128,7 @@ export function openMonthManagerModal(onSaved) {
     isMouseDownOnBackdrop = false;
   });
 
-  // 체크박스 클릭 시 스타일 실시간 전환
+  // 상단 탭 체크박스 클릭 시 스타일 실시간 전환
   form.querySelectorAll("input[name='active_month']").forEach(cb => {
     cb.addEventListener("change", () => {
       const label = cb.closest(".month-chip-select-item");
@@ -121,18 +144,41 @@ export function openMonthManagerModal(onSaved) {
     });
   });
 
+  // 모아보기 체크박스 클릭 시 스타일 실시간 전환
+  form.querySelectorAll("input[name='overview_month']").forEach(cb => {
+    cb.addEventListener("change", () => {
+      const label = cb.closest(".overview-chip-select-item");
+      if (label) {
+        if (cb.checked) {
+          label.style.background = "#ffffff";
+          label.style.borderColor = "#2563eb";
+        } else {
+          label.style.background = "#f8fafc";
+          label.style.borderColor = "#dbeafe";
+        }
+      }
+    });
+  });
+
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const yearSelect = form.querySelector("#month-mgr-year-select");
     const selectedYear = parseInt(yearSelect.value, 10) || 2026;
-    const checked = Array.from(form.querySelectorAll("input[name='active_month']:checked")).map(cb => parseInt(cb.value, 10));
-    if (checked.length === 0) {
-      alert("⚠️ 최소 1개 이상의 월을 선택해야 합니다.");
+    const checkedActive = Array.from(form.querySelectorAll("input[name='active_month']:checked")).map(cb => parseInt(cb.value, 10));
+    const checkedOverview = Array.from(form.querySelectorAll("input[name='overview_month']:checked")).map(cb => parseInt(cb.value, 10));
+
+    if (checkedActive.length === 0) {
+      alert("⚠️ 최소 1개 이상의 상단 탭 노출 월을 선택해야 합니다.");
       return;
     }
+
+    const finalOverview = checkedOverview.length > 0 ? checkedOverview : checkedActive.slice(0, 3);
+
     setSelectedYear(selectedYear);
-    saveActiveMonths(checked);
-    alert(`✅ [${selectedYear}년] 캘린더 설정이 적용되었습니다. (${checked.map(m => m + '월').join(', ')})`);
+    saveActiveMonths(checkedActive);
+    saveOverviewMonths(finalOverview);
+
+    alert(`✅ [${selectedYear}년] 캘린더 설정이 적용되었습니다.\n• 상단 탭: ${checkedActive.map(m => m + '월').join(', ')}\n• 모아보기: ${finalOverview.map(m => m + '월').join(', ')}`);
     closeModal();
     if (onSaved) onSaved();
   });

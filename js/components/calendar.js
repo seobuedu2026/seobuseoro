@@ -1,17 +1,18 @@
-import { getEvents, getMonthThemes, getActiveMonths, getCategories, getHolidayName, saveEvents, getSelectedYear, setSelectedYear, AVAILABLE_YEARS } from "../data/events.js";
+import { getEvents, getMonthThemes, getActiveMonths, getOverviewMonths, getCategories, getHolidayName, saveEvents, getSelectedYear, setSelectedYear, AVAILABLE_YEARS } from "../data/events.js";
 import { GoogleAuthService } from "../auth/googleAuth.js";
 import { openEventFormModal } from "./eventFormModal.js";
 import { openMonthManagerModal, openMonthThemeEditModal } from "./monthManagerModal.js";
 import { openAdminExcelModal } from "./adminExcelModal.js";
 import { openCategoryManagerModal } from "./categoryManagerModal.js";
 
-let currentMonth = "all"; // 'all' (3개월 포스터 모드) | 1 ~ 12
+let currentMonth = "all"; // 'all' (모아보기 모드) | 1 ~ 12
 
 export function renderCalendar(container, onSelectEventModal) {
   const user = GoogleAuthService.getCurrentUser();
   const isAdmin = !!(user && user.isAdmin);
   const currentYear = getSelectedYear();
   const activeMonths = getActiveMonths();
+  const overviewMonths = getOverviewMonths();
   const monthThemes = getMonthThemes();
   const categories = getCategories();
 
@@ -39,7 +40,7 @@ export function renderCalendar(container, onSelectEventModal) {
               `;
             }).join("")}
             <button class="m3-chip ${currentMonth === 'all' ? 'active' : ''}" data-month="all">
-              <span>✨ 3개월</span><span class="chip-text-extra"> 모아보기</span>
+              <span>✨ ${overviewMonths.length > 0 ? overviewMonths.length : 3}개월</span><span class="chip-text-extra"> 모아보기</span>
             </button>
           </div>
         </div>
@@ -138,24 +139,14 @@ function renderCalendarCards(mount, onSelectEventModal, isAdmin, mainContainer, 
   const activeMonths = getActiveMonths();
 
   if (currentMonth === "all") {
-    // 3개월 모아보기: 현재 달부터 시작하여 등록된 3개 월 순차 표시
-    const currentActualMonth = new Date().getMonth() + 1; // 1~12
-
-    let startIndex = activeMonths.findIndex(m => m >= currentActualMonth);
-    if (startIndex === -1) {
-      startIndex = 0;
-    }
-
-    let threeMonths = activeMonths.slice(startIndex, startIndex + 3);
-    if (threeMonths.length < 3 && activeMonths.length >= 3) {
-      threeMonths = activeMonths.slice(-3);
-    } else if (threeMonths.length === 0) {
-      threeMonths = activeMonths;
-    }
+    // 모아보기: 관리자가 선택한 모아보기 포함 월 표시
+    const overviewMonths = getOverviewMonths();
+    const monthsToShow = (overviewMonths && overviewMonths.length > 0) ? overviewMonths : activeMonths.slice(0, 3);
+    const cols = monthsToShow.length === 1 ? 1 : monthsToShow.length === 2 ? 2 : monthsToShow.length >= 4 ? Math.min(monthsToShow.length, 4) : 3;
 
     mount.innerHTML = `
-      <div class="poster-three-months-grid">
-        ${threeMonths.map(m => generateMonthCardHTML(m, false, isAdmin, currentYear)).join("")}
+      <div class="poster-three-months-grid" style="${monthsToShow.length === 1 ? 'max-width: 980px; margin: 0 auto;' : ''} ${monthsToShow.length !== 3 ? `grid-template-columns: repeat(${cols}, minmax(0, 1fr));` : ''}">
+        ${monthsToShow.map(m => generateMonthCardHTML(m, false, isAdmin, currentYear)).join("")}
       </div>
     `;
   } else {
