@@ -425,8 +425,24 @@
   }
 
   .site-footer {
-    padding: 20px 14px 24px 14px;
+    padding: 18px 14px 22px 14px;
     margin-top: 14px;
+  }
+
+  .footer-top-info {
+    gap: 4px 8px !important;
+  }
+
+  .footer-org-name {
+    font-size: 14.5px !important;
+  }
+
+  .footer-notice-text {
+    font-size: 12.5px !important;
+  }
+
+  .footer-copy {
+    font-size: 12.5px !important;
   }
 
   .footer-bottom-bar {
@@ -434,6 +450,7 @@
     align-items: center;
     text-align: center;
     gap: 12px;
+    padding-top: 12px;
   }
 
   .footer-admin-actions {

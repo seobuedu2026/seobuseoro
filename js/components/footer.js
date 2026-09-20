@@ -13,6 +13,7 @@ export function renderFooter(container) {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
             <span>서울특별시서부교육지원청 초등교육지원과</span>
           </div>
+          <span class="footer-info-divider">·</span>
           <p class="footer-notice-text">※ 세부 일정 및 장소는 학교 공문 및 신청 링크를 통해 확인하시기 바랍니다.</p>
         </div>
 
