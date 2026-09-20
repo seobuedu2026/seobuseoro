@@ -8,11 +8,11 @@ const ADMIN_PASSWORDS_MAP_KEY = "seobu_admin_passwords_map_v1";
 
 // 하드코딩 관리자 계정 및 비밀번호
 export const HARDCODED_ADMIN_CREDENTIALS = {
-  "gogh999@gmail.com": "qwer1234",
-  "seobuedu2026@gmail.com": "qwer1234"
+  "seobuedu2026@gmail.com": "qwer1234",
+  "gogh999@gmail.com": "qwer1234"
 };
 
-const DEFAULT_ADMIN_EMAILS = ["gogh999@gmail.com", "seobuedu2026@gmail.com"];
+const DEFAULT_ADMIN_EMAILS = ["seobuedu2026@gmail.com", "gogh999@gmail.com"];
 
 // 구글 클라이언트 ID (Google Cloud Console seobuseoro 프로젝트)
 export const GOOGLE_CLIENT_ID = "544520893088-9lj38t9e6qlp6m11q55tfh8hadvd8361.apps.googleusercontent.com";
@@ -65,7 +65,7 @@ const DUMMY_EXAMPLE_EMAILS = [
   "gogh9@senedu.kr"
 ];
 
-// 관리자 이메일 목록 반환 (저장된 목록 그대로 반환, gogh999@gmail.com 항상 보장)
+// 관리자 이메일 목록 반환 (저장된 목록 그대로 반환, seobuedu2026@gmail.com 대표 관리자 최우선 보장)
 export function getAdminEmails() {
   const saved = localStorage.getItem(ADMIN_EMAIL_STORAGE_KEY);
   let list = [...DEFAULT_ADMIN_EMAILS];
@@ -79,7 +79,7 @@ export function getAdminEmails() {
           .filter(e => e && !DUMMY_EXAMPLE_EMAILS.includes(e));
 
         if (cleanList.length > 0) {
-          list = Array.from(new Set(["gogh999@gmail.com", ...cleanList]));
+          list = Array.from(new Set(["seobuedu2026@gmail.com", "gogh999@gmail.com", ...cleanList]));
         }
       }
     } catch (e) {}
