@@ -111,6 +111,20 @@ if (typeof window !== "undefined") {
   }
 }
 
+/**
+ * 작성자 성함 표시 포맷팅 (관리자가 아닌 경우 첫 글자만 표시하고 나머지는 * 처리)
+ * 예: 김세찬 -> 김**, 홍길동 -> 홍**, 이산 -> 이*
+ */
+function formatAuthorDisplayName(rawName, isAdmin) {
+  const clean = (rawName || "서부 교원").replace(/\s*(교사|실무사|선생님)$/, "").trim();
+  if (isAdmin) {
+    return clean;
+  }
+  if (!clean) return "익명";
+  if (clean.length <= 1) return clean;
+  return clean[0] + "*".repeat(clean.length - 1);
+}
+
 export function renderReviews(container, preselectedEventId = null) {
   const user = GoogleAuthService.getCurrentUser();
   const isAdmin = !!(user && user.isAdmin);
@@ -175,9 +189,16 @@ export function renderReviews(container, preselectedEventId = null) {
               </p>
 
               <!-- 센스쿨 구글 계정 로그인 버튼 (컴팩트 사이즈) -->
-              <div style="display: flex; justify-content: center;">
+              <div style="display: flex; justify-content: center; margin-bottom: 12px;">
                 <button id="btn-custom-google-login" class="btn-m3-filled" style="padding: 8px 24px; font-size: 13.5px; font-weight: 800; border-radius: 10px; justify-content: center; box-shadow: 0 2px 8px rgba(14, 55, 83, 0.15);">
                   교원 로그인
+                </button>
+              </div>
+
+              <!-- 후기 수정하기 버튼 -->
+              <div style="border-top: 1px dashed #cbd5e1; padding-top: 12px;">
+                <button type="button" id="btn-open-review-lookup" class="btn-m3-outlined" style="width: 100%; height: 38px; border-radius: 10px; font-size: 13.5px; font-weight: 800; justify-content: center; color: #0e3753; border-color: #cbd5e1; background: #ffffff;">
+                  ✏️ 후기 수정하기
                 </button>
               </div>
             </div>
@@ -233,6 +254,13 @@ export function renderReviews(container, preselectedEventId = null) {
                   </button>
                 ` : ''}
               </div>
+
+              <!-- 후기 등록하기 버튼 아래: 후기 수정하기 버튼 -->
+              <div style="margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 10px;">
+                <button type="button" id="btn-open-review-lookup" class="btn-m3-outlined" style="width: 100%; height: 38px; border-radius: 10px; font-size: 13.5px; font-weight: 800; justify-content: center; color: #0e3753; border-color: #cbd5e1; background: #ffffff;">
+                  ✏️ 후기 수정하기
+                </button>
+              </div>
             </form>
           `}
         </div>
@@ -248,11 +276,10 @@ export function renderReviews(container, preselectedEventId = null) {
               </p>
             </div>
           ` : displayedReviews.map(rev => {
-            const cleanName = (rev.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim();
+            const cleanName = formatAuthorDisplayName(rev.userName, isAdmin);
             const cleanTitle = (rev.eventTitle || "").replace(/^🎯\s*/, "");
             const isAuthor = myReviewIds.includes(rev.id) || (user && user.email && rev.userEmail && (user.email.toLowerCase() === rev.userEmail.toLowerCase()));
             const isApproved = rev.status !== "pending";
-            const isAnonymousReview = !rev.isSenedu || !!rev.password;
 
             return `
             <div class="review-feed-card ${!isApproved ? 'is-pending' : ''}" data-review-id="${rev.id}">
@@ -263,7 +290,7 @@ export function renderReviews(container, preselectedEventId = null) {
                 </div>
               ` : ''}
 
-              <!-- 상단 바: 연수 종류 태그 + 작성자 이름 + 작성일시 | 공감 및 관리 버튼 -->
+              <!-- 상단 바: 연수 종류 태그 + 작성자 이름 + 작성일시 | 공감 및 관리자 승인 버튼 -->
               <div class="review-card-top-row">
                 <div class="review-user-name">
                   <span class="review-event-tag">${cleanTitle}</span>
@@ -295,15 +322,6 @@ export function renderReviews(container, preselectedEventId = null) {
                         승인
                       </button>
                     `}
-                  ` : ''}
-
-                  ${(isAdmin || isAuthor || isAnonymousReview) ? `
-                    <button class="btn-review-mod-edit btn-admin-action" data-review-id="${rev.id}" style="padding: 3px 8px; font-size: 11.5px; color: #0284c7; border-color: #bae6fd;" title="후기 수정">
-                      수정
-                    </button>
-                    <button class="btn-review-mod-delete btn-admin-action" data-review-id="${rev.id}" style="padding: 3px 8px; font-size: 11.5px; color: #ef4444; border-color: #fecdd3;" title="후기 삭제">
-                      삭제
-                    </button>
                   ` : ''}
                 </div>
               </div>
@@ -346,6 +364,13 @@ export function renderReviews(container, preselectedEventId = null) {
       });
     });
   }
+
+  // 후기 수정하기 버튼 바인딩 (이름 + 비밀번호로 후기 조회 및 수정)
+  container.querySelectorAll("#btn-open-review-lookup").forEach(btn => {
+    btn.addEventListener("click", () => {
+      openReviewLookupModal(container, preselectedEventId);
+    });
+  });
 
   // 후기 등록 폼 바인딩
   const form = container.querySelector("#review-submit-form");
@@ -457,60 +482,6 @@ export function renderReviews(container, preselectedEventId = null) {
     });
   });
 
-  // 수정 버튼 바인딩 (모달 창을 띄워 줄바꿈을 완벽히 보존하며 수정)
-  container.querySelectorAll(".btn-review-mod-edit").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const revId = btn.dataset.reviewId;
-      const currentList = getStoredReviews();
-      const target = currentList.find(r => r.id === revId);
-      if (!target) return;
-
-      if (!isAdmin) {
-        if (!target.password && !(user && target.userEmail && user.email.toLowerCase() === target.userEmail.toLowerCase())) {
-          alert("⚠️ 수정 권한이 없습니다.");
-          return;
-        }
-      }
-
-      openReviewEditModal(target, isAdmin, user, (newContent) => {
-        target.content = newContent;
-        saveReviews(currentList);
-        FirestoreReviewService.updateReviewContent(revId, target.content);
-        alert("✅ 후기가 성공적으로 수정되었습니다.");
-        renderReviews(container, preselectedEventId);
-      });
-    });
-  });
-
-  // 삭제 버튼 바인딩 (모달 창을 통해 비밀번호 확인 및 삭제)
-  container.querySelectorAll(".btn-review-mod-delete").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const revId = btn.dataset.reviewId;
-      const currentList = getStoredReviews();
-      const target = currentList.find(r => r.id === revId);
-      if (!target) return;
-
-      if (!isAdmin) {
-        if (!target.password && !(user && target.userEmail && user.email.toLowerCase() === target.userEmail.toLowerCase())) {
-          alert("⚠️ 삭제 권한이 없습니다.");
-          return;
-        }
-      }
-
-      openReviewDeleteModal(target, isAdmin, user, () => {
-        const filtered = currentList.filter(r => r.id !== revId);
-        saveReviews(filtered);
-        FirestoreReviewService.deleteReview(revId);
-        alert("🗑️ 후기가 완전히 삭제되었습니다.");
-        renderReviews(container, preselectedEventId);
-      });
-    });
-  });
-
   // 공감 클릭
   container.querySelectorAll(".btn-like").forEach(btn => {
     btn.addEventListener("click", (e) => {
@@ -530,208 +501,267 @@ export function renderReviews(container, preselectedEventId = null) {
 }
 
 /**
- * 후기 수정 커스텀 모달 (줄바꿈이 온전히 지원되는 textarea 및 비밀번호 확인)
+ * 작성자 성함 + 비밀번호로 후기 조회 후 수정/삭제 모달
  */
-function openReviewEditModal(rev, isAdmin, user, onUpdated) {
+function openReviewLookupModal(container, preselectedEventId) {
   const mount = document.getElementById("modal-mount");
   if (!mount) return;
 
-  const requiresPassword = !isAdmin && !!rev.password;
-
-  mount.innerHTML = `
-    <div class="m3-modal-backdrop open" id="review-edit-backdrop">
-      <div class="m3-modal-dialog" style="max-width: 540px; width: 92%; max-height: 90vh; overflow-y: auto;">
-        <div class="modal-header" style="padding-bottom: 12px; border-bottom: 1.5px solid #f1f5f9;">
-          <h3 style="font-size: 18px; font-weight: 900; color: #0e3753; display: flex; align-items: center; gap: 8px; margin: 0;">
-            <span>✏️ 참여 후기 수정</span>
-            ${isAdmin ? `<span style="font-size: 11px; font-weight: 800; background: #0e3753; color: #ffffff; padding: 2px 8px; border-radius: 9999px;">관리자</span>` : ''}
-          </h3>
-          <button class="modal-close-btn" id="btn-close-review-edit" aria-label="닫기">✕</button>
-        </div>
-
-        <form id="review-edit-form" style="display: flex; flex-direction: column; gap: 14px; margin-top: 14px;">
-          <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 10px 14px;">
-            <div style="font-size: 12px; font-weight: 800; color: #0284c7; margin-bottom: 3px;">
-              ${rev.eventTitle || "서부 교육 프로그램"}
-            </div>
-            <div style="font-size: 13.5px; font-weight: 700; color: #334155;">
-              작성자: <span style="font-weight: 800; color: #0e3753;">${rev.userName || "서부 교원"}</span>
-            </div>
+  const renderLookupStep = () => {
+    mount.innerHTML = `
+      <div class="m3-modal-backdrop open" id="review-lookup-backdrop">
+        <div class="m3-modal-dialog" style="max-width: 500px; width: 92%;">
+          <div class="modal-header" style="padding-bottom: 12px; border-bottom: 1.5px solid #f1f5f9;">
+            <h3 style="font-size: 18px; font-weight: 900; color: #0e3753; display: flex; align-items: center; gap: 8px; margin: 0;">
+              <span>✏️ 작성한 후기 수정 / 삭제</span>
+            </h3>
+            <button class="modal-close-btn" id="btn-close-lookup" aria-label="닫기">✕</button>
           </div>
 
-          ${requiresPassword ? `
+          <form id="review-lookup-form" style="display: flex; flex-direction: column; gap: 14px; margin-top: 14px;">
+            <div style="background: #f0f9ff; border: 1.5px solid #bae6fd; border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #0369a1; line-height: 1.5;">
+              ℹ️ 후기 작성 시 입력하셨던 <strong>성함</strong>과 <strong>비밀번호</strong>를 입력하시면 작성하신 후기를 찾아 수정 또는 삭제하실 수 있습니다.
+            </div>
+
+            <div id="lookup-error-msg" style="display: none; background: #fef2f2; border: 1.5px solid #fecdd3; border-radius: 10px; padding: 9px 12px; color: #dc2626; font-size: 13px; font-weight: 700;">
+            </div>
+
             <div class="form-group" style="margin-bottom: 0;">
-              <label for="review-edit-pw-input" style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 4px; display: block;">
-                비밀번호 확인 *
+              <label for="lookup-author-name" style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 4px; display: block;">
+                작성자 성함 *
               </label>
-              <input type="password" id="review-edit-pw-input" class="m3-input" placeholder="등록 시 설정한 비밀번호 입력" required style="font-size: 13.5px; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff;" />
+              <input type="text" id="lookup-author-name" class="m3-input" placeholder="작성 시 입력한 성함 (예: 김세찬)" required style="font-size: 13.5px; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff;" />
             </div>
-          ` : ''}
 
-          <div class="form-group" style="margin-bottom: 0;">
-            <label for="review-edit-content-input" style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 4px; display: block;">
-              후기 내용 (줄바꿈 자유롭게 수정 가능) *
-            </label>
-            <textarea id="review-edit-content-input" class="m3-textarea" rows="6" placeholder="수정할 후기 내용을 입력해주세요." required style="resize: vertical; white-space: pre-wrap; line-height: 1.6; font-size: 14px; padding: 12px; width: 100%; box-sizing: border-box; border: 1.5px solid #cbd5e1; border-radius: 10px; background: #ffffff;"></textarea>
-          </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="lookup-password" style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 4px; display: block;">
+                비밀번호 *
+              </label>
+              <input type="password" id="lookup-password" class="m3-input" placeholder="후기 작성 시 설정한 비밀번호" required style="font-size: 13.5px; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff;" />
+            </div>
 
-          <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;">
-            <button type="button" id="btn-cancel-review-edit" class="btn-m3-outlined" style="padding: 8px 18px; font-size: 13.5px; font-weight: 700; border-radius: 10px; cursor: pointer;">
-              취소
-            </button>
-            <button type="submit" class="btn-m3-filled" style="padding: 8px 22px; font-size: 13.5px; font-weight: 800; border-radius: 10px; cursor: pointer; background: #0e3753; color: #ffffff;">
-              수정 완료
-            </button>
-          </div>
-        </form>
+            <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;">
+              <button type="button" id="btn-cancel-lookup" class="btn-m3-outlined" style="padding: 8px 18px; font-size: 13.5px; font-weight: 700; border-radius: 10px; cursor: pointer;">
+                닫기
+              </button>
+              <button type="submit" class="btn-m3-filled" style="padding: 8px 22px; font-size: 13.5px; font-weight: 800; border-radius: 10px; cursor: pointer; background: #0e3753; color: #ffffff;">
+                후기 조회하기
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
-  `;
+    `;
 
-  const textarea = mount.querySelector("#review-edit-content-input");
-  if (textarea) {
-    textarea.value = rev.content || "";
-  }
+    const closeModal = () => { mount.innerHTML = ""; };
+    mount.querySelector("#btn-close-lookup")?.addEventListener("click", closeModal);
+    mount.querySelector("#btn-cancel-lookup")?.addEventListener("click", closeModal);
+    mount.querySelector("#review-lookup-backdrop")?.addEventListener("click", (e) => {
+      if (e.target.id === "review-lookup-backdrop") closeModal();
+    });
 
-  const closeModal = () => {
-    mount.innerHTML = "";
-  };
-
-  mount.querySelector("#btn-close-review-edit")?.addEventListener("click", closeModal);
-  mount.querySelector("#btn-cancel-review-edit")?.addEventListener("click", closeModal);
-  mount.querySelector("#review-edit-backdrop")?.addEventListener("click", (e) => {
-    if (e.target.id === "review-edit-backdrop") closeModal();
-  });
-
-  const form = mount.querySelector("#review-edit-form");
-  form?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    if (requiresPassword) {
-      const pwInput = mount.querySelector("#review-edit-pw-input");
-      if (!pwInput || pwInput.value.trim() !== rev.password) {
-        alert("❌ 비밀번호가 일치하지 않습니다.");
-        if (pwInput) pwInput.focus();
-        return;
-      }
-    }
-
-    const newContent = textarea ? textarea.value.trim() : "";
-    if (!newContent) {
-      alert("⚠️ 수정할 후기 내용을 입력해주세요.");
-      if (textarea) textarea.focus();
-      return;
-    }
-
-    closeModal();
-    if (onUpdated) onUpdated(newContent);
-  });
-
-  // Ctrl+Enter로 빠른 제출 지원
-  textarea?.addEventListener("keydown", (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+    const form = mount.querySelector("#review-lookup-form");
+    form?.addEventListener("submit", (e) => {
       e.preventDefault();
-      form?.dispatchEvent(new Event("submit"));
-    }
-  });
+      const nameInput = mount.querySelector("#lookup-author-name");
+      const pwInput = mount.querySelector("#lookup-password");
+      const errBox = mount.querySelector("#lookup-error-msg");
 
-  // 포커스 이동
-  setTimeout(() => {
-    if (requiresPassword) {
-      mount.querySelector("#review-edit-pw-input")?.focus();
-    } else if (textarea) {
-      textarea.focus();
-      textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
-    }
-  }, 50);
-}
+      const rawName = nameInput ? nameInput.value.trim() : "";
+      const rawPw = pwInput ? pwInput.value.trim() : "";
 
-/**
- * 후기 삭제 커스텀 모달 (비밀번호 확인 및 확인 절차)
- */
-function openReviewDeleteModal(rev, isAdmin, user, onDeleted) {
-  const mount = document.getElementById("modal-mount");
-  if (!mount) return;
+      if (!rawName || !rawPw) return;
 
-  const requiresPassword = !isAdmin && !!rev.password;
+      const allReviews = getStoredReviews();
+      const matched = allReviews.filter(r => {
+        const cleanRName = (r.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim();
+        return (cleanRName === rawName || cleanRName === rawName.replace(/\s*(교사|실무사|선생님)$/, "").trim()) && r.password === rawPw;
+      });
 
-  mount.innerHTML = `
-    <div class="m3-modal-backdrop open" id="review-delete-backdrop">
-      <div class="m3-modal-dialog" style="max-width: 460px; width: 92%;">
-        <div class="modal-header" style="padding-bottom: 12px; border-bottom: 1.5px solid #f1f5f9;">
-          <h3 style="font-size: 18px; font-weight: 900; color: #ef4444; display: flex; align-items: center; gap: 8px; margin: 0;">
-            <span>🗑️ 참여 후기 삭제</span>
-          </h3>
-          <button class="modal-close-btn" id="btn-close-review-del" aria-label="닫기">✕</button>
-        </div>
-
-        <form id="review-delete-form" style="display: flex; flex-direction: column; gap: 14px; margin-top: 14px;">
-          <p style="font-size: 14.5px; font-weight: 700; color: #334155; margin: 0; line-height: 1.5;">
-            정말 이 참여 후기를 삭제하시겠습니까?<br>
-            <span style="font-size: 12.5px; color: #ef4444; font-weight: 600;">(삭제된 후기는 복구할 수 없습니다.)</span>
-          </p>
-
-          <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 10px 14px;">
-            <div style="font-size: 12px; font-weight: 800; color: #0284c7; margin-bottom: 3px;">
-              ${rev.eventTitle || "서부 교육 프로그램"}
-            </div>
-            <div style="font-size: 13px; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-              "${(rev.content || "").replace(/\n/g, ' ')}"
-            </div>
-          </div>
-
-          ${requiresPassword ? `
-            <div class="form-group" style="margin-bottom: 0;">
-              <label for="review-del-pw-input" style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 4px; display: block;">
-                비밀번호 확인 *
-              </label>
-              <input type="password" id="review-del-pw-input" class="m3-input" placeholder="등록 시 설정한 비밀번호 입력" required style="font-size: 13.5px; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff;" />
-            </div>
-          ` : ''}
-
-          <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;">
-            <button type="button" id="btn-cancel-review-del" class="btn-m3-outlined" style="padding: 8px 18px; font-size: 13.5px; font-weight: 700; border-radius: 10px; cursor: pointer;">
-              취소
-            </button>
-            <button type="submit" class="btn-m3-filled" style="padding: 8px 20px; font-size: 13.5px; font-weight: 800; border-radius: 10px; cursor: pointer; background: #ef4444; color: #ffffff; border: none;">
-              삭제하기
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  `;
-
-  const closeModal = () => {
-    mount.innerHTML = "";
-  };
-
-  mount.querySelector("#btn-close-review-del")?.addEventListener("click", closeModal);
-  mount.querySelector("#btn-cancel-review-del")?.addEventListener("click", closeModal);
-  mount.querySelector("#review-delete-backdrop")?.addEventListener("click", (e) => {
-    if (e.target.id === "review-delete-backdrop") closeModal();
-  });
-
-  const form = mount.querySelector("#review-delete-form");
-  form?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    if (requiresPassword) {
-      const pwInput = mount.querySelector("#review-del-pw-input");
-      if (!pwInput || pwInput.value.trim() !== rev.password) {
-        alert("❌ 비밀번호가 일치하지 않습니다.");
-        if (pwInput) pwInput.focus();
+      if (matched.length === 0) {
+        if (errBox) {
+          errBox.style.display = "block";
+          errBox.textContent = "❌ 입력하신 성함과 비밀번호와 일치하는 참여 후기를 찾을 수 없습니다.";
+        }
         return;
       }
-    }
 
-    closeModal();
-    if (onDeleted) onDeleted();
-  });
+      // 후기가 1개인 경우 바로 수정 화면으로 이동
+      if (matched.length === 1) {
+        renderEditStep(matched[0]);
+      } else {
+        renderSelectionStep(matched);
+      }
+    });
 
-  setTimeout(() => {
-    if (requiresPassword) {
-      mount.querySelector("#review-del-pw-input")?.focus();
-    }
-  }, 50);
+    setTimeout(() => {
+      mount.querySelector("#lookup-author-name")?.focus();
+    }, 50);
+  };
+
+  const renderSelectionStep = (matchedList) => {
+    mount.innerHTML = `
+      <div class="m3-modal-backdrop open" id="review-lookup-backdrop">
+        <div class="m3-modal-dialog" style="max-width: 520px; width: 92%; max-height: 90vh; overflow-y: auto;">
+          <div class="modal-header" style="padding-bottom: 12px; border-bottom: 1.5px solid #f1f5f9;">
+            <h3 style="font-size: 18px; font-weight: 900; color: #0e3753; display: flex; align-items: center; gap: 8px; margin: 0;">
+              <span>📋 수정할 후기 선택 (${matchedList.length}건 발견)</span>
+            </h3>
+            <button class="modal-close-btn" id="btn-close-lookup" aria-label="닫기">✕</button>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 14px;">
+            ${matchedList.map(r => `
+              <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                <div style="flex: 1; overflow: hidden;">
+                  <div style="font-size: 13.5px; font-weight: 800; color: #0e3753; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    ${r.eventTitle || "서부 교육 프로그램"}
+                  </div>
+                  <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">
+                    ${r.createdAt} · ${r.status === 'pending' ? '승인대기' : '승인됨'}
+                  </div>
+                  <div style="font-size: 13px; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    "${(r.content || "").replace(/\n/g, ' ')}"
+                  </div>
+                </div>
+                <button class="btn-m3-filled btn-select-review" data-rev-id="${r.id}" style="padding: 7px 14px; font-size: 13px; font-weight: 800; border-radius: 8px; white-space: nowrap; background: #0e3753; color: #ffffff;">
+                  선택
+                </button>
+              </div>
+            `).join("")}
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; margin-top: 14px;">
+            <button type="button" id="btn-cancel-lookup" class="btn-m3-outlined" style="padding: 8px 18px; font-size: 13.5px; font-weight: 700; border-radius: 10px; cursor: pointer;">
+              닫기
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const closeModal = () => { mount.innerHTML = ""; };
+    mount.querySelector("#btn-close-lookup")?.addEventListener("click", closeModal);
+    mount.querySelector("#btn-cancel-lookup")?.addEventListener("click", closeModal);
+
+    mount.querySelectorAll(".btn-select-review").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.revId;
+        const target = matchedList.find(r => r.id === id);
+        if (target) renderEditStep(target);
+      });
+    });
+  };
+
+  const renderEditStep = (targetRev) => {
+    mount.innerHTML = `
+      <div class="m3-modal-backdrop open" id="review-lookup-backdrop">
+        <div class="m3-modal-dialog" style="max-width: 540px; width: 92%; max-height: 90vh; overflow-y: auto;">
+          <div class="modal-header" style="padding-bottom: 12px; border-bottom: 1.5px solid #f1f5f9;">
+            <h3 style="font-size: 18px; font-weight: 900; color: #0e3753; display: flex; align-items: center; gap: 8px; margin: 0;">
+              <span>✏️ 후기 내용 수정 / 삭제</span>
+            </h3>
+            <button class="modal-close-btn" id="btn-close-lookup" aria-label="닫기">✕</button>
+          </div>
+
+          <form id="review-direct-edit-form" style="display: flex; flex-direction: column; gap: 14px; margin-top: 14px;">
+            <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 10px 14px;">
+              <div style="font-size: 12px; font-weight: 800; color: #0284c7; margin-bottom: 3px;">
+                ${targetRev.eventTitle || "서부 교육 프로그램"}
+              </div>
+              <div style="font-size: 13.5px; font-weight: 700; color: #334155;">
+                작성자: <span style="font-weight: 800; color: #0e3753;">${targetRev.userName || "서부 교원"}</span>
+                <span style="font-size: 12px; color: #64748b; margin-left: 8px;">(${targetRev.createdAt})</span>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="review-direct-content" style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 4px; display: block;">
+                후기 내용 (줄바꿈 자유롭게 편집) *
+              </label>
+              <textarea id="review-direct-content" class="m3-textarea" rows="6" placeholder="수정할 후기 내용을 입력해주세요." required style="resize: vertical; white-space: pre-wrap; line-height: 1.6; font-size: 14px; padding: 12px; width: 100%; box-sizing: border-box; border: 1.5px solid #cbd5e1; border-radius: 10px; background: #ffffff;"></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+              <button type="button" id="btn-delete-direct" class="btn-m3-outlined" style="padding: 8px 16px; font-size: 13px; font-weight: 800; border-radius: 10px; color: #ef4444; border-color: #fecdd3; cursor: pointer;">
+                🗑️ 후기 삭제
+              </button>
+
+              <div style="display: flex; gap: 8px;">
+                <button type="button" id="btn-cancel-lookup" class="btn-m3-outlined" style="padding: 8px 18px; font-size: 13.5px; font-weight: 700; border-radius: 10px; cursor: pointer;">
+                  취소
+                </button>
+                <button type="submit" class="btn-m3-filled" style="padding: 8px 22px; font-size: 13.5px; font-weight: 800; border-radius: 10px; cursor: pointer; background: #0e3753; color: #ffffff;">
+                  수정 완료
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+
+    const textarea = mount.querySelector("#review-direct-content");
+    if (textarea) textarea.value = targetRev.content || "";
+
+    const closeModal = () => { mount.innerHTML = ""; };
+    mount.querySelector("#btn-close-lookup")?.addEventListener("click", closeModal);
+    mount.querySelector("#btn-cancel-lookup")?.addEventListener("click", closeModal);
+
+    const form = mount.querySelector("#review-direct-edit-form");
+    form?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const newText = textarea ? textarea.value.trim() : "";
+      if (!newText) {
+        alert("⚠️ 수정할 내용을 입력해주세요.");
+        if (textarea) textarea.focus();
+        return;
+      }
+
+      const currentList = getStoredReviews();
+      const item = currentList.find(r => r.id === targetRev.id);
+      if (item) {
+        item.content = newText;
+        saveReviews(currentList);
+        FirestoreReviewService.updateReviewContent(targetRev.id, item.content);
+      }
+
+      closeModal();
+      alert("✅ 후기가 성공적으로 수정되었습니다.");
+      renderReviews(container, preselectedEventId);
+    });
+
+    // 삭제 버튼
+    mount.querySelector("#btn-delete-direct")?.addEventListener("click", () => {
+      if (confirm("정말 이 참여 후기를 삭제하시겠습니까?\n(삭제 후 복구할 수 없습니다.)")) {
+        const currentList = getStoredReviews();
+        const filtered = currentList.filter(r => r.id !== targetRev.id);
+        saveReviews(filtered);
+        FirestoreReviewService.deleteReview(targetRev.id);
+        closeModal();
+        alert("🗑️ 후기가 성공적으로 삭제되었습니다.");
+        renderReviews(container, preselectedEventId);
+      }
+    });
+
+    // Ctrl+Enter 빠른 저장
+    textarea?.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        form?.dispatchEvent(new Event("submit"));
+      }
+    });
+
+    setTimeout(() => {
+      if (textarea) {
+        textarea.focus();
+        textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+      }
+    }, 50);
+  };
+
+  renderLookupStep();
 }
+
 
 
