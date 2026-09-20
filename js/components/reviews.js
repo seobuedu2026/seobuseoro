@@ -2,47 +2,31 @@ import { getEvents, isEventPastOrToday } from "../data/events.js";
 import { GoogleAuthService } from "../auth/googleAuth.js";
 import { FirestoreReviewService } from "../data/firestoreService.js";
 
-const REVIEWS_STORAGE_KEY = "seobu_user_reviews_v7";
-const EXCLUDED_IDS = new Set(["rev-1", "rev-2", "rev-3"]);
+const REVIEWS_STORAGE_KEY = "seobu_user_reviews_v8";
+const EXCLUDED_IDS = new Set(["rev-1", "rev-2", "rev-3", "rev-4"]);
 
-const INITIAL_REVIEWS = [
-  {
-    id: "rev-4",
-    eventId: "ev-0904",
-    eventTitle: "과학실무사 연수 (실험역량 강화)",
-    userName: "김형찬",
-    userEmail: "gogh9@senedu.kr",
-    isSenedu: true,
-    rating: 5,
-    content: "연수를 준비하며 제가 새로 알게된 것이 많아 좋았습니다.",
-    likes: 0,
-    createdAt: "2026-09-18 13:09",
-    status: "approved"
-  }
-];
+const INITIAL_REVIEWS = [];
 
 function getStoredReviews() {
   let data = localStorage.getItem(REVIEWS_STORAGE_KEY);
   
   if (!data) {
-    const v6Data = localStorage.getItem("seobu_user_reviews_v6");
-    if (v6Data) {
+    const v7Data = localStorage.getItem("seobu_user_reviews_v7");
+    if (v7Data) {
       try {
-        const parsedV6 = JSON.parse(v6Data);
-        if (Array.isArray(parsedV6) && parsedV6.length > 0) {
-          const migrated = parsedV6.filter(r => !EXCLUDED_IDS.has(r.id));
-          if (migrated.length > 0) {
-            localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(migrated));
-            data = JSON.stringify(migrated);
-          }
+        const parsedV7 = JSON.parse(v7Data);
+        if (Array.isArray(parsedV7)) {
+          const migrated = parsedV7.filter(r => !EXCLUDED_IDS.has(r.id));
+          localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(migrated));
+          data = JSON.stringify(migrated);
         }
       } catch (e) {}
     }
   }
 
   if (!data) {
-    localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(INITIAL_REVIEWS));
-    return INITIAL_REVIEWS;
+    localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify([]));
+    return [];
   }
 
   try {
@@ -52,15 +36,13 @@ function getStoredReviews() {
         .filter(r => !EXCLUDED_IDS.has(r.id))
         .map(r => ({
           ...r,
-          userName: (r.userEmail === "gogh9@senedu.kr" || r.userName === "김*찬")
-            ? "김형찬"
-            : (r.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim(),
+          userName: (r.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim(),
           status: r.status === "pending" ? "pending" : "approved"
         }));
     }
-    return INITIAL_REVIEWS;
+    return [];
   } catch (e) {
-    return INITIAL_REVIEWS;
+    return [];
   }
 }
 
@@ -76,6 +58,9 @@ let selectedRating = 5;
 
 // Firestore 설정 및 후기 실시간 동기화 리스너 전역 등록
 if (typeof window !== "undefined") {
+  // 초기 샘플 더미 후기 Firestore 완전 제거
+  EXCLUDED_IDS.forEach(id => FirestoreReviewService.deleteReview(id));
+
   if (!window._firestoreConfigSubscribed) {
     window._firestoreConfigSubscribed = true;
     FirestoreReviewService.subscribeReviewAuthMode((mode) => {
@@ -98,13 +83,7 @@ if (typeof window !== "undefined") {
             status: r.status === "pending" ? "pending" : "approved"
           }));
 
-        if (cleanRemote.length > 0) {
-          saveReviews(cleanRemote, false);
-        } else {
-          // Firestore 컬렉션이 비어있는 경우 초기 데이터 등록
-          INITIAL_REVIEWS.forEach(r => FirestoreReviewService.saveReview(r));
-          saveReviews(INITIAL_REVIEWS, false);
-        }
+        saveReviews(cleanRemote, false);
 
         const activeContainer = document.querySelector("#tab-content-mount");
         if (activeContainer && activeContainer.querySelector(".reviews-view-wrapper")) {
