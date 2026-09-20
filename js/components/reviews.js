@@ -145,23 +145,21 @@ export function renderReviews(container, preselectedEventId = null) {
             </div>
           ` : `
             <form id="review-submit-form">
-              <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 10px 12px; border-radius: 10px; margin-bottom: 14px; font-size: 15px; font-weight: 700; color: #166534; display: flex; align-items: center; justify-content: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                <span>👤</span>
+              <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 10px 12px; border-radius: 10px; margin-bottom: 12px; font-size: 15px; font-weight: 700; color: #166534; display: flex; align-items: center; justify-content: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                 <span style="font-weight: 800; color: #166534; font-size: 15px;">${user.name}</span>
                 <span style="font-size: 14px; font-weight: 600; color: #15803d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">(${user.email})</span>
               </div>
 
-              <div class="form-group">
-                <label for="review-event-select" style="font-weight: 800; font-size: 13px; color: #0e3753;">참여한 행사 선택 *</label>
-                <select id="review-event-select" class="m3-select" required>
-                  <option value="">행사를 선택하세요</option>
+              <div class="form-group" style="margin-bottom: 14px;">
+                <select id="review-event-select" class="m3-select" required style="text-align: center; text-align-last: center; font-size: 13.5px; padding: 10px 8px;">
+                  <option value="">참여한 행사를 선택하세요</option>
                   ${getEvents().filter(isEventPastOrToday).map(ev => `
                     <option value="${ev.id}" ${preselectedEventId === ev.id ? 'selected' : ''}>
                       [${ev.month}월 ${ev.day}일] ${ev.title} ${ev.subtitle ? `(${ev.subtitle})` : ''}
                     </option>
                   `).join("")}
                 </select>
-                <div style="font-size: 11.5px; color: #64748b; margin-top: 4px;">
+                <div style="font-size: 11.5px; color: #64748b; margin-top: 4px; text-align: center;">
                   * 후기 작성은 행사 진행 당일부터 가능합니다.
                 </div>
               </div>
@@ -193,6 +191,7 @@ export function renderReviews(container, preselectedEventId = null) {
             </div>
           ` : displayedReviews.map(rev => {
             const cleanName = (rev.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim();
+            const cleanTitle = (rev.eventTitle || "").replace(/^🎯\s*/, "");
             const isAuthor = user && user.email && rev.userEmail && (user.email.toLowerCase() === rev.userEmail.toLowerCase());
             const isApproved = rev.status !== "pending";
 
@@ -201,7 +200,7 @@ export function renderReviews(container, preselectedEventId = null) {
               <!-- 상단 바: 연수 종류 태그 + 작성자 이름 + 작성일시 | 공감 및 관리 버튼 -->
               <div class="review-card-top-row">
                 <div class="review-user-name">
-                  <span class="review-event-tag">🎯 ${rev.eventTitle}</span>
+                  <span class="review-event-tag">${cleanTitle}</span>
                   <span class="user-display-name">${cleanName}</span>
                   <span class="review-date-text">${rev.createdAt}</span>
                   ${isAdmin ? `
