@@ -224,9 +224,7 @@ export function renderReviews(container, preselectedEventId = null) {
               </p>
             </div>
           ` : displayedReviews.map(rev => {
-            const cleanName = (rev.userEmail === "gogh9@senedu.kr" || rev.userName === "김*찬")
-              ? "김형찬"
-              : (rev.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim();
+            const cleanName = (rev.userName || "").replace(/\s*(교사|실무사|선생님)$/, "").trim();
             const cleanTitle = (rev.eventTitle || "").replace(/^🎯\s*/, "");
             const isAuthor = user && user.email && rev.userEmail && (user.email.toLowerCase() === rev.userEmail.toLowerCase());
             const isApproved = rev.status !== "pending";
