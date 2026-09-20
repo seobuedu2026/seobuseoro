@@ -172,29 +172,31 @@ function renderCalendarCards(mount, onSelectEventModal, isAdmin, mainContainer, 
     });
   }
 
-  // 행사 칩 드래그 앤 드롭 & 클릭 이벤트 바인딩
+  // 행사 칩 드래그 앤 드롭 (관리자 전용) & 클릭 이벤트 바인딩
   let draggedEventId = null;
   let isDragging = false;
 
   mount.querySelectorAll(".cal-event-pill").forEach(pill => {
-    pill.setAttribute("draggable", "true");
+    if (isAdmin) {
+      pill.setAttribute("draggable", "true");
 
-    pill.addEventListener("dragstart", (e) => {
-      isDragging = true;
-      draggedEventId = pill.dataset.eventId;
-      pill.classList.add("is-dragging");
-      e.dataTransfer.setData("text/plain", draggedEventId);
-      e.dataTransfer.effectAllowed = "move";
-    });
+      pill.addEventListener("dragstart", (e) => {
+        isDragging = true;
+        draggedEventId = pill.dataset.eventId;
+        pill.classList.add("is-dragging");
+        e.dataTransfer.setData("text/plain", draggedEventId);
+        e.dataTransfer.effectAllowed = "move";
+      });
 
-    pill.addEventListener("dragend", () => {
-      pill.classList.remove("is-dragging");
-      mount.querySelectorAll(".cal-cell.drag-over-cell").forEach(c => c.classList.remove("drag-over-cell"));
-      setTimeout(() => {
-        isDragging = false;
-        draggedEventId = null;
-      }, 60);
-    });
+      pill.addEventListener("dragend", () => {
+        pill.classList.remove("is-dragging");
+        mount.querySelectorAll(".cal-cell.drag-over-cell").forEach(c => c.classList.remove("drag-over-cell"));
+        setTimeout(() => {
+          isDragging = false;
+          draggedEventId = null;
+        }, 60);
+      });
+    }
 
     pill.addEventListener("click", (e) => {
       e.stopPropagation();

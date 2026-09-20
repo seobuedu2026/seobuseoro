@@ -1,21 +1,26 @@
-import { renderHeader } from "./components/header.js?v=20260920_v56";
-import { renderFooter } from "./components/footer.js?v=20260920_v56";
-import { renderCalendar } from "./components/calendar.js?v=20260920_v56";
-import { renderPrograms } from "./components/programs.js?v=20260920_v56";
-import { renderReviews } from "./components/reviews.js?v=20260920_v56";
-import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v56";
-import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v56";
-import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v56";
-import { isEventPastOrToday } from "./data/events.js?v=20260920_v56";
+import { renderHeader } from "./components/header.js?v=20260920_v57";
+import { renderFooter } from "./components/footer.js?v=20260920_v57";
+import { renderCalendar } from "./components/calendar.js?v=20260920_v57";
+import { renderPrograms } from "./components/programs.js?v=20260920_v57";
+import { renderReviews } from "./components/reviews.js?v=20260920_v57";
+import { renderPadletRooms } from "./components/padletRooms.js?v=20260920_v57";
+import { openEventFormModal } from "./components/eventFormModal.js?v=20260920_v57";
+import { GoogleAuthService } from "./auth/googleAuth.js?v=20260920_v57";
+import { isEventPastOrToday } from "./data/events.js?v=20260920_v57";
 
 let activeTab = "calendar"; // 'calendar' | 'programs' | 'reviews' | 'padlet'
 
-document.addEventListener("DOMContentLoaded", () => {
+function initApp() {
   const headerMount = document.getElementById("header-mount");
   const footerMount = document.getElementById("footer-mount");
   const tabContentMount = document.getElementById("tab-content-mount");
   const modalMount = document.getElementById("modal-mount");
   const navTabs = document.querySelectorAll(".nav-tab-item");
+
+  if (!tabContentMount) {
+    console.warn("DOM elements not ready yet, retrying...");
+    return;
+  }
 
   // 헤더 및 푸터 렌더링
   renderHeader(headerMount);
@@ -223,4 +228,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 초기 화면 렌더링 (첫 화면: 캘린더)
   switchTab("calendar");
-});
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initApp);
+} else {
+  initApp();
+}

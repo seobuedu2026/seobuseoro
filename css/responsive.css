@@ -453,10 +453,25 @@
     padding-top: 12px;
   }
 
-  .footer-admin-actions {
-    position: static !important;
-    margin: 0 auto;
-    justify-content: center;
+  /* 모바일 모달 다이얼로그 최적화 */
+  .m3-modal-backdrop {
+    padding: 12px !important;
+  }
+
+  .m3-modal-dialog {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 20px 16px !important;
+    border-radius: 18px !important;
+    max-height: 90vh !important;
+    box-sizing: border-box !important;
+  }
+
+  .nav-tab-item,
+  .m3-chip,
+  .cal-event-pill,
+  button {
+    touch-action: manipulation !important;
   }
 }
 
