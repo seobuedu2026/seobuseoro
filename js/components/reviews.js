@@ -87,11 +87,11 @@ export function renderReviews(container, preselectedEventId = null) {
       <div class="review-layout">
         <!-- 후기 작성 영역 (@senedu.kr 전용 로그인) -->
         <div class="review-form-card">
-          <div style="position: relative; margin-bottom: 14px; text-align: center;">
-            <h3 style="font-size: 17.5px; font-weight: 900; color: #0e3753; margin: 0; text-align: center;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
+            <h3 style="font-size: 16.5px; font-weight: 900; color: #0e3753; margin: 0;">
               참여 후기 등록
             </h3>
-            ${user ? `<button id="btn-review-logout" class="footer-link-btn" style="position: absolute; right: 0; top: 2px; font-size: 12px; font-weight: 600; color: #64748b;">[로그아웃]</button>` : ''}
+            ${user ? `<button id="btn-review-logout" class="footer-link-btn" style="font-size: 12px; font-weight: 700; color: #dc2626; padding: 3px 8px; border-radius: 6px; background: #fee2e2; border: 1px solid #fecdd3; cursor: pointer;">로그아웃</button>` : ''}
           </div>
 
           ${isAdmin ? `
@@ -122,16 +122,20 @@ export function renderReviews(container, preselectedEventId = null) {
             </div>
           ` : `
             <form id="review-submit-form">
-              <div class="form-group">
-                <label style="font-weight: 800; font-size: 13px; color: #0e3753;">작성 교원</label>
-                <div style="display: flex; align-items: center; justify-content: space-between; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 8px 12px; border-radius: 10px;">
-                  <div style="display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 700; color: #166534;">
-                    <span>👤 ${user.name}</span>
-                    <span style="font-size: 11px; font-weight: 800; background: #0284c7; color: #ffffff; padding: 2px 8px; border-radius: 9999px;">
-                      @senedu.kr 인증
-                    </span>
+              <div class="form-group" style="margin-bottom: 14px;">
+                <label style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 4px;">작성 교원</label>
+                <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 9px 12px; border-radius: 10px; display: flex; flex-direction: column; gap: 4px;">
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 800; color: #166534; white-space: nowrap;">
+                      <span>👤 ${user.name}</span>
+                      <span style="font-size: 10.5px; font-weight: 800; background: #0284c7; color: #ffffff; padding: 2px 6px; border-radius: 9999px; white-space: nowrap;">
+                        @senedu.kr
+                      </span>
+                    </div>
                   </div>
-                  <span style="font-size: 11px; color: #15803d; font-weight: 600;">${user.email}</span>
+                  <div style="font-size: 11.5px; color: #15803d; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    ${user.email}
+                  </div>
                 </div>
               </div>
 
