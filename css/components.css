@@ -533,10 +533,18 @@
 
 .program-cards-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   width: 100%;
   align-items: start;
+}
+
+/* 사용자가 고른 열 수는 넓은 화면에서만 적용하고,
+   좁은 화면에서는 responsive.css의 기본 규칙을 따른다. */
+@media (min-width: 1200px) {
+  .program-cards-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .program-cards-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .program-cards-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
 }
 
 .program-card {
@@ -2104,7 +2112,8 @@
    헤더 홈 이동
    ========================================================================== */
 .header-home-link {
-  display: block;
+  display: flex;
+  justify-content: center;
   width: 100%;
   padding: 0;
   border: none;
@@ -2154,10 +2163,15 @@
   border-color: #0e3753;
 }
 
+@media (max-width: 1199px) {
+  .header-home-pill {
+    top: 6px;
+    left: 8px;
+  }
+}
+
 @media (max-width: 767px) {
   .header-home-pill {
-    top: 8px;
-    left: 8px;
     height: 29px;
     padding: 0 11px;
     font-size: 12px;
@@ -2249,6 +2263,81 @@
   gap: 12px;
   margin-bottom: 18px;
   flex-wrap: wrap;
+}
+
+.prog-result-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.prog-view-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.prog-view-label {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.prog-sort-select {
+  width: auto;
+  min-width: 142px;
+  height: 36px;
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* 한 줄에 보이는 개수 선택 */
+.prog-col-group {
+  display: inline-flex;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 9px;
+  overflow: hidden;
+  background: #ffffff;
+  height: 36px;
+}
+
+.prog-col-btn {
+  width: 34px;
+  border: none;
+  background: #ffffff;
+  color: #64748b;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.prog-col-btn + .prog-col-btn {
+  border-left: 1px solid #e2e8f0;
+}
+
+.prog-col-btn:hover {
+  background: #f1f5f9;
+  color: #0e3753;
+}
+
+.prog-col-btn.active {
+  background: #0e3753;
+  color: #ffffff;
+}
+
+/* 열 수 선택은 넓은 화면에서만 의미가 있다 */
+@media (max-width: 1199px) {
+  .prog-col-group {
+    display: none;
+  }
 }
 
 .prog-result-count {

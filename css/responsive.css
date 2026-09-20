@@ -95,7 +95,8 @@
   .hero-header-inner {
     width: 100% !important;
     max-width: 100% !important;
-    padding: 0 !important;
+    /* 홈 버튼이 배너의 기관 엠블럼을 가리지 않도록 위쪽에 자리를 둔다 */
+    padding: 42px 0 0 0 !important;
   }
 
   .main-title-wrap {

@@ -1,11 +1,43 @@
-import { getEvents, isEventPastOrToday, getActiveMonths, getCategories, resolveApplyLink } from "../data/events.js?v=20260920_v70";
-import { GoogleAuthService } from "../auth/googleAuth.js?v=20260920_v70";
-import { openEventFormModal } from "./eventFormModal.js?v=20260920_v70";
-import { openCategoryManagerModal } from "./categoryManagerModal.js?v=20260920_v70";
+import { getEvents, isEventPastOrToday, getActiveMonths, getCategories, resolveApplyLink } from "../data/events.js?v=20260920_v72";
+import { GoogleAuthService } from "../auth/googleAuth.js?v=20260920_v72";
+import { openEventFormModal } from "./eventFormModal.js?v=20260920_v72";
+import { openCategoryManagerModal } from "./categoryManagerModal.js?v=20260920_v72";
 
 let selectedCategory = "all";
 let selectedMonth = "all";
 let searchQuery = "";
+
+// 보기 설정(정렬·열 수)은 개인 취향이므로 이 브라우저에만 저장한다.
+const VIEW_PREF_KEY = "seobu_programs_view_pref_v1";
+
+const SORT_OPTIONS = [
+  { key: "date-asc", label: "날짜 빠른순" },
+  { key: "date-desc", label: "날짜 늦은순" },
+  { key: "title-asc", label: "이름순 (가나다)" },
+  { key: "category", label: "유형순" }
+];
+
+function loadViewPref() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(VIEW_PREF_KEY) || "{}");
+    return {
+      sort: SORT_OPTIONS.some(o => o.key === saved.sort) ? saved.sort : "date-asc",
+      columns: [2, 3, 4].includes(saved.columns) ? saved.columns : 3
+    };
+  } catch (e) {
+    return { sort: "date-asc", columns: 3 };
+  }
+}
+
+let viewPref = loadViewPref();
+
+function saveViewPref() {
+  try {
+    localStorage.setItem(VIEW_PREF_KEY, JSON.stringify(viewPref));
+  } catch (e) {
+    // 저장 실패해도 화면 동작에는 영향 없음
+  }
+}
 
 function escapeHtml(text) {
   return String(text || "")
@@ -29,22 +61,37 @@ function matchesSearch(ev, query) {
   return q.split(/\s+/).filter(Boolean).every(term => haystack.includes(term));
 }
 
+// 날짜 비교용 숫자 (예: 2026년 9월 15일 → 20260915)
+function dateValue(ev) {
+  const year = parseInt(ev.year, 10) || 2026;
+  const month = parseInt(ev.month, 10) || 0;
+  const day = typeof ev.day === "number"
+    ? ev.day
+    : parseInt(String(ev.day).replace(/\D/g, '') || '99', 10);
+  return year * 10000 + month * 100 + day;
+}
+
+function compareEvents(a, b) {
+  switch (viewPref.sort) {
+    case "date-desc":
+      return dateValue(b) - dateValue(a);
+    case "title-asc":
+      return String(a.title || "").localeCompare(String(b.title || ""), "ko");
+    case "category": {
+      const catDiff = String(a.categoryLabel || "").localeCompare(String(b.categoryLabel || ""), "ko");
+      return catDiff !== 0 ? catDiff : dateValue(a) - dateValue(b);
+    }
+    default:
+      return dateValue(a) - dateValue(b);
+  }
+}
+
 function getFilteredEvents() {
   return getEvents().filter(ev => {
     const matchCat = selectedCategory === "all" || ev.category === selectedCategory;
     const matchMonth = selectedMonth === "all" || String(ev.month) === selectedMonth;
     return matchCat && matchMonth && matchesSearch(ev, searchQuery);
-  }).sort((a, b) => {
-    const yearA = parseInt(a.year, 10) || 2026;
-    const yearB = parseInt(b.year, 10) || 2026;
-    if (yearA !== yearB) return yearA - yearB;
-    const monthA = parseInt(a.month, 10) || 0;
-    const monthB = parseInt(b.month, 10) || 0;
-    if (monthA !== monthB) return monthA - monthB;
-    const dayA = typeof a.day === "number" ? a.day : parseInt(String(a.day).replace(/\D/g, '') || '99', 10);
-    const dayB = typeof b.day === "number" ? b.day : parseInt(String(b.day).replace(/\D/g, '') || '99', 10);
-    return dayA - dayB;
-  });
+  }).sort(compareEvents);
 }
 
 function buildCardsHTML(filteredEvents, isAdmin) {
@@ -189,14 +236,33 @@ export function renderPrograms(container, onSelectEventModal) {
         </div>
       </div>
 
-      <!-- 결과 요약 -->
+      <!-- 결과 요약 및 보기 설정 -->
       <div class="prog-result-bar">
-        <p class="prog-result-count" id="prog-result-count" aria-live="polite"></p>
-        <button type="button" class="prog-reset-btn" id="btn-reset-filters" hidden>조건 초기화</button>
+        <div class="prog-result-left">
+          <p class="prog-result-count" id="prog-result-count" aria-live="polite"></p>
+          <button type="button" class="prog-reset-btn" id="btn-reset-filters" hidden>조건 초기화</button>
+        </div>
+
+        <div class="prog-view-controls">
+          <label class="prog-view-label" for="prog-sort-select">정렬</label>
+          <select id="prog-sort-select" class="m3-select prog-sort-select" aria-label="정렬 기준">
+            ${SORT_OPTIONS.map(o => `
+              <option value="${o.key}" ${viewPref.sort === o.key ? "selected" : ""}>${o.label}</option>
+            `).join("")}
+          </select>
+
+          <div class="prog-col-group" role="group" aria-label="한 줄에 보이는 개수">
+            ${[2, 3, 4].map(n => `
+              <button type="button" class="prog-col-btn ${viewPref.columns === n ? 'active' : ''}"
+                      data-columns="${n}" aria-pressed="${viewPref.columns === n}"
+                      title="한 줄에 ${n}개씩 보기">${n}</button>
+            `).join("")}
+          </div>
+        </div>
       </div>
 
       <!-- 프로그램 카드 그리드 -->
-      <div class="program-cards-grid" id="prog-cards-grid"></div>
+      <div class="program-cards-grid cols-${viewPref.columns}" id="prog-cards-grid"></div>
     </div>
   `;
 
@@ -293,6 +359,36 @@ export function renderPrograms(container, onSelectEventModal) {
   }
 
   if (resetBtn) resetBtn.addEventListener("click", resetFilters);
+
+  // 정렬 기준 변경
+  const sortSelect = container.querySelector("#prog-sort-select");
+  if (sortSelect) {
+    sortSelect.addEventListener("change", (e) => {
+      viewPref.sort = e.target.value;
+      saveViewPref();
+      refreshCards();
+    });
+  }
+
+  // 한 줄에 보이는 카드 수 변경
+  container.querySelectorAll(".prog-col-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const n = parseInt(btn.dataset.columns, 10);
+      if (!n || n === viewPref.columns) return;
+
+      viewPref.columns = n;
+      saveViewPref();
+
+      grid.classList.remove("cols-2", "cols-3", "cols-4");
+      grid.classList.add(`cols-${n}`);
+
+      container.querySelectorAll(".prog-col-btn").forEach(b => {
+        const active = parseInt(b.dataset.columns, 10) === n;
+        b.classList.toggle("active", active);
+        b.setAttribute("aria-pressed", String(active));
+      });
+    });
+  });
 
   // 새 프로그램 추가 버튼 이벤트 바인딩
   const btnAddProg = container.querySelector("#btn-add-program");
