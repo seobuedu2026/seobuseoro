@@ -6,7 +6,13 @@ const ADMIN_PW_STORAGE_KEY = "seobu_admin_password_custom_v1";
 const ADMIN_EMAIL_STORAGE_KEY = "seobu_admin_email_custom_v2"; // v2로 승격하여 기존 예시 ID 잔여물 완전 격리
 const ADMIN_PASSWORDS_MAP_KEY = "seobu_admin_passwords_map_v1";
 
-const DEFAULT_ADMIN_EMAILS = ["seobuedu2026@gmail.com"];
+// 하드코딩 관리자 계정 및 비밀번호
+export const HARDCODED_ADMIN_CREDENTIALS = {
+  "gogh999@gmail.com": "qwer1234",
+  "seobuedu2026@gmail.com": "qwer1234"
+};
+
+const DEFAULT_ADMIN_EMAILS = ["gogh999@gmail.com", "seobuedu2026@gmail.com"];
 
 // 구글 클라이언트 ID (Google Cloud Console seobuseoro 프로젝트)
 export const GOOGLE_CLIENT_ID = "544520893088-9lj38t9e6qlp6m11q55tfh8hadvd8361.apps.googleusercontent.com";
@@ -14,14 +20,14 @@ export const GOOGLE_CLIENT_ID = "544520893088-9lj38t9e6qlp6m11q55tfh8hadvd8361.a
 // 관리자 계정별 비밀번호 맵 조회
 export function getAdminPasswordMap() {
   const saved = localStorage.getItem(ADMIN_PASSWORDS_MAP_KEY);
+  let map = { ...HARDCODED_ADMIN_CREDENTIALS };
   if (saved) {
     try {
-      return JSON.parse(saved) || {};
-    } catch (e) {
-      return {};
-    }
+      const parsed = JSON.parse(saved) || {};
+      map = { ...map, ...parsed };
+    } catch (e) {}
   }
-  return {};
+  return map;
 }
 
 // 특정 관리자 이메일의 비밀번호 반환
@@ -29,7 +35,7 @@ export function getAdminPasswordForEmail(email) {
   if (!email) return "";
   const cleanEmail = email.trim().toLowerCase();
   const map = getAdminPasswordMap();
-  return map[cleanEmail] || "";
+  return map[cleanEmail] || HARDCODED_ADMIN_CREDENTIALS[cleanEmail] || "";
 }
 
 // 특정 관리자 이메일의 비밀번호 설정/변경
@@ -59,29 +65,27 @@ const DUMMY_EXAMPLE_EMAILS = [
   "gogh9@senedu.kr"
 ];
 
-// 관리자 이메일 목록 반환 (저장된 목록 그대로 반환, 삭제된 항목이 되살아나지 않음)
+// 관리자 이메일 목록 반환 (저장된 목록 그대로 반환, gogh999@gmail.com 항상 보장)
 export function getAdminEmails() {
   const saved = localStorage.getItem(ADMIN_EMAIL_STORAGE_KEY);
+  let list = [...DEFAULT_ADMIN_EMAILS];
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed) && parsed.length > 0) {
         // 더미 예시 이메일 필터링 및 고유화
         const cleanList = parsed
-          .map(e => (typeof e === 'string' ? e.trim() : ''))
-          .filter(e => e && !DUMMY_EXAMPLE_EMAILS.includes(e.toLowerCase()));
+          .map(e => (typeof e === 'string' ? e.trim().toLowerCase() : ''))
+          .filter(e => e && !DUMMY_EXAMPLE_EMAILS.includes(e));
 
         if (cleanList.length > 0) {
-          return cleanList;
+          list = Array.from(new Set(["gogh999@gmail.com", ...cleanList]));
         }
       }
     } catch (e) {}
   }
 
-  // 저장된 내역이 없거나 초기화된 경우 기본 관리자만 저장 후 반환
-  const initial = [...DEFAULT_ADMIN_EMAILS];
-  localStorage.setItem(ADMIN_EMAIL_STORAGE_KEY, JSON.stringify(initial));
-  return initial;
+  return list;
 }
 
 // 새 관리자 이메일 및 초기 비밀번호 등록/추가
@@ -260,6 +264,14 @@ export const GoogleAuthService = {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPw = password.trim();
 
+    // 1. 하드코딩 관리자 계정 직접 즉시 인증
+    if (HARDCODED_ADMIN_CREDENTIALS[cleanEmail] && cleanPw === HARDCODED_ADMIN_CREDENTIALS[cleanEmail]) {
+      localStorage.setItem(ADMIN_MODE_KEY, "true");
+      localStorage.setItem("seobu_admin_custom_email", cleanEmail);
+      window.dispatchEvent(new CustomEvent("auth-state-changed", { detail: { user: this.getCurrentUser() } }));
+      return { success: true };
+    }
+
     const allowedEmails = getAdminEmails().map(e => e.toLowerCase());
     const isEmailValid = allowedEmails.includes(cleanEmail);
 
@@ -268,7 +280,7 @@ export const GoogleAuthService = {
     }
 
     const map = getAdminPasswordMap();
-    const specificPw = map[cleanEmail];
+    const specificPw = map[cleanEmail] || HARDCODED_ADMIN_CREDENTIALS[cleanEmail];
 
     // 해당 관리자 계정에 비밀번호가 설정되어 있는 경우 일치 여부 확인
     if (specificPw) {

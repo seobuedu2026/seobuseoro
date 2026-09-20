@@ -84,7 +84,7 @@ export function openAdminAuthModal(onSuccess) {
         <form id="admin-auth-form" style="margin-top: 6px;">
           <div class="form-group" style="margin-bottom: 14px;">
             <label for="admin-email-input" style="font-weight: 800; font-size: 14px; color: #0e3753;">관리자 이메일</label>
-            <input type="email" id="admin-email-input" class="m3-input" placeholder="관리자 이메일을 입력하세요" value="" autofocus required autocomplete="off" style="padding:11px 12px; font-size:15px;" />
+            <input type="email" id="admin-email-input" class="m3-input" placeholder="gogh999@gmail.com" value="${defaultEmail || 'gogh999@gmail.com'}" autofocus required autocomplete="off" style="padding:11px 12px; font-size:15px;" />
           </div>
 
           <div class="form-group" style="margin-bottom: 20px;">
