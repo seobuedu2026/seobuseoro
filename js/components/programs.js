@@ -22,10 +22,10 @@ function loadViewPref() {
     const saved = JSON.parse(localStorage.getItem(VIEW_PREF_KEY) || "{}");
     return {
       sort: SORT_OPTIONS.some(o => o.key === saved.sort) ? saved.sort : "date-asc",
-      columns: [2, 3, 4].includes(saved.columns) ? saved.columns : 3
+      columns: [2, 3, 4].includes(saved.columns) ? saved.columns : 2
     };
   } catch (e) {
-    return { sort: "date-asc", columns: 3 };
+    return { sort: "date-asc", columns: 2 };
   }
 }
 
@@ -190,94 +190,100 @@ export function renderPrograms(container, onSelectEventModal) {
   const activeMonths = getActiveMonths();
 
   container.innerHTML = `
-    <div class="programs-view-wrapper cols-${viewPref.columns}">
-      <div class="tab-header-single-line" style="margin-bottom: 16px; display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-        <div style="display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;">
-          <h2 class="tab-header-title">프로그램 한눈에 보기</h2>
-          <p class="tab-header-desc">행사명으로 검색하거나 월·유형으로 좁혀 찾을 수 있습니다.</p>
-        </div>
-        <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
-          <p class="prog-result-count" id="prog-result-count" aria-live="polite" style="margin: 0; font-size: 14px; font-weight: 800; color: #0e3753; white-space: nowrap;"></p>
-        </div>
-      </div>
-
-      <!-- 새 프로그램 추가 및 유형 관리 버튼 (관리자 전용) -->
-      ${isAdmin ? `
-        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
-          <button id="btn-add-program" class="btn-admin-action">
-            새 프로그램 추가
-          </button>
-          <button id="btn-manage-cats-prog" class="btn-admin-action" title="프로그램 유형 추가 및 관리">
-            유형 추가·관리
-          </button>
-        </div>
-      ` : ''}
-
-      <!-- 검색, 필터, 정렬, 보기 개수 통합 한 줄 바 -->
-      <div class="prog-search-bar">
-        <div class="prog-search-field">
-          <span class="prog-search-icon" aria-hidden="true">🔍</span>
-          <input type="search" id="prog-search-input" class="m3-input prog-search-input"
-                 placeholder="행사명, 장소, 대상으로 검색"
-                 aria-label="프로그램 검색" value="${escapeHtml(searchQuery)}" />
-          <button type="button" class="prog-search-clear" id="btn-clear-search"
-                  aria-label="검색어 지우기" ${searchQuery ? "" : "hidden"}>✕</button>
+    <div class="programs-view-wrapper">
+      <!-- 상단 타이틀, 검색창, 필터, 정렬 버튼 영역 (항상 980px 고정) -->
+      <div class="prog-top-controls-container">
+        <div class="tab-header-single-line" style="margin-bottom: 16px; display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;">
+            <h2 class="tab-header-title">프로그램 한눈에 보기</h2>
+            <p class="tab-header-desc">행사명으로 검색하거나 월·유형으로 좁혀 찾을 수 있습니다.</p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+            <p class="prog-result-count" id="prog-result-count" aria-live="polite" style="margin: 0; font-size: 14px; font-weight: 800; color: #0e3753; white-space: nowrap;"></p>
+          </div>
         </div>
 
-        <select id="prog-month-select" class="m3-select prog-filter-select" aria-label="월 선택">
-          <option value="all" ${selectedMonth === "all" ? "selected" : ""}>전체 기간</option>
-          ${activeMonths.map(m => `
-            <option value="${m}" ${selectedMonth === String(m) ? "selected" : ""}>${m}월</option>
-          `).join("")}
-        </select>
+        <!-- 새 프로그램 추가 및 유형 관리 버튼 (관리자 전용) -->
+        ${isAdmin ? `
+          <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+            <button id="btn-add-program" class="btn-admin-action">
+              새 프로그램 추가
+            </button>
+            <button id="btn-manage-cats-prog" class="btn-admin-action" title="프로그램 유형 추가 및 관리">
+              유형 추가·관리
+            </button>
+          </div>
+        ` : ''}
 
-        <select id="prog-cat-select" class="m3-select prog-filter-select" aria-label="유형 선택">
-          <option value="all" ${selectedCategory === "all" ? "selected" : ""}>전체 유형</option>
-          ${categories.map(cat => `
-            <option value="${cat.key}" ${selectedCategory === cat.key ? "selected" : ""}>${escapeHtml(cat.label)}</option>
-          `).join("")}
-        </select>
+        <!-- 검색, 필터, 정렬, 보기 개수 통합 한 줄 바 -->
+        <div class="prog-search-bar">
+          <div class="prog-search-field">
+            <span class="prog-search-icon" aria-hidden="true">🔍</span>
+            <input type="search" id="prog-search-input" class="m3-input prog-search-input"
+                   placeholder="행사명, 장소, 대상으로 검색"
+                   aria-label="프로그램 검색" value="${escapeHtml(searchQuery)}" />
+            <button type="button" class="prog-search-clear" id="btn-clear-search"
+                    aria-label="검색어 지우기" ${searchQuery ? "" : "hidden"}>✕</button>
+          </div>
 
-        <div class="prog-view-controls">
-          <label class="prog-view-label" for="prog-sort-select">정렬</label>
-          <select id="prog-sort-select" class="m3-select prog-sort-select" aria-label="정렬 기준">
-            ${SORT_OPTIONS.map(o => `
-              <option value="${o.key}" ${viewPref.sort === o.key ? "selected" : ""}>${o.label}</option>
+          <select id="prog-month-select" class="m3-select prog-filter-select" aria-label="월 선택">
+            <option value="all" ${selectedMonth === "all" ? "selected" : ""}>전체 기간</option>
+            ${activeMonths.map(m => `
+              <option value="${m}" ${selectedMonth === String(m) ? "selected" : ""}>${m}월</option>
             `).join("")}
           </select>
 
-          <div class="prog-col-group" role="group" aria-label="한 줄에 보이는 개수">
-            ${[2, 3, 4].map(n => `
-              <button type="button" class="prog-col-btn ${viewPref.columns === n ? 'active' : ''}"
-                      data-columns="${n}" aria-pressed="${viewPref.columns === n}"
-                      title="한 줄에 ${n}개씩 보기">${n}</button>
+          <select id="prog-cat-select" class="m3-select prog-filter-select" aria-label="유형 선택">
+            <option value="all" ${selectedCategory === "all" ? "selected" : ""}>전체 유형</option>
+            ${categories.map(cat => `
+              <option value="${cat.key}" ${selectedCategory === cat.key ? "selected" : ""}>${escapeHtml(cat.label)}</option>
             `).join("")}
+          </select>
+
+          <div class="prog-view-controls">
+            <label class="prog-view-label" for="prog-sort-select">정렬</label>
+            <select id="prog-sort-select" class="m3-select prog-sort-select" aria-label="정렬 기준">
+              ${SORT_OPTIONS.map(o => `
+                <option value="${o.key}" ${viewPref.sort === o.key ? "selected" : ""}>${o.label}</option>
+              `).join("")}
+            </select>
+
+            <div class="prog-col-group" role="group" aria-label="한 줄에 보이는 개수">
+              ${[2, 3, 4].map(n => `
+                <button type="button" class="prog-col-btn ${viewPref.columns === n ? 'active' : ''}"
+                        data-columns="${n}" aria-pressed="${viewPref.columns === n}"
+                        title="한 줄에 ${n}개씩 보기">${n}</button>
+              `).join("")}
+            </div>
+
+            <button type="button" class="prog-reset-btn" id="btn-reset-filters" hidden>조건 초기화</button>
           </div>
-
-          <button type="button" class="prog-reset-btn" id="btn-reset-filters" hidden>조건 초기화</button>
         </div>
       </div>
 
-      <!-- 프로그램 카드 그리드 -->
-      <div class="program-cards-grid cols-${viewPref.columns}" id="prog-cards-grid"></div>
+      <!-- 하단 카드 그리드 및 범례 영역 (2/3/4열 선택에 따라 폭 확장) -->
+      <div class="program-cards-grid-wrapper cols-${viewPref.columns}">
+        <!-- 프로그램 카드 그리드 -->
+        <div class="program-cards-grid cols-${viewPref.columns}" id="prog-cards-grid"></div>
 
-      <!-- 하단 인쇄물 공식 범례 칩 목록 (캘린더와 동일한 스타일) -->
-      <div class="brochure-legend-container" style="margin-top: 32px;">
-        <div class="legend-chips-list">
-          ${categories.map(cat => `
-            <span class="legend-badge ${cat.cls}">${cat.label}</span>
-          `).join("")}
-          ${isAdmin ? `
-            <button id="btn-edit-legend-cats-prog" class="btn-admin-action" title="프로그램 유형 추가 및 관리">
-              유형 추가·관리
-            </button>
-          ` : ''}
+        <!-- 하단 인쇄물 공식 범례 칩 목록 (캘린더와 동일한 스타일) -->
+        <div class="brochure-legend-container" style="margin-top: 32px;">
+          <div class="legend-chips-list">
+            ${categories.map(cat => `
+              <span class="legend-badge ${cat.cls}">${cat.label}</span>
+            `).join("")}
+            ${isAdmin ? `
+              <button id="btn-edit-legend-cats-prog" class="btn-admin-action" title="프로그램 유형 추가 및 관리">
+                유형 추가·관리
+              </button>
+            ` : ''}
+          </div>
         </div>
-      </div>
 
-      <!-- 안내 문구 (범례 아래) -->
-      <div style="text-align: center; margin-top: 14px; margin-bottom: 6px; font-size: 13.5px; font-weight: 700; color: #475569;">
-        ※ 세부 일정 및 장소는 학교 공문 및 신청 링크를 통해 확인하시기 바랍니다.
+        <!-- 안내 문구 (범례 아래) -->
+        <div style="text-align: center; margin-top: 14px; margin-bottom: 6px; font-size: 13.5px; font-weight: 700; color: #475569;">
+          ※ 세부 일정 및 장소는 학교 공문 및 신청 링크를 통해 확인하시기 바랍니다.
+        </div>
       </div>
     </div>
   `;
@@ -396,7 +402,7 @@ export function renderPrograms(container, onSelectEventModal) {
       saveViewPref();
 
       // 그리드와 바깥 폭을 함께 바꿔 좌우로 고르게 넓어지도록 한다
-      const wrapper = container.querySelector(".programs-view-wrapper");
+      const wrapper = container.querySelector(".program-cards-grid-wrapper");
       [grid, wrapper].forEach(el => {
         if (!el) return;
         el.classList.remove("cols-2", "cols-3", "cols-4");

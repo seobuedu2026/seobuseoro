@@ -527,31 +527,44 @@
    ========================================================================== */
 .programs-view-wrapper {
   width: 100%;
+  margin: 0 auto;
+}
+
+/* 상단 검색바, 제목, 필터, 정렬, 2/3/4 버튼 영역은 항상 980px로 고정 */
+.prog-top-controls-container {
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+/* 하단 카드 그리드 및 범례 영역은 2/3/4열 선택에 따라 확장 */
+.program-cards-grid-wrapper {
+  width: 100%;
   max-width: 980px;
   margin: 0 auto;
   transition: max-width 0.25s cubic-bezier(0.2, 0, 0, 1);
 }
 
-.programs-view-wrapper.cols-2 {
+.program-cards-grid-wrapper.cols-2 {
   max-width: 980px;
 }
 
 /* 3개의 경우 2개(980px)와 4개(전체 너비) 사이 중간으로 넓게 설정 */
 @media (min-width: 1200px) {
-  .programs-view-wrapper.cols-3 {
+  .program-cards-grid-wrapper.cols-3 {
     max-width: 1380px;
   }
 }
 
 /* 4개의 경우 옆의 빈 공간 없이 100% 꽉 채워서 표시 */
-.programs-view-wrapper.cols-4 {
+.program-cards-grid-wrapper.cols-4 {
   max-width: 100%;
   width: 100%;
 }
 
 @media (min-width: 768px) and (max-width: 1199px) {
-  .programs-view-wrapper.cols-3,
-  .programs-view-wrapper.cols-4 {
+  .program-cards-grid-wrapper.cols-3,
+  .program-cards-grid-wrapper.cols-4 {
     max-width: 100%;
   }
 }
