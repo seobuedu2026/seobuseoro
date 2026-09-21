@@ -105,7 +105,7 @@ export function renderParticipationStories() {
       </div>
 
       <p class="stories-footnote">
-        참여 이야기는 협의회·연수 참여 후기 자료를 바탕으로 요약·정리했습니다. 개별 참여자가 직접 등록한 게시물은 아닙니다.
+        참여 이야기는 협의회·연수 참여 후기 자료를 바탕으로 요약·정리했습니다.
       </p>
     </section>
   `;
