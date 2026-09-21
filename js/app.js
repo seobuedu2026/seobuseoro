@@ -1,7 +1,7 @@
 import { renderHeader } from "./components/header.js?v=20260921_v83";
 import { renderFooter } from "./components/footer.js?v=20260921_v83";
 import { renderCalendar } from "./components/calendar.js?v=20260921_v83";
-import { renderPrograms } from "./components/programs.js?v=20260921_v95";
+import { renderPrograms } from "./components/programs.js?v=20260921_v96";
 import { renderReviews } from "./components/reviews.js?v=20260921_v83";
 import { renderPadletRooms } from "./components/padletRooms.js?v=20260921_v83";
 import { openEventFormModal } from "./components/eventFormModal.js?v=20260921_v83";

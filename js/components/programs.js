@@ -196,7 +196,6 @@ export function renderPrograms(container, onSelectEventModal) {
         <div class="tab-header-single-line" style="margin-bottom: 16px; display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
           <div style="display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;">
             <h2 class="tab-header-title">프로그램 한눈에 보기</h2>
-            <p class="tab-header-desc">행사명으로 검색하거나 월·유형으로 좁혀 찾을 수 있습니다.</p>
           </div>
           <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
             <p class="prog-result-count" id="prog-result-count" aria-live="polite" style="margin: 0; font-size: 14px; font-weight: 800; color: #0e3753; white-space: nowrap;"></p>
