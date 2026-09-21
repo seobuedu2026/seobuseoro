@@ -191,9 +191,14 @@ export function renderPrograms(container, onSelectEventModal) {
 
   container.innerHTML = `
     <div class="programs-view-wrapper cols-${viewPref.columns}">
-      <div class="tab-header-single-line" style="margin-bottom: 16px;">
-        <h2 class="tab-header-title">프로그램 한눈에 보기</h2>
-        <p class="tab-header-desc">행사명으로 검색하거나 월·유형으로 좁혀 찾을 수 있습니다.</p>
+      <div class="tab-header-single-line" style="margin-bottom: 16px; display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;">
+          <h2 class="tab-header-title">프로그램 한눈에 보기</h2>
+          <p class="tab-header-desc">행사명으로 검색하거나 월·유형으로 좁혀 찾을 수 있습니다.</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+          <p class="prog-result-count" id="prog-result-count" aria-live="polite" style="margin: 0; font-size: 14px; font-weight: 800; color: #0e3753; white-space: nowrap;"></p>
+        </div>
       </div>
 
       <!-- 새 프로그램 추가 및 유형 관리 버튼 (관리자 전용) -->
@@ -237,9 +242,8 @@ export function renderPrograms(container, onSelectEventModal) {
       </div>
 
       <!-- 결과 요약 및 보기 설정 -->
-      <div class="prog-result-bar">
+      <div class="prog-result-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
         <div class="prog-result-left">
-          <p class="prog-result-count" id="prog-result-count" aria-live="polite"></p>
           <button type="button" class="prog-reset-btn" id="btn-reset-filters" hidden>조건 초기화</button>
         </div>
 
