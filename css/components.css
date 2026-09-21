@@ -531,13 +531,6 @@
   margin: 0 auto;
 }
 
-/* 열을 늘리면 카드가 좁아지는 대신 전체 폭이 좌우로 넓어진다.
-   margin: 0 auto 이므로 가운데를 기준으로 양쪽이 함께 늘어난다. */
-@media (min-width: 1200px) {
-  .programs-view-wrapper.cols-3 { max-width: 1300px; }
-  .programs-view-wrapper.cols-4 { max-width: 1616px; }
-}
-
 .program-cards-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
