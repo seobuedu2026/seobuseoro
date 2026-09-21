@@ -135,7 +135,7 @@ if (typeof window !== "undefined") {
 
   if (!window._firestoreConfigSubscribed) {
     window._firestoreConfigSubscribed = true;
-    FirestoreReviewService.subscribeReviewAuthMode((mode) => {
+    FirestoreReviewService.subscribeReviewConfig(() => {
       const activeContainer = document.querySelector("#tab-content-mount");
       if (activeContainer && activeContainer.querySelector(".reviews-view-wrapper")) {
         renderReviews(activeContainer);
@@ -183,6 +183,7 @@ function formatAuthorDisplayName(rawName, isAdmin) {
 export function renderReviews(container, preselectedEventId = null, page = 1) {
   const user = GoogleAuthService.getCurrentUser();
   const isAdmin = !!(user && user.isAdmin);
+  const postingMode = FirestoreReviewService.getReviewPostingMode(); // 'direct' (직접게시-기본) | 'user_input' (사용자 입력)
   const authMode = FirestoreReviewService.getReviewAuthMode(); // 'login_required' | 'anonymous_allowed'
   const allReviews = getStoredReviews();
   const myReviewIds = getMyReviewIds();
@@ -224,6 +225,279 @@ export function renderReviews(container, preselectedEventId = null, page = 1) {
   const startIndex = (currentPage - 1) * REVIEWS_PER_PAGE;
   const pagedReviews = visibleReviews.slice(startIndex, startIndex + REVIEWS_PER_PAGE);
 
+  // 관리자 전용 후기 게시 방식 설정 바
+  const adminConfigBar = isAdmin ? `
+    <div class="admin-review-mode-panel" style="background-color: #f8fafc; border: 1.5px solid #0e3753; border-radius: 14px; padding: 16px 18px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(14, 55, 83, 0.06);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+        <div style="font-size: 15px; font-weight: 800; color: #0e3753; display: flex; align-items: center; gap: 8px;">
+          ⚙️ <span>후기 게시 방식 설정 (관리자 전용)</span>
+        </div>
+        <span style="font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; ${postingMode === 'direct' ? 'background: #e0f2fe; color: #0369a1;' : 'background: #dcfce7; color: #15803d;'}">
+          ${postingMode === 'direct' ? '현재 모드: 직접게시 (기본)' : '현재 모드: 사용자 입력'}
+        </span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-bottom: ${postingMode === 'user_input' ? '12px' : '0'};">
+        <label style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; background: ${postingMode === 'direct' ? '#ffffff' : '#f1f5f9'}; border: 2px solid ${postingMode === 'direct' ? '#0e3753' : '#cbd5e1'}; border-radius: 10px; cursor: pointer; transition: all 0.15s ease;">
+          <input type="radio" name="review-posting-mode-radio" value="direct" ${postingMode === 'direct' ? 'checked' : ''} style="margin-top: 3px; cursor: pointer;" />
+          <div>
+            <div style="font-size: 14px; font-weight: 800; color: #0e3753; margin-bottom: 2px;">
+              📌 직접게시 (기본)
+            </div>
+            <div style="font-size: 12px; color: #64748b; line-height: 1.4;">
+              수다박스 참여 이야기 카드만 깔끔하게 노출하며, 사용자 입력창 및 개별 등록 피드는 숨깁니다.
+            </div>
+          </div>
+        </label>
+
+        <label style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; background: ${postingMode === 'user_input' ? '#ffffff' : '#f1f5f9'}; border: 2px solid ${postingMode === 'user_input' ? '#0e3753' : '#cbd5e1'}; border-radius: 10px; cursor: pointer; transition: all 0.15s ease;">
+          <input type="radio" name="review-posting-mode-radio" value="user_input" ${postingMode === 'user_input' ? 'checked' : ''} style="margin-top: 3px; cursor: pointer;" />
+          <div>
+            <div style="font-size: 14px; font-weight: 800; color: #0e3753; margin-bottom: 2px;">
+              ✍️ 사용자 입력
+            </div>
+            <div style="font-size: 12px; color: #64748b; line-height: 1.4;">
+              교원이 직접 후기를 등록하고 공유할 수 있도록 후기 등록 폼과 피드를 모두 노출합니다.
+            </div>
+          </div>
+        </label>
+      </div>
+
+      ${postingMode === 'user_input' ? `
+        <div style="background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+          <span style="font-size: 13px; font-weight: 800; color: #334155;">🔒 작성 권한:</span>
+          <div style="display: flex; gap: 14px;">
+            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; font-weight: 700; color: #0e3753;">
+              <input type="radio" name="review-auth-mode-radio" value="login_required" ${authMode === 'login_required' ? 'checked' : ''} style="cursor: pointer;" />
+              <span>센스쿨 로그인 필수</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; font-weight: 700; color: #0e3753;">
+              <input type="radio" name="review-auth-mode-radio" value="anonymous_allowed" ${authMode === 'anonymous_allowed' ? 'checked' : ''} style="cursor: pointer;" />
+              <span>로그인 없이 작성 허용</span>
+            </label>
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  ` : '';
+
+  // 사용자 후기 피드 및 입력 폼 컴포넌트 HTML 생성
+  const renderUserReviewLayout = (isCollapsedForAdmin = false) => `
+    <div class="review-layout ${isCollapsedForAdmin ? 'admin-direct-mode-review-layout' : ''}" style="${isCollapsedForAdmin ? 'margin-top: 30px;' : ''}">
+      <!-- 후기 작성 영역 (@senedu.kr 전용 로그인 또는 비로그인 모드) -->
+      <div class="review-form-card">
+        <div style="text-align: center; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
+          <h3 style="font-size: 16.5px; font-weight: 900; color: #0e3753; margin: 0; text-align: center;">
+            참여 후기 등록
+          </h3>
+        </div>
+
+        ${(!user && authMode === 'login_required' && !isAdmin) ? `
+          <div style="background-color: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 18px 12px; text-align: center;">
+            <p style="font-size: 14px; font-weight: 800; color: #0e3753; margin-bottom: 6px; line-height: 1.45;">
+              후기 작성은 교원 로그인 후 가능합니다.
+            </p>
+            <p style="font-size: 12.5px; color: #0284c7; font-weight: 700; margin-bottom: 14px;">
+              (센스쿨 구글 계정 @senedu.kr)
+            </p>
+
+            <!-- 센스쿨 구글 계정 로그인 버튼 (컴팩트 사이즈) -->
+            <div style="display: flex; justify-content: center; margin-bottom: 12px;">
+              <button id="btn-custom-google-login" class="btn-m3-filled" style="padding: 8px 24px; font-size: 13.5px; font-weight: 800; border-radius: 10px; justify-content: center; box-shadow: 0 2px 8px rgba(14, 55, 83, 0.15);">
+                교원 로그인
+              </button>
+            </div>
+
+            <!-- 후기 수정하기 버튼 -->
+            <div style="border-top: 1px dashed #cbd5e1; padding-top: 12px;">
+              <button type="button" id="btn-open-review-lookup" class="btn-m3-outlined" style="width: 100%; height: 38px; border-radius: 10px; font-size: 13.5px; font-weight: 800; justify-content: center; color: #0e3753; border-color: #cbd5e1; background: #ffffff;">
+                ✏️ 후기 수정하기
+              </button>
+            </div>
+          </div>
+        ` : `
+          <form id="review-submit-form">
+            ${user ? `
+              <div style="background: #f1f5f9; border: 1.5px solid #e2e8f0; padding: 9px 12px; border-radius: 10px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                <span style="font-weight: 800; color: #0e3753; font-size: 14.5px;">${user.name}</span>
+                <span style="font-size: 13px; font-weight: 600; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">(${user.email})</span>
+              </div>
+            ` : `
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label for="review-author-input" style="font-weight: 800; font-size: 13.5px; color: #0e3753; margin-bottom: 2px;">
+                  작성자 성함
+                </label>
+                <input type="text" id="review-author-input" class="m3-input" style="font-size: 14px; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff; outline: none;" />
+              </div>
+
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label for="review-password-input" style="font-weight: 800; font-size: 13.5px; color: #0e3753; margin-bottom: 2px;">
+                  비밀번호
+                </label>
+                <input type="password" id="review-password-input" class="m3-input" required maxlength="20" style="font-size: 14px; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff; outline: none;" />
+              </div>
+            `}
+
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label for="review-event-select" style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 2px;">
+                후기를 작성할 행사 선택
+              </label>
+              <select id="review-event-select" class="m3-select" required>
+                <option value="">행사 선택</option>
+                ${getEvents().filter(isEventPastOrToday).map(ev => `
+                  <option value="${ev.id}" ${preselectedEventId === ev.id ? 'selected' : ''}>
+                    [${ev.month}월 ${ev.day}일] ${ev.title} ${ev.subtitle ? `(${ev.subtitle})` : ''}
+                  </option>
+                `).join("")}
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 14px;">
+              <label for="review-text-input" style="font-weight: 800; font-size: 13.5px; color: #0e3753; margin-bottom: 2px;">소감 및 수업 적용 나눔</label>
+              <textarea id="review-text-input" class="m3-textarea" rows="4" placeholder="연수/행사에서 얻은 인사이트나 교실 실천 계획을 자유롭게 적어주세요." required style="resize: vertical; white-space: pre-wrap; line-height: 1.6;"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button type="submit" class="btn-m3-filled" style="flex: 1; height: 42px; border-radius: 10px; font-size: 14px; font-weight: 800; justify-content: center; padding: 0 16px;">
+                후기 등록하기
+              </button>
+              ${user ? `
+                <button type="button" id="btn-review-logout" class="btn-review-logout-inline" title="로그아웃">
+                  로그아웃
+                </button>
+              ` : ''}
+            </div>
+
+            <!-- 후기 등록하기 버튼 아래: 후기 수정하기 버튼 -->
+            <div style="margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 10px;">
+              <button type="button" id="btn-open-review-lookup" class="btn-m3-outlined" style="width: 100%; height: 38px; border-radius: 10px; font-size: 13.5px; font-weight: 800; justify-content: center; color: #0e3753; border-color: #cbd5e1; background: #ffffff;">
+                ✏️ 후기 수정하기
+              </button>
+            </div>
+          </form>
+        `}
+      </div>
+
+      <!-- 등록된 후기 목록 -->
+      <div class="review-feed-list" id="review-feed-container">
+
+        ${displayedReviews.length > 0 ? `
+          <div class="review-view-bar">
+            <p class="review-view-count">
+              ${reviewEventFilter === "all"
+                ? `후기 ${totalReviews}건`
+                : `전체 ${displayedReviews.length}건 중 ${totalReviews}건`}
+            </p>
+
+            <div class="review-view-controls">
+              ${eventOptions.length > 1 ? `
+                <select id="review-event-filter" class="m3-select review-view-select" aria-label="행사별 보기">
+                  <option value="all" ${reviewEventFilter === "all" ? "selected" : ""}>전체 행사</option>
+                  ${eventOptions.map(o => `
+                    <option value="${o.id}" ${reviewEventFilter === o.id ? "selected" : ""}>${o.title}</option>
+                  `).join("")}
+                </select>
+              ` : ""}
+
+              <select id="review-sort-select" class="m3-select review-view-select" aria-label="정렬 기준">
+                ${REVIEW_SORT_OPTIONS.map(o => `
+                  <option value="${o.key}" ${reviewSort === o.key ? "selected" : ""}>${o.label}</option>
+                `).join("")}
+              </select>
+            </div>
+          </div>
+        ` : ""}
+
+        ${pagedReviews.length === 0 ? `
+          <div style="background: #ffffff; border: 1.5px dashed #cbd5e1; border-radius: 18px; padding: 48px 20px; text-align: center; color: #64748b;">
+            <div style="font-size: 36px; margin-bottom: 10px;">💬</div>
+            <p style="font-size: 15px; font-weight: 700; color: #334155; margin: 0;">
+              등록된 참여 후기가 없습니다.
+            </p>
+          </div>
+        ` : pagedReviews.map(rev => {
+          const cleanName = formatAuthorDisplayName(rev.userName, isAdmin);
+          const cleanTitle = (rev.eventTitle || "").replace(/^🎯\s*/, "");
+          const isAuthor = myReviewIds.includes(rev.id) || (user && user.email && rev.userEmail && (user.email.toLowerCase() === rev.userEmail.toLowerCase()));
+          const isApproved = rev.status !== "pending";
+
+          return `
+          <div class="review-feed-card ${!isApproved ? 'is-pending' : ''}" data-review-id="${rev.id}">
+            ${(!isApproved && !isAdmin && isAuthor) ? `
+              <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 10px; padding: 9px 13px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #b45309; line-height: 1.45;">
+                <span style="font-size: 16px;">⏳</span>
+                <span>작성하신 후기는 관리자의 승인을 기다리고 있습니다. (승인 후 모든 사용자에게 공개됩니다)</span>
+              </div>
+            ` : ''}
+
+            <!-- 상단 바: 연수 종류 태그 + 작성자 이름 + 작성일시 | 공감 및 관리자 승인 버튼 -->
+            <div class="review-card-top-row">
+              <div class="review-user-name">
+                <span class="review-event-tag">${cleanTitle}</span>
+                <span class="user-display-name">${cleanName}</span>
+                <span class="review-date-text">${rev.createdAt}</span>
+                ${isAdmin ? `
+                  <span style="font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 4px; ${isApproved ? 'background:#dcfce7; color:#166534;' : 'background:#fef3c7; color:#b45309;'}">
+                    ${isApproved ? '승인됨' : '승인대기'}
+                  </span>
+                ` : (!isApproved && isAuthor) ? `
+                  <span style="font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 4px; background:#fef3c7; color:#b45309;">
+                    승인대기
+                  </span>
+                ` : ''}
+              </div>
+
+              <div class="review-top-actions-group">
+                <button class="btn-like-pill btn-like ${likedReviewIds.includes(rev.id) ? 'liked' : ''}"
+                        data-review-id="${rev.id}"
+                        aria-pressed="${likedReviewIds.includes(rev.id)}"
+                        title="${likedReviewIds.includes(rev.id) ? '공감 취소' : '공감하기'}">
+                  ${likedReviewIds.includes(rev.id) ? '❤️' : '🤍'} <span>공감</span> <strong>${rev.likes || 0}</strong>
+                </button>
+
+                ${isAdmin ? `
+                  ${isApproved ? `
+                    <button class="btn-review-mod-unapprove btn-admin-action" data-review-id="${rev.id}" style="padding: 3px 8px; font-size: 11.5px; color: #b45309; border-color: #fde68a;" title="승인 취소 (일반 교원 화면에서 숨김)">
+                      승인취소
+                    </button>
+                  ` : `
+                    <button class="btn-review-mod-approve btn-admin-action filled" data-review-id="${rev.id}" style="padding: 3px 8px; font-size: 11.5px; background: #166534; border-color: #166534; color: #ffffff;" title="후기 승인 (홈페이지에 공개)">
+                      승인
+                    </button>
+                  `}
+                  <button class="btn-review-mod-delete btn-admin-action" data-review-id="${rev.id}" style="padding: 3px 8px; font-size: 11.5px; color: #dc2626; border-color: #fecdd3;" title="후기 영구 삭제 (되돌릴 수 없음)">
+                    삭제
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+
+            <p class="review-content-body">${rev.content}</p>
+          </div>
+        `;
+        }).join("")}
+
+        ${totalPages > 1 ? `
+          <div class="reviews-pagination" style="display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 24px; flex-wrap: wrap;">
+            <button class="btn-page-nav" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled style="opacity: 0.4; cursor: not-allowed; padding: 6px 12px; border: 1.5px solid #cbd5e1; background: #ffffff; border-radius: 8px; font-weight: 700; font-size: 13px; color: #0e3753;"' : 'style="cursor: pointer; padding: 6px 12px; border: 1.5px solid #cbd5e1; background: #ffffff; border-radius: 8px; font-weight: 700; font-size: 13px; color: #0e3753;"'}>
+              ◀ 이전
+            </button>
+
+            ${Array.from({ length: totalPages }, (_, i) => i + 1).map(p => `
+              <button class="btn-page-num ${p === currentPage ? 'active' : ''}" data-page="${p}" style="padding: 6px 12px; border-radius: 8px; font-weight: 800; font-size: 13px; border: 1.5px solid ${p === currentPage ? '#0e3753' : '#cbd5e1'}; background: ${p === currentPage ? '#0e3753' : '#ffffff'}; color: ${p === currentPage ? '#ffffff' : '#0e3753'}; cursor: pointer;">
+                ${p}
+              </button>
+            `).join("")}
+
+            <button class="btn-page-nav" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled style="opacity: 0.4; cursor: not-allowed; padding: 6px 12px; border: 1.5px solid #cbd5e1; background: #ffffff; border-radius: 8px; font-weight: 700; font-size: 13px; color: #0e3753;"' : 'style="cursor: pointer; padding: 6px 12px; border: 1.5px solid #cbd5e1; background: #ffffff; border-radius: 8px; font-weight: 700; font-size: 13px; color: #0e3753;"'}>
+              다음 ▶
+            </button>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+
   container.innerHTML = `
     <div class="reviews-view-wrapper">
       <div class="tab-header-single-line" style="margin-bottom: 24px;">
@@ -231,248 +505,48 @@ export function renderReviews(container, preselectedEventId = null, page = 1) {
         <p class="tab-header-desc">행사에 참여하신 선생님들의 생생한 후기와 교실 수업 적용 사례를 자유롭게 공유해주세요.</p>
       </div>
 
+      ${adminConfigBar}
+
       ${renderParticipationStories()}
 
-      <div class="review-layout">
-        <!-- 후기 작성 영역 (@senedu.kr 전용 로그인 또는 비로그인 모드) -->
-        <div class="review-form-card">
-          <div style="text-align: center; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
-            <h3 style="font-size: 16.5px; font-weight: 900; color: #0e3753; margin: 0; text-align: center;">
-              참여 후기 등록
-            </h3>
-          </div>
-
-          ${isAdmin ? `
-            <div style="background-color: #f8fafc; border: 1.5px solid #0e3753; border-radius: 12px; padding: 14px; text-align: left;">
-              <div style="margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #e2e8f0;">
-                <div style="font-size: 14px; font-weight: 800; color: #0e3753; display: flex; align-items: center; gap: 6px;">
-                  ⚙️ <span>후기 작성 방식 설정</span>
-                </div>
-              </div>
-
-              <div style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 10px;">
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13.5px; font-weight: 700; color: #0e3753;">
-                  <input type="radio" name="review-auth-mode-radio" value="login_required" ${authMode === 'login_required' ? 'checked' : ''} style="cursor: pointer;" />
-                  <span>🔒 센스쿨 로그인 필수</span>
-                </label>
-
-                <div style="height: 1px; background: #f1f5f9;"></div>
-
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13.5px; font-weight: 700; color: #0e3753;">
-                  <input type="radio" name="review-auth-mode-radio" value="anonymous_allowed" ${authMode === 'anonymous_allowed' ? 'checked' : ''} style="cursor: pointer;" />
-                  <span>🔓 로그인 없이 작성 허용</span>
-                </label>
-              </div>
+      ${postingMode === 'user_input' ? renderUserReviewLayout(false) : (isAdmin ? `
+        <!-- 직접게시 모드일 때 관리자용 후기 관리 서브 섹션 (접기/펼치기) -->
+        <div style="margin-top: 40px; border-top: 1.5px dashed #cbd5e1; padding-top: 24px;">
+          <details style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 14px 18px;">
+            <summary style="cursor: pointer; font-size: 14.5px; font-weight: 800; color: #0e3753; display: flex; align-items: center; justify-content: space-between; user-select: none;">
+              <span>📂 사용자 등록 후기 관리 데이터 (${totalReviews}건) <span style="font-size: 12px; font-weight: 600; color: #64748b; margin-left: 6px;">(일반 교원에게는 숨김 상태)</span></span>
+              <span style="font-size: 12.5px; color: #0284c7; font-weight: 700;">펼치기/접기 ▾</span>
+            </summary>
+            <div style="margin-top: 16px;">
+              ${renderUserReviewLayout(true)}
             </div>
-          ` : (!user && authMode === 'login_required') ? `
-            <div style="background-color: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 18px 12px; text-align: center;">
-              <p style="font-size: 14px; font-weight: 800; color: #0e3753; margin-bottom: 6px; line-height: 1.45;">
-                후기 작성은 교원 로그인 후 가능합니다.
-              </p>
-              <p style="font-size: 12.5px; color: #0284c7; font-weight: 700; margin-bottom: 14px;">
-                (센스쿨 구글 계정 @senedu.kr)
-              </p>
-
-              <!-- 센스쿨 구글 계정 로그인 버튼 (컴팩트 사이즈) -->
-              <div style="display: flex; justify-content: center; margin-bottom: 12px;">
-                <button id="btn-custom-google-login" class="btn-m3-filled" style="padding: 8px 24px; font-size: 13.5px; font-weight: 800; border-radius: 10px; justify-content: center; box-shadow: 0 2px 8px rgba(14, 55, 83, 0.15);">
-                  교원 로그인
-                </button>
-              </div>
-
-              <!-- 후기 수정하기 버튼 -->
-              <div style="border-top: 1px dashed #cbd5e1; padding-top: 12px;">
-                <button type="button" id="btn-open-review-lookup" class="btn-m3-outlined" style="width: 100%; height: 38px; border-radius: 10px; font-size: 13.5px; font-weight: 800; justify-content: center; color: #0e3753; border-color: #cbd5e1; background: #ffffff;">
-                  ✏️ 후기 수정하기
-                </button>
-              </div>
-            </div>
-          ` : `
-            <form id="review-submit-form">
-              ${user ? `
-                <div style="background: #f1f5f9; border: 1.5px solid #e2e8f0; padding: 9px 12px; border-radius: 10px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                  <span style="font-weight: 800; color: #0e3753; font-size: 14.5px;">${user.name}</span>
-                  <span style="font-size: 13px; font-weight: 600; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">(${user.email})</span>
-                </div>
-              ` : `
-                <div class="form-group" style="margin-bottom: 12px;">
-                  <label for="review-author-input" style="font-weight: 800; font-size: 13.5px; color: #0e3753; margin-bottom: 2px;">
-                    작성자 성함
-                  </label>
-                  <input type="text" id="review-author-input" class="m3-input" style="font-size: 14px; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff; outline: none;" />
-                </div>
-
-                <div class="form-group" style="margin-bottom: 12px;">
-                  <label for="review-password-input" style="font-weight: 800; font-size: 13.5px; color: #0e3753; margin-bottom: 2px;">
-                    비밀번호
-                  </label>
-                  <input type="password" id="review-password-input" class="m3-input" required maxlength="20" style="font-size: 14px; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; background: #ffffff; outline: none;" />
-                </div>
-              `}
-
-              <div class="form-group" style="margin-bottom: 12px;">
-                <label for="review-event-select" style="font-weight: 800; font-size: 13px; color: #0e3753; margin-bottom: 2px;">
-                  후기를 작성할 행사 선택
-                </label>
-                <select id="review-event-select" class="m3-select" required>
-                  <option value="">행사 선택</option>
-                  ${getEvents().filter(isEventPastOrToday).map(ev => `
-                    <option value="${ev.id}" ${preselectedEventId === ev.id ? 'selected' : ''}>
-                      [${ev.month}월 ${ev.day}일] ${ev.title} ${ev.subtitle ? `(${ev.subtitle})` : ''}
-                    </option>
-                  `).join("")}
-                </select>
-              </div>
-
-              <div class="form-group" style="margin-bottom: 14px;">
-                <label for="review-text-input" style="font-weight: 800; font-size: 13.5px; color: #0e3753; margin-bottom: 2px;">소감 및 수업 적용 나눔</label>
-                <textarea id="review-text-input" class="m3-textarea" rows="4" placeholder="연수/행사에서 얻은 인사이트나 교실 실천 계획을 자유롭게 적어주세요." required style="resize: vertical; white-space: pre-wrap; line-height: 1.6;"></textarea>
-              </div>
-
-              <div style="display: flex; gap: 8px; align-items: center;">
-                <button type="submit" class="btn-m3-filled" style="flex: 1; height: 42px; border-radius: 10px; font-size: 14px; font-weight: 800; justify-content: center; padding: 0 16px;">
-                  후기 등록하기
-                </button>
-                ${user ? `
-                  <button type="button" id="btn-review-logout" class="btn-review-logout-inline" title="로그아웃">
-                    로그아웃
-                  </button>
-                ` : ''}
-              </div>
-
-              <!-- 후기 등록하기 버튼 아래: 후기 수정하기 버튼 -->
-              <div style="margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 10px;">
-                <button type="button" id="btn-open-review-lookup" class="btn-m3-outlined" style="width: 100%; height: 38px; border-radius: 10px; font-size: 13.5px; font-weight: 800; justify-content: center; color: #0e3753; border-color: #cbd5e1; background: #ffffff;">
-                  ✏️ 후기 수정하기
-                </button>
-              </div>
-            </form>
-          `}
+          </details>
         </div>
-
-        <!-- 등록된 후기 목록 -->
-        <div class="review-feed-list" id="review-feed-container">
-
-          ${displayedReviews.length > 0 ? `
-            <div class="review-view-bar">
-              <p class="review-view-count">
-                ${reviewEventFilter === "all"
-                  ? `후기 ${totalReviews}건`
-                  : `전체 ${displayedReviews.length}건 중 ${totalReviews}건`}
-              </p>
-
-              <div class="review-view-controls">
-                ${eventOptions.length > 1 ? `
-                  <select id="review-event-filter" class="m3-select review-view-select" aria-label="행사별 보기">
-                    <option value="all" ${reviewEventFilter === "all" ? "selected" : ""}>전체 행사</option>
-                    ${eventOptions.map(o => `
-                      <option value="${o.id}" ${reviewEventFilter === o.id ? "selected" : ""}>${o.title}</option>
-                    `).join("")}
-                  </select>
-                ` : ""}
-
-                <select id="review-sort-select" class="m3-select review-view-select" aria-label="정렬 기준">
-                  ${REVIEW_SORT_OPTIONS.map(o => `
-                    <option value="${o.key}" ${reviewSort === o.key ? "selected" : ""}>${o.label}</option>
-                  `).join("")}
-                </select>
-              </div>
-            </div>
-          ` : ""}
-
-          ${pagedReviews.length === 0 ? `
-            <div style="background: #ffffff; border: 1.5px dashed #cbd5e1; border-radius: 18px; padding: 48px 20px; text-align: center; color: #64748b;">
-              <div style="font-size: 36px; margin-bottom: 10px;">💬</div>
-              <p style="font-size: 15px; font-weight: 700; color: #334155; margin: 0;">
-                등록된 참여 후기가 없습니다.
-              </p>
-            </div>
-          ` : pagedReviews.map(rev => {
-            const cleanName = formatAuthorDisplayName(rev.userName, isAdmin);
-            const cleanTitle = (rev.eventTitle || "").replace(/^🎯\s*/, "");
-            const isAuthor = myReviewIds.includes(rev.id) || (user && user.email && rev.userEmail && (user.email.toLowerCase() === rev.userEmail.toLowerCase()));
-            const isApproved = rev.status !== "pending";
-
-            return `
-            <div class="review-feed-card ${!isApproved ? 'is-pending' : ''}" data-review-id="${rev.id}">
-              ${(!isApproved && !isAdmin && isAuthor) ? `
-                <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 10px; padding: 9px 13px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #b45309; line-height: 1.45;">
-                  <span style="font-size: 16px;">⏳</span>
-                  <span>작성하신 후기는 관리자의 승인을 기다리고 있습니다. (승인 후 모든 사용자에게 공개됩니다)</span>
-                </div>
-              ` : ''}
-
-              <!-- 상단 바: 연수 종류 태그 + 작성자 이름 + 작성일시 | 공감 및 관리자 승인 버튼 -->
-              <div class="review-card-top-row">
-                <div class="review-user-name">
-                  <span class="review-event-tag">${cleanTitle}</span>
-                  <span class="user-display-name">${cleanName}</span>
-                  <span class="review-date-text">${rev.createdAt}</span>
-                  ${isAdmin ? `
-                    <span style="font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 4px; ${isApproved ? 'background:#dcfce7; color:#166534;' : 'background:#fef3c7; color:#b45309;'}">
-                      ${isApproved ? '승인됨' : '승인대기'}
-                    </span>
-                  ` : (!isApproved && isAuthor) ? `
-                    <span style="font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 4px; background:#fef3c7; color:#b45309;">
-                      승인대기
-                    </span>
-                  ` : ''}
-                </div>
-
-                <div class="review-top-actions-group">
-                  <button class="btn-like-pill btn-like ${likedReviewIds.includes(rev.id) ? 'liked' : ''}"
-                          data-review-id="${rev.id}"
-                          aria-pressed="${likedReviewIds.includes(rev.id)}"
-                          title="${likedReviewIds.includes(rev.id) ? '공감 취소' : '공감하기'}">
-                    ${likedReviewIds.includes(rev.id) ? '❤️' : '🤍'} <span>공감</span> <strong>${rev.likes || 0}</strong>
-                  </button>
-
-                  ${isAdmin ? `
-                    ${isApproved ? `
-                      <button class="btn-review-mod-unapprove btn-admin-action" data-review-id="${rev.id}" style="padding: 3px 8px; font-size: 11.5px; color: #b45309; border-color: #fde68a;" title="승인 취소 (일반 교원 화면에서 숨김)">
-                        승인취소
-                      </button>
-                    ` : `
-                      <button class="btn-review-mod-approve btn-admin-action filled" data-review-id="${rev.id}" style="padding: 3px 8px; font-size: 11.5px; background: #166534; border-color: #166534; color: #ffffff;" title="후기 승인 (홈페이지에 공개)">
-                        승인
-                      </button>
-                    `}
-                    <button class="btn-review-mod-delete btn-admin-action" data-review-id="${rev.id}" style="padding: 3px 8px; font-size: 11.5px; color: #dc2626; border-color: #fecdd3;" title="후기 영구 삭제 (되돌릴 수 없음)">
-                      삭제
-                    </button>
-                  ` : ''}
-                </div>
-              </div>
-
-              <p class="review-content-body">${rev.content}</p>
-            </div>
-          `;
-          }).join("")}
-
-          ${totalPages > 1 ? `
-            <div class="reviews-pagination" style="display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 24px; flex-wrap: wrap;">
-              <button class="btn-page-nav" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled style="opacity: 0.4; cursor: not-allowed; padding: 6px 12px; border: 1.5px solid #cbd5e1; background: #ffffff; border-radius: 8px; font-weight: 700; font-size: 13px; color: #0e3753;"' : 'style="cursor: pointer; padding: 6px 12px; border: 1.5px solid #cbd5e1; background: #ffffff; border-radius: 8px; font-weight: 700; font-size: 13px; color: #0e3753;"'}>
-                ◀ 이전
-              </button>
-
-              ${Array.from({ length: totalPages }, (_, i) => i + 1).map(p => `
-                <button class="btn-page-num ${p === currentPage ? 'active' : ''}" data-page="${p}" style="padding: 6px 12px; border-radius: 8px; font-weight: 800; font-size: 13px; border: 1.5px solid ${p === currentPage ? '#0e3753' : '#cbd5e1'}; background: ${p === currentPage ? '#0e3753' : '#ffffff'}; color: ${p === currentPage ? '#ffffff' : '#0e3753'}; cursor: pointer;">
-                  ${p}
-                </button>
-              `).join("")}
-
-              <button class="btn-page-nav" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled style="opacity: 0.4; cursor: not-allowed; padding: 6px 12px; border: 1.5px solid #cbd5e1; background: #ffffff; border-radius: 8px; font-weight: 700; font-size: 13px; color: #0e3753;"' : 'style="cursor: pointer; padding: 6px 12px; border: 1.5px solid #cbd5e1; background: #ffffff; border-radius: 8px; font-weight: 700; font-size: 13px; color: #0e3753;"'}>
-                다음 ▶
-              </button>
-            </div>
-          ` : ''}
-        </div>
-      </div>
+      ` : '')}
     </div>
   `;
 
   // 참여 이야기 펼침 버튼 바인딩
   bindParticipationStories(container);
+
+  // 관리자 모드: 후기 게시 방식 (직접게시 vs 사용자 입력) 라디오 버튼 변경 이벤트 바인딩
+  if (isAdmin) {
+    container.querySelectorAll("input[name='review-posting-mode-radio']").forEach(radio => {
+      radio.addEventListener("change", (e) => {
+        const newPostingMode = e.target.value;
+        FirestoreReviewService.saveReviewPostingMode(newPostingMode);
+        renderReviews(container, preselectedEventId);
+      });
+    });
+
+    container.querySelectorAll("input[name='review-auth-mode-radio']").forEach(radio => {
+      radio.addEventListener("change", (e) => {
+        const newAuthMode = e.target.value;
+        FirestoreReviewService.saveReviewAuthMode(newAuthMode);
+        renderReviews(container, preselectedEventId);
+      });
+    });
+  }
 
   // 후기 정렬 변경
   const reviewSortSelect = container.querySelector("#review-sort-select");
@@ -510,17 +584,6 @@ export function renderReviews(container, preselectedEventId = null, page = 1) {
       }
     });
   });
-
-  // 관리자 모드: 후기 작성 방식 라디오 버튼 변경 이벤트 바인딩
-  if (isAdmin) {
-    container.querySelectorAll("input[name='review-auth-mode-radio']").forEach(radio => {
-      radio.addEventListener("change", (e) => {
-        const newMode = e.target.value;
-        FirestoreReviewService.saveReviewAuthMode(newMode);
-        renderReviews(container, preselectedEventId);
-      });
-    });
-  }
 
   // 로그아웃 버튼 바인딩 (관리자 또는 로그인 사용자)
   const btnLogout = container.querySelector("#btn-review-logout");

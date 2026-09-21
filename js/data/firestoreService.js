@@ -196,6 +196,24 @@ export const FirestoreReviewService = {
     }
   },
 
+  // 후기 게시 방식 설정 조회 ('direct' | 'user_input', 기본값: 'direct')
+  getReviewPostingMode() {
+    return localStorage.getItem("seobu_review_posting_mode") || "direct";
+  },
+
+  // 후기 게시 방식 설정 저장
+  async saveReviewPostingMode(mode) {
+    localStorage.setItem("seobu_review_posting_mode", mode);
+    window.dispatchEvent(new CustomEvent("review-posting-mode-changed", { detail: { mode } }));
+    if (!db) return;
+    try {
+      const settingDoc = doc(db, "settings", "review_config");
+      await setDoc(settingDoc, { postingMode: mode, updatedAt: new Date().toISOString() }, { merge: true });
+    } catch (e) {
+      console.warn("Firestore 후기 게시 방식 저장 오류:", e);
+    }
+  },
+
   // 후기 작성 방식 설정 조회
   getReviewAuthMode() {
     return localStorage.getItem("seobu_review_auth_mode") || "login_required"; // 'login_required' | 'anonymous_allowed'
@@ -214,17 +232,22 @@ export const FirestoreReviewService = {
     }
   },
 
-  // 후기 작성 방식 설정 실시간 구독
-  subscribeReviewAuthMode(callback) {
+  // 후기 설정 (게시 방식 및 작성 방식) 실시간 구독
+  subscribeReviewConfig(callback) {
     if (!db) return () => {};
     try {
       const settingDoc = doc(db, "settings", "review_config");
       const unsubscribe = onSnapshot(settingDoc, (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
-          if (data && data.authMode) {
-            localStorage.setItem("seobu_review_auth_mode", data.authMode);
-            if (callback) callback(data.authMode);
+          if (data) {
+            if (data.postingMode) {
+              localStorage.setItem("seobu_review_posting_mode", data.postingMode);
+            }
+            if (data.authMode) {
+              localStorage.setItem("seobu_review_auth_mode", data.authMode);
+            }
+            if (callback) callback(data);
           }
         }
       }, (err) => {
@@ -234,5 +257,14 @@ export const FirestoreReviewService = {
     } catch (e) {
       return () => {};
     }
+  },
+
+  // 하위 호환성 유지용
+  subscribeReviewAuthMode(callback) {
+    return this.subscribeReviewConfig((config) => {
+      if (callback && config && config.authMode) {
+        callback(config.authMode);
+      }
+    });
   }
 };

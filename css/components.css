@@ -756,6 +756,15 @@
   margin: 0 auto;
 }
 
+.admin-review-mode-panel {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.admin-review-mode-panel label:hover {
+  border-color: #0e3753 !important;
+  box-shadow: 0 2px 6px rgba(14, 55, 83, 0.08);
+}
+
 .review-layout {
   display: grid;
   grid-template-columns: 260px 1fr;
