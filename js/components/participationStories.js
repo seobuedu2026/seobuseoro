@@ -41,11 +41,11 @@ export function renderParticipationStories() {
   return `
     <section class="stories-section">
       <div class="stories-head">
-        <p class="stories-eyebrow">함께 배우고 · 서로 나누고</p>
-        <h2 class="stories-title">수다박스 참여 이야기</h2>
-        <p class="stories-desc">
-          만남에서 얻은 배움, 현장에서 바라는 지원. 협의회와 연수에 함께한 선생님들의 이야기를 전합니다.
-        </p>
+        <div class="stories-head-row">
+          <span class="stories-eyebrow">함께 배우고 · 서로 나누고</span>
+          <h2 class="stories-title">수다박스 참여 이야기</h2>
+          <p class="stories-desc">만남에서 얻은 배움, 현장에서 바라는 지원. 협의회와 연수에 함께한 선생님들의 이야기를 전합니다.</p>
+        </div>
       </div>
 
       <div class="stories-grid">
