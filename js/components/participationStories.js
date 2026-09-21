@@ -70,7 +70,7 @@ export function renderParticipationStories() {
             ${story.highlight ? `
               <div class="story-highlight">
                 <p class="story-highlight-label">참여 이야기 한눈에</p>
-                <p class="story-highlight-text">${multiline(story.highlight)}</p>
+                <p class="story-highlight-text">${escapeHtml(story.highlight.replace(/\n+/g, " ").trim())}</p>
               </div>
             ` : ''}
 

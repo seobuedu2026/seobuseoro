@@ -326,7 +326,7 @@ export function openAdminHwpxModal(onUpdated) {
         ${story.highlight ? `
           <div class="story-highlight" style="padding: 12px 16px; background: #f0fdf4; border-top: 1px solid #dcfce7; border-bottom: 1px solid #dcfce7;">
             <p class="story-highlight-label" style="font-size: 11.5px; font-weight: 800; color: #15803d; margin: 0 0 2px 0;">참여 이야기 한눈에</p>
-            <p class="story-highlight-text" style="font-size: 13.5px; font-weight: 800; color: #0e3753; margin: 0; line-height: 1.4;">${multiline(story.highlight)}</p>
+            <p class="story-highlight-text" style="font-size: 13.5px; font-weight: 800; color: #0e3753; margin: 0; line-height: 1.4;">${escapeHtml(story.highlight.replace(/\n+/g, " ").trim())}</p>
           </div>
         ` : ''}
 
@@ -410,7 +410,7 @@ export function openAdminHwpxModal(onUpdated) {
       currentParsedStory.subtitle = (mount.querySelector("#edit-story-subtitle")?.value || "").replace(/\n/g, " ").trim();
       currentParsedStory.meta = mount.querySelector("#edit-story-meta")?.value.trim() || "";
       currentParsedStory.description = mount.querySelector("#edit-story-desc")?.value.trim() || "";
-      currentParsedStory.highlight = mount.querySelector("#edit-story-highlight")?.value.trim() || "";
+      currentParsedStory.highlight = (mount.querySelector("#edit-story-highlight")?.value || "").replace(/\n/g, " ").trim();
       
       const likedRaw = mount.querySelector("#edit-story-liked")?.value || "";
       currentParsedStory.liked = likedRaw.split("\n").map(s => s.trim()).filter(Boolean);

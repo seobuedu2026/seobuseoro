@@ -17,7 +17,7 @@ export const DEFAULT_STORIES = [
     subtitle: "함께 나누며 찾은 연구·교육과정 업무의 해법",
     meta: "카페 느티 · 연구(교육과정)부장 29명",
     description: "학교자율시간, 학교평가 등 공통의 업무 고민을 나누고, 학교별 운영 사례와 업무 효율을 높이는 노하우를 공유했습니다.",
-    highlight: "편안한 만남 속에서\n동료와 나누는 업무의 지혜",
+    highlight: "편안한 만남 속에서 동료와 나누는 업무의 지혜",
     liked: [
       "편안한 카페에서 소규모로 이야기를 나눌 수 있었습니다.",
       "현재 운영 방식을 유지하면서 동료들과 소통할 기회를 더 늘려 달라는 의견이 있었습니다."
@@ -39,7 +39,7 @@ export const DEFAULT_STORIES = [
     subtitle: "사례로 배우고, 질문으로 풀어본 학적업무",
     meta: "녹번초 시청각실 · 교무부장 및 희망 교원 19명",
     description: "실제 사례로 학적업무 처리 방법을 살펴보고, 사전 설문으로 모은 질문을 함께 풀며 업무에 필요한 이해를 넓혔습니다.",
-    highlight: "실제 사례로 배우고\n궁금했던 업무를 함께 풀다",
+    highlight: "실제 사례로 배우고 궁금했던 업무를 함께 풀다",
     liked: [
       "실제 사례를 중심으로 배우는 구성과 대면 연수 방식에 긍정적인 의견이 있었습니다.",
       "대면·비대면 연수를 번갈아 운영하며 서로 다른 내용을 다루는 방식에 만족했습니다.",
@@ -79,7 +79,8 @@ function normalizeStoryCategory(story) {
     ...story,
     badge,
     badgeClass,
-    title: story.title ? story.title.replace(/\n/g, " ") : ""
+    title: story.title ? story.title.replace(/\n/g, " ").trim() : "",
+    highlight: story.highlight ? story.highlight.replace(/\n/g, " ").trim() : ""
   };
 }
 
