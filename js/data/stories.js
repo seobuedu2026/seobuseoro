@@ -13,7 +13,7 @@ export const DEFAULT_STORIES = [
     month: 9,
     day: 9,
     kicker: "2026학년도 2학기 수다박스",
-    title: "연구(교육과정)부장\n협의회",
+    title: "연구(교육과정)부장 협의회",
     subtitle: "함께 나누며 찾은 연구·교육과정 업무의 해법",
     meta: "카페 느티 · 연구(교육과정)부장 29명",
     description: "학교자율시간, 학교평가 등 공통의 업무 고민을 나누고, 학교별 운영 사례와 업무 효율을 높이는 노하우를 공유했습니다.",
@@ -35,7 +35,7 @@ export const DEFAULT_STORIES = [
     month: 9,
     day: 10,
     kicker: "2026학년도 2학기 수다박스",
-    title: "사례로 풀어보는\n학적업무 첫걸음",
+    title: "사례로 풀어보는 학적업무 첫걸음",
     subtitle: "사례로 배우고, 질문으로 풀어본 학적업무",
     meta: "녹번초 시청각실 · 교무부장 및 희망 교원 19명",
     description: "실제 사례로 학적업무 처리 방법을 살펴보고, 사전 설문으로 모은 질문을 함께 풀며 업무에 필요한 이해를 넓혔습니다.",
@@ -58,7 +58,12 @@ export function getStories() {
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed)) return parsed;
+      if (Array.isArray(parsed)) {
+        return parsed.map(s => ({
+          ...s,
+          title: s.title ? s.title.replace(/\n/g, " ") : ""
+        }));
+      }
     } catch (e) {
       console.warn("참여 이야기 데이터를 읽지 못했습니다:", e);
     }

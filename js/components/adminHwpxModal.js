@@ -439,7 +439,7 @@ export function openAdminHwpxModal(onUpdated) {
 
           ${story.kicker ? `<p class="story-kicker">${escapeHtml(story.kicker)}</p>` : ''}
 
-          <h3 class="story-title" style="font-size: 18px; margin: 4px 0 6px 0;">${multiline(story.title)}</h3>
+          <h3 class="story-title" style="font-size: 18px; margin: 4px 0 6px 0;">${escapeHtml(story.title?.replace(/\n/g, " "))}</h3>
           ${story.subtitle ? `<p class="story-subtitle" style="font-size: 13px; font-weight: 700; color: #15803d; margin: 0 0 4px 0;">${escapeHtml(story.subtitle)}</p>` : ''}
           ${story.meta ? `<p class="story-meta" style="font-size: 12px; color: #64748b; margin: 0 0 10px 0;">${escapeHtml(story.meta)}</p>` : ''}
           ${story.description ? `<p class="story-desc" style="font-size: 13px; color: #334155; line-height: 1.5;">${escapeHtml(story.description)}</p>` : ''}

@@ -61,7 +61,7 @@ export function renderParticipationStories() {
 
               ${story.kicker ? `<p class="story-kicker">${escapeHtml(story.kicker)}</p>` : ''}
 
-              <h3 class="story-title">${multiline(story.title)}</h3>
+              <h3 class="story-title">${escapeHtml(story.title?.replace(/\n/g, " "))}</h3>
               ${story.subtitle ? `<p class="story-subtitle">${escapeHtml(story.subtitle)}</p>` : ''}
               ${story.meta ? `<p class="story-meta">${escapeHtml(story.meta)}</p>` : ''}
               ${story.description ? `<p class="story-desc">${escapeHtml(story.description)}</p>` : ''}
