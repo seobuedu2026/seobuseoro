@@ -53,8 +53,8 @@ export function renderParticipationStories() {
           <article class="story-card" data-story-id="${escapeHtml(story.id)}">
             <div class="story-card-body">
               <div class="story-card-top">
-                <span class="prog-category-badge ${escapeHtml(story.badgeClass || 'cat-mentoring')}">
-                  ${escapeHtml(story.badge || '참여 이야기')}
+                <span class="prog-category-badge ${escapeHtml(story.badgeClass || 'cat-sudabox')}">
+                  ${escapeHtml(story.badge || '수다박스')}
                 </span>
                 <span class="story-date">${formatDate(story)}</span>
               </div>

@@ -139,16 +139,25 @@ function parseHwpxXmlToStory(xmlText, fileName = "") {
     title = cleanFileName || paragraphs[0] || "서부 교육 참여 이야기";
   }
 
-  // 3. 구분 (badge)
-  let badge = "협의회";
-  let badgeClass = "cat-mentoring";
-  if (/연수|역량|직무|직무연수/.test(title + " " + rawFullText)) {
+  // 3. 구분 (badge - 캘린더 범례와 통일)
+  let badge = "수다박스";
+  let badgeClass = "cat-sudabox";
+  if (/연수|역량|직무|직무연수|워크숍/.test(title + " " + rawFullText)) {
     badge = "연수·워크숍";
     badgeClass = "cat-workshop";
-  } else if (/나눔|수업나눔|사례나눔/.test(title + " " + rawFullText)) {
-    badge = "수업나눔";
+  } else if (/나눔|수업나눔|사례나눔|콘서트/.test(title + " " + rawFullText)) {
+    badge = "수업나눔 교육콘서트";
     badgeClass = "cat-sharing";
-  } else if (/수다박스/.test(title + " " + rawFullText)) {
+  } else if (/특강/.test(title + " " + rawFullText)) {
+    badge = "특강";
+    badgeClass = "cat-lecture";
+  } else if (/멘토링/.test(title + " " + rawFullText)) {
+    badge = "멘토링";
+    badgeClass = "cat-mentoring";
+  } else if (/한마당|성과공유|보고회/.test(title + " " + rawFullText)) {
+    badge = "성과공유·보고·한마당";
+    badgeClass = "cat-festival";
+  } else if (/수다박스|협의회/.test(title + " " + rawFullText)) {
     badge = "수다박스";
     badgeClass = "cat-sudabox";
   }

@@ -7,8 +7,8 @@ export const STORIES_STORAGE_KEY = "seobu_participation_stories_v1";
 export const DEFAULT_STORIES = [
   {
     id: "story-2026-0909",
-    badge: "협의회",
-    badgeClass: "cat-mentoring",
+    badge: "수다박스",
+    badgeClass: "cat-sudabox",
     year: 2026,
     month: 9,
     day: 9,
@@ -29,8 +29,8 @@ export const DEFAULT_STORIES = [
   },
   {
     id: "story-2026-0910",
-    badge: "업무 역량 강화 연수",
-    badgeClass: "cat-mentoring",
+    badge: "연수·워크숍",
+    badgeClass: "cat-workshop",
     year: 2026,
     month: 9,
     day: 10,
@@ -52,6 +52,37 @@ export const DEFAULT_STORIES = [
   }
 ];
 
+// 카테고리 라벨 및 클래스 캘린더와 통일 매핑 헬퍼
+function normalizeStoryCategory(story) {
+  let badge = story.badge || "수다박스";
+  let badgeClass = story.badgeClass;
+
+  if (badge === "협의회") {
+    badge = "수다박스";
+    badgeClass = "cat-sudabox";
+  } else if (badge === "업무 역량 강화 연수" || badge === "연수") {
+    badge = "연수·워크숍";
+    badgeClass = "cat-workshop";
+  }
+
+  if (!badgeClass) {
+    if (badge.includes("수다박스")) badgeClass = "cat-sudabox";
+    else if (badge.includes("연수") || badge.includes("워크숍")) badgeClass = "cat-workshop";
+    else if (badge.includes("특강")) badgeClass = "cat-lecture";
+    else if (badge.includes("나눔") || badge.includes("콘서트")) badgeClass = "cat-sharing";
+    else if (badge.includes("멘토링")) badgeClass = "cat-mentoring";
+    else if (badge.includes("한마당") || badge.includes("공유")) badgeClass = "cat-festival";
+    else badgeClass = "cat-sudabox";
+  }
+
+  return {
+    ...story,
+    badge,
+    badgeClass,
+    title: story.title ? story.title.replace(/\n/g, " ") : ""
+  };
+}
+
 // 현재 참여 이야기 목록 조회
 export function getStories() {
   const saved = localStorage.getItem(STORIES_STORAGE_KEY);
@@ -59,16 +90,13 @@ export function getStories() {
     try {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed)) {
-        return parsed.map(s => ({
-          ...s,
-          title: s.title ? s.title.replace(/\n/g, " ") : ""
-        }));
+        return parsed.map(normalizeStoryCategory);
       }
     } catch (e) {
       console.warn("참여 이야기 데이터를 읽지 못했습니다:", e);
     }
   }
-  return DEFAULT_STORIES;
+  return DEFAULT_STORIES.map(normalizeStoryCategory);
 }
 
 // 참여 이야기 목록 저장 (클라우드 동기화 포함)
