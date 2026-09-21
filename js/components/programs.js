@@ -213,7 +213,7 @@ export function renderPrograms(container, onSelectEventModal) {
         </div>
       ` : ''}
 
-      <!-- 검색 및 필터 바 -->
+      <!-- 검색, 필터, 정렬, 보기 개수 통합 한 줄 바 -->
       <div class="prog-search-bar">
         <div class="prog-search-field">
           <span class="prog-search-icon" aria-hidden="true">🔍</span>
@@ -224,28 +224,19 @@ export function renderPrograms(container, onSelectEventModal) {
                   aria-label="검색어 지우기" ${searchQuery ? "" : "hidden"}>✕</button>
         </div>
 
-        <div class="prog-filter-selects">
-          <select id="prog-month-select" class="m3-select" aria-label="월 선택">
-            <option value="all" ${selectedMonth === "all" ? "selected" : ""}>전체 기간</option>
-            ${activeMonths.map(m => `
-              <option value="${m}" ${selectedMonth === String(m) ? "selected" : ""}>${m}월</option>
-            `).join("")}
-          </select>
+        <select id="prog-month-select" class="m3-select prog-filter-select" aria-label="월 선택">
+          <option value="all" ${selectedMonth === "all" ? "selected" : ""}>전체 기간</option>
+          ${activeMonths.map(m => `
+            <option value="${m}" ${selectedMonth === String(m) ? "selected" : ""}>${m}월</option>
+          `).join("")}
+        </select>
 
-          <select id="prog-cat-select" class="m3-select" aria-label="유형 선택">
-            <option value="all" ${selectedCategory === "all" ? "selected" : ""}>전체 유형</option>
-            ${categories.map(cat => `
-              <option value="${cat.key}" ${selectedCategory === cat.key ? "selected" : ""}>${escapeHtml(cat.label)}</option>
-            `).join("")}
-          </select>
-        </div>
-      </div>
-
-      <!-- 결과 요약 및 보기 설정 -->
-      <div class="prog-result-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <div class="prog-result-left">
-          <button type="button" class="prog-reset-btn" id="btn-reset-filters" hidden>조건 초기화</button>
-        </div>
+        <select id="prog-cat-select" class="m3-select prog-filter-select" aria-label="유형 선택">
+          <option value="all" ${selectedCategory === "all" ? "selected" : ""}>전체 유형</option>
+          ${categories.map(cat => `
+            <option value="${cat.key}" ${selectedCategory === cat.key ? "selected" : ""}>${escapeHtml(cat.label)}</option>
+          `).join("")}
+        </select>
 
         <div class="prog-view-controls">
           <label class="prog-view-label" for="prog-sort-select">정렬</label>
@@ -262,6 +253,8 @@ export function renderPrograms(container, onSelectEventModal) {
                       title="한 줄에 ${n}개씩 보기">${n}</button>
             `).join("")}
           </div>
+
+          <button type="button" class="prog-reset-btn" id="btn-reset-filters" hidden>조건 초기화</button>
         </div>
       </div>
 
