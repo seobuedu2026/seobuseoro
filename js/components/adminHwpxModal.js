@@ -68,39 +68,84 @@ async function parseHwpxFile(file) {
 }
 
 /**
- * XML 텍스트에서 참여 이야기(Story) 데이터 스마트 파싱
+ * XML 문서에서 모든 문단(<hp:p>, <p>) 및 텍스트(<hp:t>, <t>)를 순서대로 정확하게 추출
  */
-function parseHwpxXmlToStory(xmlText, fileName = "") {
-  const parser = new DOMParser();
-  const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-
+function extractParagraphsFromXml(xmlDoc) {
   const paragraphs = [];
-  const pNodes = xmlDoc.getElementsByTagName("hp:p");
   
-  if (pNodes.length > 0) {
-    for (let i = 0; i < pNodes.length; i++) {
-      const p = pNodes[i];
-      const tNodes = p.getElementsByTagName("hp:t");
-      let pText = "";
-      for (let j = 0; j < tNodes.length; j++) {
-        pText += tNodes[j].textContent || "";
+  // 1. 단락 요소(<hp:p>, <p>) 탐색
+  let pNodes = [];
+  try {
+    pNodes = Array.from(xmlDoc.querySelectorAll("p, hp\\:p"));
+  } catch (e) {
+    pNodes = Array.from(xmlDoc.getElementsByTagName("hp:p"));
+  }
+  
+  if (!pNodes || pNodes.length === 0) {
+    if (xmlDoc.getElementsByTagNameNS) {
+      pNodes = Array.from(xmlDoc.getElementsByTagNameNS("*", "p"));
+    }
+  }
+
+  if (pNodes && pNodes.length > 0) {
+    for (const p of pNodes) {
+      let tNodes = [];
+      try {
+        tNodes = Array.from(p.querySelectorAll("t, hp\\:t"));
+      } catch (e) {
+        tNodes = Array.from(p.getElementsByTagName("hp:t"));
       }
+      if (!tNodes || tNodes.length === 0) {
+        if (p.getElementsByTagNameNS) {
+          tNodes = Array.from(p.getElementsByTagNameNS("*", "t"));
+        }
+      }
+
+      let pText = "";
+      if (tNodes && tNodes.length > 0) {
+        pText = tNodes.map(t => t.textContent || "").join("");
+      } else {
+        pText = p.textContent || "";
+      }
+
       pText = pText.trim();
       if (pText) {
         paragraphs.push(pText);
       }
     }
-  } else {
-    const allTextNodes = xmlDoc.querySelectorAll("t, hp\\:t, text");
-    allTextNodes.forEach(node => {
-      const txt = (node.textContent || "").trim();
-      if (txt) paragraphs.push(txt);
-    });
   }
 
+  // 2. 만약 pNode에서 추출되지 않았다면 모든 텍스트 노드 직접 추출
+  if (paragraphs.length === 0) {
+    let tNodes = [];
+    try {
+      tNodes = Array.from(xmlDoc.querySelectorAll("t, hp\\:t"));
+    } catch (e) {
+      tNodes = Array.from(xmlDoc.getElementsByTagName("hp:t"));
+    }
+    if (tNodes && tNodes.length > 0) {
+      for (const t of tNodes) {
+        const txt = (t.textContent || "").trim();
+        if (txt) paragraphs.push(txt);
+      }
+    }
+  }
+
+  return paragraphs;
+}
+
+/**
+ * XML 텍스트에서 한글 HWPX 문서의 원문 내용을 그대로 추출하여 Story 객체 구성
+ * (임의의 가짜 문장 생성 없이 실제 문서 내용 100% 보존)
+ */
+function parseHwpxXmlToStory(xmlText, fileName = "") {
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+
+  const paragraphs = extractParagraphsFromXml(xmlDoc);
   const rawFullText = paragraphs.join("\n");
 
-  // 1. 날짜 추출
+  // 1. 날짜 추출 (문서 내 실제 날짜)
   let year = 2026;
   let month = 9;
   let day = 1;
@@ -120,11 +165,11 @@ function parseHwpxXmlToStory(xmlText, fileName = "") {
 
   // 2. 제목 추출
   let title = "";
-  const titleKeywords = ["행사명", "연수명", "협의회명", "프로그램명", "주제", "제목"];
+  const titleKeywords = ["행사명", "연수명", "협의회명", "프로그램명", "주제", "제목", "과정명"];
   for (const p of paragraphs) {
     for (const kw of titleKeywords) {
-      if (p.includes(kw) && (p.includes(":") || p.includes("]"))) {
-        const parts = p.split(/[:\]]/);
+      if (p.includes(kw) && (p.includes(":") || p.includes("]") || p.includes("="))) {
+        const parts = p.split(/[:\]=]/);
         if (parts.length > 1 && parts[1].trim()) {
           title = parts.slice(1).join(":").trim().replace(/\n/g, " ");
           break;
@@ -142,22 +187,23 @@ function parseHwpxXmlToStory(xmlText, fileName = "") {
   // 3. 구분 (badge - 캘린더 범례와 통일)
   let badge = "수다박스";
   let badgeClass = "cat-sudabox";
-  if (/연수|역량|직무|직무연수|워크숍/.test(title + " " + rawFullText)) {
+  const searchCorpus = (title + " " + rawFullText);
+  if (/연수|역량|직무|직무연수|워크숍/.test(searchCorpus)) {
     badge = "연수·워크숍";
     badgeClass = "cat-workshop";
-  } else if (/나눔|수업나눔|사례나눔|콘서트/.test(title + " " + rawFullText)) {
+  } else if (/나눔|수업나눔|사례나눔|콘서트/.test(searchCorpus)) {
     badge = "수업나눔 교육콘서트";
     badgeClass = "cat-sharing";
-  } else if (/특강/.test(title + " " + rawFullText)) {
+  } else if (/특강/.test(searchCorpus)) {
     badge = "특강";
     badgeClass = "cat-lecture";
-  } else if (/멘토링/.test(title + " " + rawFullText)) {
+  } else if (/멘토링/.test(searchCorpus)) {
     badge = "멘토링";
     badgeClass = "cat-mentoring";
-  } else if (/한마당|성과공유|보고회/.test(title + " " + rawFullText)) {
+  } else if (/한마당|성과공유|보고회/.test(searchCorpus)) {
     badge = "성과공유·보고·한마당";
     badgeClass = "cat-festival";
-  } else if (/수다박스|협의회/.test(title + " " + rawFullText)) {
+  } else if (/수다박스|협의회/.test(searchCorpus)) {
     badge = "수다박스";
     badgeClass = "cat-sudabox";
   }
@@ -167,53 +213,74 @@ function parseHwpxXmlToStory(xmlText, fileName = "") {
   let targetStr = "";
 
   for (const p of paragraphs) {
-    if (/장소|장 소/.test(p) && p.includes(":")) {
-      locationStr = p.split(":")[1].trim();
+    if (/장소|장 소/.test(p) && (p.includes(":") || p.includes("]"))) {
+      const parts = p.split(/[:\]]/);
+      if (parts[1]) locationStr = parts.slice(1).join(":").trim();
     }
-    if (/대상|인원|참석|참여/.test(p) && p.includes(":")) {
-      targetStr = p.split(":")[1].trim();
+    if (/대상|인원|참석|참여|인 원/.test(p) && (p.includes(":") || p.includes("]"))) {
+      const parts = p.split(/[:\]]/);
+      if (parts[1]) targetStr = parts.slice(1).join(":").trim();
     }
   }
 
-  let meta = [locationStr, targetStr].filter(Boolean).join(" · ") || "서부 관내 학교 · 교원 참여";
+  let meta = [locationStr, targetStr].filter(Boolean).join(" · ");
 
-  // 5. 좋았던 점 (liked) 및 바라는 점 (wanted) 분리 추출
+  // 5. 원문 섹션별 내용 분류 (좋았던 점 / 바라는 점 / 행사 개요 및 내용 / 하이라이트)
   const liked = [];
   const wanted = [];
+  const descParagraphs = [];
+  let highlight = "";
   let currentSection = null;
 
+  const likedHeadingRegex = /(좋았던\s*점|만족|긍정|유익|소감|성과|참여자\s*의견|설문\s*결과|주요\s*의견|나눔\s*내용|우수\s*사례|참여\s*소감)/i;
+  const wantedHeadingRegex = /(바라는\s*점|지원\s*요청|건의|개선|제안|향후\s*과제|희망\s*사항|후속\s*지원|요청\s*사항|바람)/i;
+  const descHeadingRegex = /(개요|목적|추진\s*배경|운영\s*내용|주요\s*내용|진행\s*순서|행사\s*내용|활동\s*내용|내용)/i;
+
   for (const p of paragraphs) {
-    if (/좋았던\s*점|만족|긍정|유익|소감|성과/.test(p)) {
+    // 제목 줄 또는 메타 줄은 본문에서 제외
+    if (p === title || (title && p.includes(title) && p.length < title.length + 15)) continue;
+
+    // 섹션 헤더 검출
+    if (likedHeadingRegex.test(p) && (p.length < 35 || p.includes(":") || /^[ⅠⅡⅢⅣ\d\.\s❍•]/.test(p))) {
       currentSection = "liked";
       continue;
-    } else if (/바라는\s*점|지원|요청|건의|개선|제안|향후/.test(p)) {
+    } else if (wantedHeadingRegex.test(p) && (p.length < 35 || p.includes(":") || /^[ⅠⅡⅢⅣ\d\.\s❍•]/.test(p))) {
       currentSection = "wanted";
       continue;
-    } else if (/개요|목적|내용|운영\s*내용/.test(p)) {
+    } else if (descHeadingRegex.test(p) && (p.length < 35 || p.includes(":") || /^[ⅠⅡⅢⅣ\d\.\s❍•]/.test(p))) {
       currentSection = "desc";
       continue;
     }
 
-    const cleanItem = p.replace(/^[\-•·\*\d\.\)\(\s]{1,4}\s*/, "").trim();
+    const cleanItem = p.replace(/^[\-•·\*\d\.\)\(❍ㆍ□■\s]{1,5}\s*/, "").trim();
+    if (!cleanItem || cleanItem.length < 2) continue;
 
-    if (currentSection === "liked" && cleanItem.length > 5) {
+    if (currentSection === "liked") {
       if (!liked.includes(cleanItem)) liked.push(cleanItem);
-    } else if (currentSection === "wanted" && cleanItem.length > 5) {
+    } else if (currentSection === "wanted") {
       if (!wanted.includes(cleanItem)) wanted.push(cleanItem);
+    } else if (currentSection === "desc") {
+      if (!descParagraphs.includes(cleanItem)) descParagraphs.push(cleanItem);
+    } else {
+      // 일반 본문 문단 수집
+      if (!descParagraphs.includes(cleanItem) && !p.includes("일시") && !p.includes("장소") && !p.includes("대상")) {
+        descParagraphs.push(cleanItem);
+      }
     }
   }
 
-  if (liked.length === 0) {
-    liked.push("실무와 현장에 바로 도움이 되는 내용으로 구성되어 유익했습니다.");
-    liked.push("동료 선생님들과 업무 고민을 함께 나누는 소통의 시간이 되었습니다.");
-  }
-  if (wanted.length === 0) {
-    wanted.push("선생님들의 지속적인 성장을 위한 후속 연수 및 교류 기회 확대");
+  // 행사 설명: 문서 내의 실제 개요 및 본문 문단 사용
+  let description = descParagraphs.slice(0, 3).join(" ").trim();
+  if (!description && paragraphs.length > 1) {
+    description = paragraphs.slice(1, 3).join(" ").trim();
   }
 
-  const subtitle = title.includes("부장") ? "함께 나누며 찾은 교육활동의 해법" : "현장의 생생한 이야기와 수업 성장 나눔";
-  const description = `${title}에 함께 참여하여 학교별 운영 사례와 현장의 지혜를 나누고, 교실 수업과 업무에 필요한 노하우를 공유했습니다.`;
-  const highlight = "편안한 만남 속에서\n동료와 나누는 배움의 지혜";
+  // 하이라이트(한눈에): 문서에 소감이나 강조 문구가 있으면 첫 문장 활용, 없으면 비워둠
+  if (liked.length > 0) {
+    highlight = liked[0];
+  } else if (descParagraphs.length > 0) {
+    highlight = descParagraphs[0];
+  }
 
   return {
     id: `story-${year}-${String(month).padStart(2, "0")}${String(day).padStart(2, "0")}-${Date.now().toString().slice(-4)}`,
@@ -224,17 +291,18 @@ function parseHwpxXmlToStory(xmlText, fileName = "") {
     day,
     kicker: `${year}학년도 2학기 수다박스`,
     title: title.replace(/\n/g, " "),
-    subtitle,
+    subtitle: "",
     meta,
     description,
     highlight,
     liked,
-    wanted
+    wanted,
+    rawFullText
   };
 }
 
 /**
- * 캘린더/프로그램 행사 객체(Event)로부터 참여 이야기 카드 기본 데이터 생성
+ * 캘린더/프로그램 행사 객체(Event)로부터 참여 이야기 카드 기본 구조 생성 (가짜 문장 없음)
  */
 function createStoryFromEvent(ev) {
   if (!ev) return null;
@@ -245,16 +313,16 @@ function createStoryFromEvent(ev) {
 
   // 제목 구성
   const title = ev.title ? ev.title.replace(/\n/g, " ").trim() : "서부 교육 프로그램";
-  const subtitle = ev.subtitle ? ev.subtitle.replace(/\n/g, " ").trim() : "함께 나누며 찾은 교육활동의 해법";
+  const subtitle = ev.subtitle ? ev.subtitle.replace(/\n/g, " ").trim() : "";
   
   // 장소 및 대상
   const location = ev.location ? ev.location.trim() : "";
   const target = ev.target ? ev.target.trim() : "";
-  const meta = [location, target].filter(Boolean).join(" · ") || "서부 관내 학교 · 교원 참여";
+  const meta = [location, target].filter(Boolean).join(" · ");
 
   // 구분/뱃지 (프로그램/캘린더의 구분을 그대로 적용)
-  const badge = ev.categoryLabel || "협의회";
-  const badgeClass = ev.categoryClass || "cat-mentoring";
+  const badge = ev.categoryLabel || "수다박스";
+  const badgeClass = ev.categoryClass || "cat-sudabox";
 
   return {
     id: `story-${year}-${String(month).padStart(2, "0")}${String(day).padStart(2, "0")}-${Date.now().toString().slice(-4)}`,
@@ -268,15 +336,11 @@ function createStoryFromEvent(ev) {
     title: title,
     subtitle: subtitle,
     meta: meta,
-    description: ev.description || `${title}에 함께 참여하여 학교별 운영 사례와 현장의 지혜를 나누고, 교실 수업과 업무에 필요한 노하우를 공유했습니다.`,
-    highlight: "편안한 만남 속에서\n동료와 나누는 배움의 지혜",
-    liked: [
-      "실무와 현장에 바로 도움이 되는 내용으로 구성되어 유익했습니다.",
-      "동료 선생님들과 업무 고민을 함께 나누는 소통의 시간이 되었습니다."
-    ],
-    wanted: [
-      "선생님들의 지속적인 성장을 위한 후속 연수 및 교류 기회 확대"
-    ]
+    description: ev.description || "",
+    highlight: "",
+    liked: [],
+    wanted: [],
+    rawFullText: ""
   };
 }
 
@@ -306,7 +370,7 @@ export function openAdminHwpxModal(onUpdated) {
 
     mount.innerHTML = `
       <div class="m3-modal-backdrop open" id="admin-hwpx-backdrop">
-        <div class="m3-modal-dialog" style="max-width: 890px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
+        <div class="m3-modal-dialog" style="max-width: 920px; width: 95%; max-height: 92vh; display: flex; flex-direction: column;">
           
           <!-- 모달 헤더 -->
           <div class="modal-header" style="padding-bottom: 12px; border-bottom: 1.5px solid #e2e8f0; flex-shrink: 0;">
@@ -314,15 +378,15 @@ export function openAdminHwpxModal(onUpdated) {
               <span style="background: #0e3753; color: #fff; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 9999px;">
                 ADMIN ONLY
               </span>
-              <h2 style="font-size: 19px; font-weight: 900; color: #0e3753; margin: 0;">
-                📄 HWPX 참여 이야기 등록 및 관리 (행사 연동)
+              <h2 style="font-size: 18.5px; font-weight: 900; color: #0e3753; margin: 0;">
+                📄 HWPX 참여 이야기 등록 및 관리 (원문 내용 100% 반영)
               </h2>
             </div>
             <button class="modal-close-btn" id="btn-close-hwpx-modal" aria-label="닫기">✕</button>
           </div>
 
           <!-- 모달 본문 (스크롤 영역) -->
-          <div style="overflow-y: auto; padding: 16px 2px; flex: 1;">
+          <div style="overflow-y: auto; padding: 16px 4px; flex: 1;">
             
             <!-- 1단계: 행사 선택 (프로그램/캘린더의 행사 정보 및 구분 자동 연동) -->
             <div style="background: #f8fafc; border: 1.5px solid #0e3753; border-radius: 12px; padding: 14px 16px; margin-bottom: 16px;">
@@ -331,12 +395,12 @@ export function openAdminHwpxModal(onUpdated) {
                   <span>🎯 1단계: 후기를 등록할 행사 선택 (프로그램·캘린더 연동)</span>
                 </label>
                 <span style="font-size: 12px; color: #0369a1; font-weight: 700;">
-                  ✓ 선택 시 행사명·일시·장소·구분이 자동 입력됩니다.
+                  ✓ 선택 시 캘린더의 행사명·일시·장소·구분이 연동됩니다.
                 </span>
               </div>
 
               <select id="select-event-for-hwpx" class="m3-select" style="font-size: 13.5px; font-weight: 700; height: 44px; border-color: #0e3753;">
-                <option value="">-- 프로그램을 선택하거나 아래에서 직접 HWPX 파일을 올리세요 --</option>
+                <option value="">-- 캘린더 행사를 선택하거나 아래에서 HWPX 파일을 바로 올리세요 --</option>
                 ${allEvents.map(ev => `
                   <option value="${ev.id}" ${selectedEventId === ev.id ? 'selected' : ''}>
                     [${ev.month}월 ${ev.day}일] [${ev.categoryLabel}] ${ev.title} ${ev.subtitle ? `(${ev.subtitle})` : ''} - ${ev.location || ''}
@@ -345,11 +409,15 @@ export function openAdminHwpxModal(onUpdated) {
               </select>
             </div>
 
-            <!-- 2단계: HWPX 파일 업로드 (소감, 바라는 점 등 자동 파싱) -->
+            <!-- 2단계: HWPX 파일 업로드 (문서 내용 그대로 원문 추출) -->
             <div style="margin-bottom: 18px;">
-              <div style="font-size: 14px; font-weight: 900; color: #0e3753; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                <span>📄 2단계: 한글 후기 요약 문서(.hwpx) 업로드</span>
-                <span style="font-size: 12px; color: #64748b; font-weight: 600;">(소감 및 건의사항 자동 분석)</span>
+              <div style="font-size: 14px; font-weight: 900; color: #0e3753; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+                <span style="display: flex; align-items: center; gap: 6px;">
+                  <span>📄 2단계: 한글 후기 문서(.hwpx) 업로드</span>
+                </span>
+                <span style="font-size: 12px; color: #15803d; font-weight: 700;">
+                  ✓ 문서 내 텍스트와 소감/건의사항을 임의 변경 없이 원문 그대로 가져옵니다.
+                </span>
               </div>
 
               <div class="excel-drop-zone" id="hwpx-drop-zone" style="border: 2px dashed #0284c7; background: #f0f9ff; padding: 22px 14px;">
@@ -359,23 +427,38 @@ export function openAdminHwpxModal(onUpdated) {
                   클릭하여 .hwpx 파일 선택 또는 여기로 드래그 앤 드롭
                 </div>
                 <div style="font-size: 12px; color: #64748b;">
-                  지원 형식: 한글 표준 XML 문서 (<strong>.hwpx</strong>) · 기존 .hwp는 '다른 이름으로 저장' 후 업로드
+                  지원 형식: 한글 표준 XML 문서 (<strong>.hwpx</strong>) · 기존 .hwp는 한글에서 '다른 이름으로 저장' 후 업로드
                 </div>
               </div>
             </div>
 
-            <!-- 3단계: 파싱 및 연동된 데이터 편집 & 실시간 카드 미리보기 -->
+            <!-- 3단계: 파싱된 데이터 확인 및 편집 & 실시간 카드 미리보기 -->
             <div id="hwpx-edit-section" style="${currentParsedStory ? 'display: block;' : 'display: none;'} margin-bottom: 24px;">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 6px;">
                 <h3 style="font-size: 15.5px; font-weight: 900; color: #0e3753; margin: 0;">
-                  ✨ 3단계: 참여 이야기 내용 확인 및 수정
+                  ✨ 3단계: 추출된 내용 확인 및 최종 게시
                 </h3>
                 <span style="font-size: 12px; font-weight: 700; color: #16a34a; background: #dcfce7; padding: 3px 8px; border-radius: 6px;">
-                  ✓ 정보 연동 및 분석 완료
+                  ✓ 원문 추출 완료 (아래에서 수정 및 검토 가능)
                 </span>
               </div>
 
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start;">
+              <!-- 원문 전체 내용 보기 박스 -->
+              ${currentParsedStory?.rawFullText ? `
+                <div style="margin-bottom: 14px; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 12px 14px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-size: 13px; font-weight: 800; color: #0e3753;">
+                      📋 HWPX 문서에서 추출된 원문 전체 내용 (${(currentParsedStory.rawFullText || '').length}자)
+                    </span>
+                    <button type="button" id="btn-copy-raw-hwpx" class="btn-admin-action" style="font-size: 11.5px; padding: 3px 8px; font-weight: 700;">
+                      📋 원문 복사
+                    </button>
+                  </div>
+                  <textarea id="hwpx-raw-fulltext" readonly rows="4" style="width: 100%; font-size: 12px; line-height: 1.45; font-family: inherit; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; color: #334155; resize: vertical;">${escapeHtml(currentParsedStory.rawFullText)}</textarea>
+                </div>
+              ` : ''}
+
+              <div style="display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 18px; align-items: start;">
                 
                 <!-- 좌측: 입력/수정 폼 -->
                 <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
@@ -383,7 +466,7 @@ export function openAdminHwpxModal(onUpdated) {
                   <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px;">
                     <div>
                       <label style="font-size: 12.5px; font-weight: 800; color: #0e3753; display: block; margin-bottom: 4px;">구분(뱃지)</label>
-                      <input type="text" id="edit-story-badge" class="m3-input" style="height: 38px; font-size: 13px;" value="${escapeHtml(currentParsedStory?.badge || '협의회')}" />
+                      <input type="text" id="edit-story-badge" class="m3-input" style="height: 38px; font-size: 13px;" value="${escapeHtml(currentParsedStory?.badge || '수다박스')}" />
                     </div>
                     <div>
                       <label style="font-size: 12.5px; font-weight: 800; color: #0e3753; display: block; margin-bottom: 4px;">행사 일시 (연/월/일)</label>
@@ -407,7 +490,7 @@ export function openAdminHwpxModal(onUpdated) {
 
                   <div>
                     <label style="font-size: 12.5px; font-weight: 800; color: #0e3753; display: block; margin-bottom: 4px;">부제목 / 핵심 슬로건</label>
-                    <input type="text" id="edit-story-subtitle" class="m3-input" style="height: 38px; font-size: 13px;" value="${escapeHtml(currentParsedStory?.subtitle || '')}" />
+                    <input type="text" id="edit-story-subtitle" class="m3-input" style="height: 38px; font-size: 13px;" value="${escapeHtml(currentParsedStory?.subtitle || '')}" placeholder="필요한 경우 입력" />
                   </div>
 
                   <div>
@@ -416,7 +499,7 @@ export function openAdminHwpxModal(onUpdated) {
                   </div>
 
                   <div>
-                    <label style="font-size: 12.5px; font-weight: 800; color: #0e3753; display: block; margin-bottom: 4px;">행사 요약 설명</label>
+                    <label style="font-size: 12.5px; font-weight: 800; color: #0e3753; display: block; margin-bottom: 4px;">행사 요약 / 운영 내용</label>
                     <textarea id="edit-story-desc" class="m3-textarea" rows="2" style="font-size: 13px;">${escapeHtml(currentParsedStory?.description || '')}</textarea>
                   </div>
 
@@ -426,13 +509,13 @@ export function openAdminHwpxModal(onUpdated) {
                   </div>
 
                   <div>
-                    <label style="font-size: 12.5px; font-weight: 800; color: #166534; display: block; margin-bottom: 4px;">💬 이런 점이 좋았어요 (줄바꿈으로 구분)</label>
-                    <textarea id="edit-story-liked" class="m3-textarea" rows="3" style="font-size: 12.5px;">${escapeHtml((currentParsedStory?.liked || []).join("\n"))}</textarea>
+                    <label style="font-size: 12.5px; font-weight: 800; color: #166534; display: block; margin-bottom: 4px;">💬 이런 점이 좋았어요 (줄바꿈으로 항목 구분)</label>
+                    <textarea id="edit-story-liked" class="m3-textarea" rows="4" style="font-size: 12.5px;">${escapeHtml((currentParsedStory?.liked || []).join("\n"))}</textarea>
                   </div>
 
                   <div>
-                    <label style="font-size: 12.5px; font-weight: 800; color: #0284c7; display: block; margin-bottom: 4px;">🌱 이런 지원을 바랐어요 (줄바꿈으로 구분)</label>
-                    <textarea id="edit-story-wanted" class="m3-textarea" rows="3" style="font-size: 12.5px;">${escapeHtml((currentParsedStory?.wanted || []).join("\n"))}</textarea>
+                    <label style="font-size: 12.5px; font-weight: 800; color: #0284c7; display: block; margin-bottom: 4px;">🌱 이런 지원을 바랐어요 (줄바꿈으로 항목 구분)</label>
+                    <textarea id="edit-story-wanted" class="m3-textarea" rows="4" style="font-size: 12.5px;">${escapeHtml((currentParsedStory?.wanted || []).join("\n"))}</textarea>
                   </div>
 
                   <button type="button" id="btn-save-parsed-story" class="btn-m3-filled" style="height: 44px; font-size: 14.5px; font-weight: 800; justify-content: center; background: #15803d; border-radius: 10px; margin-top: 4px;">
@@ -469,8 +552,8 @@ export function openAdminHwpxModal(onUpdated) {
                   <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
                     <div>
                       <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-                        <span class="prog-category-badge ${escapeHtml(st.badgeClass || 'cat-mentoring')}" style="font-size: 11px; padding: 2px 6px;">
-                          ${escapeHtml(st.badge || '참여 이야기')}
+                        <span class="prog-category-badge ${escapeHtml(st.badgeClass || 'cat-sudabox')}" style="font-size: 11px; padding: 2px 6px;">
+                          ${escapeHtml(st.badge || '수다박스')}
                         </span>
                         <span style="font-size: 12px; font-weight: 700; color: #64748b;">${formatDate(st)}</span>
                       </div>
@@ -510,8 +593,8 @@ export function openAdminHwpxModal(onUpdated) {
       <article class="story-card" style="box-shadow: 0 4px 14px rgba(14, 55, 83, 0.08); border-radius: 16px; border: 1.5px solid #cbd5e1; background: #ffffff;">
         <div class="story-card-body" style="padding: 18px 16px;">
           <div class="story-card-top">
-            <span class="prog-category-badge ${escapeHtml(story.badgeClass || 'cat-mentoring')}">
-              ${escapeHtml(story.badge || '참여 이야기')}
+            <span class="prog-category-badge ${escapeHtml(story.badgeClass || 'cat-sudabox')}">
+              ${escapeHtml(story.badge || '수다박스')}
             </span>
             <span class="story-date">${formatDate(story)}</span>
           </div>
@@ -561,6 +644,7 @@ export function openAdminHwpxModal(onUpdated) {
     const dropZone = mount.querySelector("#hwpx-drop-zone");
     const fileInput = mount.querySelector("#hwpx-file-input");
     const selectEvent = mount.querySelector("#select-event-for-hwpx");
+    const btnCopyRaw = mount.querySelector("#btn-copy-raw-hwpx");
 
     const closeModal = () => {
       if (mount) mount.innerHTML = "";
@@ -574,7 +658,22 @@ export function openAdminHwpxModal(onUpdated) {
       });
     }
 
-    // 행사 선택 시 행사 정보(제목, 일시, 장소, 대상, 구분/뱃지 등)를 그대로 가져오기
+    if (btnCopyRaw) {
+      btnCopyRaw.addEventListener("click", () => {
+        const rawEl = mount.querySelector("#hwpx-raw-fulltext");
+        if (rawEl && rawEl.value) {
+          navigator.clipboard.writeText(rawEl.value).then(() => {
+            alert("📋 원문 전체 텍스트가 클립보드에 복사되었습니다.");
+          }).catch(() => {
+            rawEl.select();
+            document.execCommand("copy");
+            alert("📋 원문 전체 텍스트가 복사되었습니다.");
+          });
+        }
+      });
+    }
+
+    // 행사 선택 시 행사 정보(제목, 일시, 장소, 대상, 구분/뱃지 등)를 연동
     if (selectEvent) {
       selectEvent.addEventListener("change", (e) => {
         selectedEventId = e.target.value;
@@ -586,7 +685,7 @@ export function openAdminHwpxModal(onUpdated) {
 
         const baseStory = createStoryFromEvent(ev);
         if (currentParsedStory) {
-          // 이미 HWPX 파일에서 파싱된 소감(liked), 지원(wanted) 등이 있으면 유지하면서 행사 정보만 덮어씀
+          // 이미 HWPX 파일에서 추출된 원문 텍스트(liked, wanted, desc, highlight, rawFullText)는 100% 보존
           currentParsedStory = {
             ...currentParsedStory,
             badge: baseStory.badge,
@@ -595,9 +694,9 @@ export function openAdminHwpxModal(onUpdated) {
             month: baseStory.month,
             day: baseStory.day,
             title: baseStory.title,
-            subtitle: baseStory.subtitle,
-            meta: baseStory.meta,
-            description: baseStory.description
+            subtitle: currentParsedStory.subtitle || baseStory.subtitle,
+            meta: currentParsedStory.meta || baseStory.meta,
+            description: currentParsedStory.description || baseStory.description
           };
         } else {
           currentParsedStory = baseStory;
@@ -655,9 +754,12 @@ export function openAdminHwpxModal(onUpdated) {
             const baseStory = createStoryFromEvent(ev);
             currentParsedStory = {
               ...baseStory,
-              liked: (parsed.liked && parsed.liked.length) ? parsed.liked : baseStory.liked,
-              wanted: (parsed.wanted && parsed.wanted.length) ? parsed.wanted : baseStory.wanted,
-              highlight: parsed.highlight || baseStory.highlight
+              title: baseStory.title || parsed.title,
+              liked: parsed.liked || [],
+              wanted: parsed.wanted || [],
+              highlight: parsed.highlight || "",
+              description: parsed.description || baseStory.description,
+              rawFullText: parsed.rawFullText || ""
             };
           } else {
             currentParsedStory = parsed;
@@ -675,9 +777,11 @@ export function openAdminHwpxModal(onUpdated) {
             const baseStory = createStoryFromEvent(matchedEvent);
             currentParsedStory = {
               ...baseStory,
-              liked: (parsed.liked && parsed.liked.length) ? parsed.liked : baseStory.liked,
-              wanted: (parsed.wanted && parsed.wanted.length) ? parsed.wanted : baseStory.wanted,
-              highlight: parsed.highlight || baseStory.highlight
+              liked: parsed.liked || [],
+              wanted: parsed.wanted || [],
+              highlight: parsed.highlight || "",
+              description: parsed.description || baseStory.description,
+              rawFullText: parsed.rawFullText || ""
             };
           } else {
             currentParsedStory = parsed;
@@ -701,7 +805,7 @@ export function openAdminHwpxModal(onUpdated) {
     function updatePreviewFromInputs() {
       if (!currentParsedStory) return;
 
-      currentParsedStory.badge = mount.querySelector("#edit-story-badge")?.value.trim() || "협의회";
+      currentParsedStory.badge = mount.querySelector("#edit-story-badge")?.value.trim() || "수다박스";
       currentParsedStory.year = parseInt(mount.querySelector("#edit-story-year")?.value, 10) || 2026;
       currentParsedStory.month = parseInt(mount.querySelector("#edit-story-month")?.value, 10) || 9;
       currentParsedStory.day = parseInt(mount.querySelector("#edit-story-day")?.value, 10) || 1;
