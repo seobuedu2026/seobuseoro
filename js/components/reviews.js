@@ -235,7 +235,7 @@ export function renderReviews(container, preselectedEventId = null, page = 1) {
         </div>
         <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
           <button type="button" id="btn-open-hwpx-modal" class="btn-admin-action filled" style="padding: 5px 12px; font-size: 12.5px; font-weight: 800; background: #0284c7; border-color: #0284c7; color: #ffffff; border-radius: 8px; display: inline-flex; align-items: center; gap: 5px;">
-            📄 HWPX 참여 이야기 자동 등록
+            ✨ 참여 이야기 등록 및 관리
           </button>
           <span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; ${postingMode === 'direct' ? 'background: #e0f2fe; color: #0369a1;' : 'background: #dcfce7; color: #15803d;'}">
             ${postingMode === 'direct' ? '현재 모드: 직접게시 (기본)' : '현재 모드: 사용자 입력'}
