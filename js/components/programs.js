@@ -263,6 +263,25 @@ export function renderPrograms(container, onSelectEventModal) {
 
       <!-- 프로그램 카드 그리드 -->
       <div class="program-cards-grid cols-${viewPref.columns}" id="prog-cards-grid"></div>
+
+      <!-- 하단 인쇄물 공식 범례 칩 목록 (캘린더와 동일한 스타일) -->
+      <div class="brochure-legend-container" style="margin-top: 32px;">
+        <div class="legend-chips-list">
+          ${categories.map(cat => `
+            <span class="legend-badge ${cat.cls}">${cat.label}</span>
+          `).join("")}
+          ${isAdmin ? `
+            <button id="btn-edit-legend-cats-prog" class="btn-admin-action" title="프로그램 유형 추가 및 관리">
+              유형 추가·관리
+            </button>
+          ` : ''}
+        </div>
+      </div>
+
+      <!-- 안내 문구 (범례 아래) -->
+      <div style="text-align: center; margin-top: 14px; margin-bottom: 6px; font-size: 13.5px; font-weight: 700; color: #475569;">
+        ※ 세부 일정 및 장소는 학교 공문 및 신청 링크를 통해 확인하시기 바랍니다.
+      </div>
     </div>
   `;
 
@@ -407,6 +426,14 @@ export function renderPrograms(container, onSelectEventModal) {
   const btnManageCats = container.querySelector("#btn-manage-cats-prog");
   if (btnManageCats) {
     btnManageCats.addEventListener("click", () => {
+      openCategoryManagerModal(() => renderPrograms(container, onSelectEventModal));
+    });
+  }
+
+  // 하단 범례의 유형 추가·관리 버튼 이벤트 바인딩
+  const btnEditLegendCatsProg = container.querySelector("#btn-edit-legend-cats-prog");
+  if (btnEditLegendCatsProg) {
+    btnEditLegendCatsProg.addEventListener("click", () => {
       openCategoryManagerModal(() => renderPrograms(container, onSelectEventModal));
     });
   }
