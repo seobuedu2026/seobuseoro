@@ -4,6 +4,7 @@ import { FirestoreReviewService } from "../data/firestoreService.js";
 import { renderParticipationStories, bindParticipationStories } from "./participationStories.js";
 import { openPrivacyConsentModal } from "./privacyConsentModal.js";
 import { hasConsented } from "../data/consent.js";
+import { openAdminHwpxModal } from "./adminHwpxModal.js";
 
 const REVIEWS_STORAGE_KEY = "seobu_user_reviews_v8";
 const MY_REVIEWS_STORAGE_KEY = "seobu_my_review_ids_v1";
@@ -232,9 +233,14 @@ export function renderReviews(container, preselectedEventId = null, page = 1) {
         <div style="font-size: 15px; font-weight: 800; color: #0e3753; display: flex; align-items: center; gap: 8px;">
           ⚙️ <span>후기 게시 방식 설정 (관리자 전용)</span>
         </div>
-        <span style="font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; ${postingMode === 'direct' ? 'background: #e0f2fe; color: #0369a1;' : 'background: #dcfce7; color: #15803d;'}">
-          ${postingMode === 'direct' ? '현재 모드: 직접게시 (기본)' : '현재 모드: 사용자 입력'}
-        </span>
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <button type="button" id="btn-open-hwpx-modal" class="btn-admin-action filled" style="padding: 5px 12px; font-size: 12.5px; font-weight: 800; background: #0284c7; border-color: #0284c7; color: #ffffff; border-radius: 8px; display: inline-flex; align-items: center; gap: 5px;">
+            📄 HWPX 참여 이야기 자동 등록
+          </button>
+          <span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; ${postingMode === 'direct' ? 'background: #e0f2fe; color: #0369a1;' : 'background: #dcfce7; color: #15803d;'}">
+            ${postingMode === 'direct' ? '현재 모드: 직접게시 (기본)' : '현재 모드: 사용자 입력'}
+          </span>
+        </div>
       </div>
 
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-bottom: ${postingMode === 'user_input' ? '12px' : '0'};">
@@ -546,6 +552,13 @@ export function renderReviews(container, preselectedEventId = null, page = 1) {
         renderReviews(container, preselectedEventId);
       });
     });
+
+    const btnOpenHwpx = container.querySelector("#btn-open-hwpx-modal");
+    if (btnOpenHwpx) {
+      btnOpenHwpx.addEventListener("click", () => {
+        openAdminHwpxModal(() => renderReviews(container, preselectedEventId));
+      });
+    }
   }
 
   // 후기 정렬 변경
