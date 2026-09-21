@@ -536,14 +536,17 @@
   max-width: 980px;
 }
 
-/* 3개, 4개 선택 시 화면을 더 넓게 설정하여 여유 있게 표시 */
+/* 3개의 경우 2개(980px)와 4개(전체 너비) 사이 중간으로 넓게 설정 */
 @media (min-width: 1200px) {
   .programs-view-wrapper.cols-3 {
-    max-width: 1360px;
+    max-width: 1380px;
   }
-  .programs-view-wrapper.cols-4 {
-    max-width: 1680px;
-  }
+}
+
+/* 4개의 경우 옆의 빈 공간 없이 100% 꽉 채워서 표시 */
+.programs-view-wrapper.cols-4 {
+  max-width: 100%;
+  width: 100%;
 }
 
 @media (min-width: 768px) and (max-width: 1199px) {
