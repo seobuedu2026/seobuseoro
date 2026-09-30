@@ -10,6 +10,7 @@ import { isEventPastOrToday, resolveApplyLink } from "./data/events.js?v=2026092
 import { initSiteSync } from "./data/siteSync.js";
 import { openPrivacyConsentModal } from "./components/privacyConsentModal.js";
 import { hasConsented } from "./data/consent.js";
+import { checkAndOpenNoticePopup } from "./components/noticePopupModal.js";
 
 let activeTab = "calendar"; // 'calendar' | 'programs' | 'reviews' | 'padlet'
 
@@ -254,8 +255,18 @@ function initApp() {
     }
   });
 
+  // 팝업 공지 설정 변경 리스너
+  window.addEventListener("popup-notice-updated", () => {
+    renderHeader(headerMount);
+  });
+
   // 초기 화면 렌더링 (첫 화면: 캘린더)
   switchTab("calendar");
+
+  // 공지 팝업창 띄우기 (오늘 하루 보지 않기 여부 체크 후 노출)
+  setTimeout(() => {
+    checkAndOpenNoticePopup();
+  }, 350);
 
   // 이미 로그인된 상태에서 동의 기록이 없으면 다시 안내한다
   ensurePrivacyConsent();

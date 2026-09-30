@@ -148,9 +148,32 @@ export function deletePadletRoom(roomId) {
   return true;
 }
 
+// 수업나눔방 순서 변경 (드래그 앤 드롭 등)
+export function reorderPadletRooms(sourceIndex, targetIndex) {
+  const current = getPadletRooms();
+  if (sourceIndex < 0 || sourceIndex >= current.length || targetIndex < 0 || targetIndex >= current.length || sourceIndex === targetIndex) {
+    return false;
+  }
+  const item = current.splice(sourceIndex, 1)[0];
+  current.splice(targetIndex, 0, item);
+  savePadletRooms(current);
+  return true;
+}
+
+// 수업나눔방 1단계 위치 이동 (direction: -1 이전, 1 다음)
+export function movePadletRoom(roomId, direction) {
+  const current = getPadletRooms();
+  const idx = current.findIndex(r => r.id === roomId);
+  if (idx === -1) return false;
+  const targetIdx = idx + direction;
+  if (targetIdx < 0 || targetIdx >= current.length) return false;
+  return reorderPadletRooms(idx, targetIdx);
+}
+
 // 초기 기본값 복원
 export function resetPadletRooms() {
   clearPersisted(ROOMS_STORAGE_KEY);
   window.dispatchEvent(new CustomEvent("rooms-updated", { detail: { rooms: INITIAL_PADLET_ROOMS } }));
   return INITIAL_PADLET_ROOMS;
 }
+

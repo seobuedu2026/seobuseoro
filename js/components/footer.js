@@ -1,5 +1,6 @@
 import { GoogleAuthService, getPrimaryAdminEmail } from "../auth/googleAuth.js";
 import { openAdminAccountModal } from "./adminAccountModal.js";
+import { openAdminPopupModal } from "./adminPopupModal.js";
 
 export function renderFooter(container) {
   const user = GoogleAuthService.getCurrentUser();
@@ -22,6 +23,9 @@ export function renderFooter(container) {
               <span style="font-size: 11.5px; font-weight: 800; background: #0e3753; color: #ffffff; padding: 2px 8px; border-radius: 9999px;">
                 관리자
               </span>
+              <button id="footer-btn-admin-popup" class="btn-admin-action" style="font-size: 12px; padding: 3px 10px; background: #f0fdfa; color: #0f766e; border-color: #99f6e4;" title="팝업 공지(일정 변경/모집 안내) 설정">
+                📢 팝업 공지
+              </button>
               <button id="footer-btn-admin-account" class="btn-admin-action" style="font-size: 12px; padding: 3px 10px;" title="관리자 ID 현황 조회, 추가/삭제 및 비밀번호(PW) 설정">
                 계정 관리
               </button>
@@ -39,6 +43,7 @@ export function renderFooter(container) {
   const btnLogout = container.querySelector("#footer-btn-logout");
   const btnAdminVerify = container.querySelector("#footer-btn-admin-verify");
   const btnAdminAccount = container.querySelector("#footer-btn-admin-account");
+  const btnAdminPopup = container.querySelector("#footer-btn-admin-popup");
 
   if (btnLogout) {
     btnLogout.addEventListener("click", () => {
@@ -53,6 +58,12 @@ export function renderFooter(container) {
         renderFooter(container);
         window.dispatchEvent(new CustomEvent("auth-state-changed"));
       });
+    });
+  }
+
+  if (btnAdminPopup) {
+    btnAdminPopup.addEventListener("click", () => {
+      openAdminPopupModal();
     });
   }
 
