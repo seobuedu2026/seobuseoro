@@ -13,7 +13,7 @@ export function renderHeader(container) {
   container.innerHTML = `
     <header class="hero-header">
       <div class="hero-header-inner" style="position: relative;">
-        <div style="position: absolute; top: 10px; left: 10px; z-index: 10; display: flex; align-items: center; gap: 8px;">
+        <div class="header-pill-group" style="position: absolute; top: 10px; left: 10px; z-index: 10; display: flex; align-items: center; gap: 8px;">
           <button type="button" id="btn-home-pill" class="header-home-pill" title="첫 화면으로 이동">
             <span aria-hidden="true">🏠</span> 홈
           </button>
