@@ -1450,48 +1450,10 @@
   backdrop-filter: blur(4px);
 }
 
-.padlet-order-btns {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  border-right: 1px solid #e2e8f0;
-  padding-right: 5px;
-  margin-right: 2px;
-}
-
-.btn-move-room {
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  color: #0e3753;
-  font-size: 11px;
-  font-weight: 900;
-  width: 22px;
-  height: 22px;
-  border-radius: 4px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
-  padding: 0;
-  line-height: 1;
-}
-
-.btn-move-room:hover:not(:disabled) {
-  background: #0e3753;
-  color: #ffffff;
-  border-color: #0e3753;
-}
-
-.btn-move-room:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-  background: #f8fafc;
-}
-
 .padlet-drag-handle {
-  font-size: 14px;
-  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 800;
+  color: #64748b;
   cursor: grab;
   padding: 0 2px;
   user-select: none;
@@ -2353,6 +2315,13 @@
 .header-home-pill:hover {
   background: #ffffff;
   border-color: #0e3753;
+}
+
+/* 홈/주요 공지 버튼 그룹: 그룹이 위치를 잡으므로 개별 버튼은 흐름 배치 (세로 줄바꿈·겹침 방지) */
+.header-pill-group .header-home-pill {
+  position: static;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 @media (max-width: 1199px) {

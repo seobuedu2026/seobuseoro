@@ -1,4 +1,4 @@
-import { getPadletRooms, reorderPadletRooms, movePadletRoom, resetPadletRooms } from "../data/rooms.js";
+import { getPadletRooms, reorderPadletRooms, resetPadletRooms } from "../data/rooms.js";
 import { openRoomEditModal } from "./roomEditModal.js";
 import { GoogleAuthService } from "../auth/googleAuth.js";
 
@@ -27,7 +27,7 @@ export function renderPadletRooms(container) {
               </button>
             </div>
             <div style="font-size: 12.5px; color: #0e3753; font-weight: 700; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 4px 12px; border-radius: 9999px; display: inline-flex; align-items: center; gap: 4px;">
-              <span>💡</span> <span>카드를 마우스로 <strong>드래그 앤 드롭</strong>하거나 <strong>◀ ▶ 버튼</strong>으로 위치를 자유롭게 변경할 수 있습니다.</span>
+              <span>💡</span> <span>카드를 마우스로 <strong>드래그 앤 드롭</strong>하여 위치를 자유롭게 변경할 수 있습니다.</span>
             </div>
           </div>
         ` : ''}
@@ -36,9 +36,6 @@ export function renderPadletRooms(container) {
       <!-- 8개 카드 4열 x 2행 그리드 (카드 전체가 링크 버튼 및 수정 기능 포함) -->
       <div class="padlet-cards-grid ${isAdmin ? 'admin-reorder-enabled' : ''}" id="padlet-cards-container">
         ${rooms.map((room, idx) => {
-          const isFirst = idx === 0;
-          const isLast = idx === rooms.length - 1;
-
           return `
             <div 
               class="padlet-card-wrapper ${isAdmin ? 'admin-card-draggable' : ''}" 
@@ -47,7 +44,7 @@ export function renderPadletRooms(container) {
               ${isAdmin ? 'draggable="true"' : ''}
               style="position: relative;"
             >
-              <a href="${room.padletUrl}" target="_blank" rel="noopener noreferrer" class="padlet-card-item" title="${room.title} 바로가기">
+              <a href="${room.padletUrl}" target="_blank" rel="noopener noreferrer" class="padlet-card-item" title="${room.title} 바로가기" ${isAdmin ? 'draggable="false"' : ''}>
                 <div class="padlet-icon-box" style="background-color: ${room.iconBg || '#f0fdf4'};">
                   <span class="padlet-icon-emoji">${room.icon || '📚'}</span>
                 </div>
@@ -57,17 +54,9 @@ export function renderPadletRooms(container) {
               </a>
               
               ${isAdmin ? `
-                <!-- 관리자 컨트롤 바 (위치 이동 버튼 & 드래그 핸들 & 수정 버튼) -->
+                <!-- 관리자 컨트롤 바 (드래그 핸들 & 수정 버튼) -->
                 <div class="padlet-admin-card-controls">
-                  <div class="padlet-order-btns">
-                    <button type="button" class="btn-move-room btn-move-prev" data-room-id="${room.id}" data-dir="-1" title="왼쪽/앞으로 위치 이동" ${isFirst ? 'disabled' : ''}>
-                      ◀
-                    </button>
-                    <span class="padlet-drag-handle" title="마우스로 끌어서 순서 변경">⠿</span>
-                    <button type="button" class="btn-move-room btn-move-next" data-room-id="${room.id}" data-dir="1" title="오른쪽/뒤로 위치 이동" ${isLast ? 'disabled' : ''}>
-                      ▶
-                    </button>
-                  </div>
+                  <span class="padlet-drag-handle" title="카드를 끌어서 순서 변경">⠿ 이동</span>
                   <button type="button" class="btn-edit-padlet-room btn-admin-action" data-room-id="${room.id}" title="수업나눔방 정보 수정">
                     수정
                   </button>
@@ -112,19 +101,6 @@ export function renderPadletRooms(container) {
         openRoomEditModal(targetRoom, () => {
           renderPadletRooms(container);
         });
-      }
-    });
-  });
-
-  // 각 룸별 순서 이동 버튼 (◀ / ▶) 이벤트
-  container.querySelectorAll(".btn-move-room").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const roomId = btn.dataset.roomId;
-      const direction = parseInt(btn.dataset.dir, 10);
-      if (movePadletRoom(roomId, direction)) {
-        renderPadletRooms(container);
       }
     });
   });
