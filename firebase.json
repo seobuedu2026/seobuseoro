@@ -8,7 +8,9 @@
       "**/.*",
       "**/node_modules/**",
       "*.pdf",
-      "*.log"
+      "*.log",
+      "**/*.zip",
+      "concert/교육콘서트_안내앱_index.html"
     ],
     "headers": [
       {

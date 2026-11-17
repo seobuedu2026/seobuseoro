@@ -11,6 +11,7 @@ import { initSiteSync } from "./data/siteSync.js";
 import { openPrivacyConsentModal } from "./components/privacyConsentModal.js";
 import { hasConsented } from "./data/consent.js";
 import { checkAndOpenNoticePopup } from "./components/noticePopupModal.js";
+import { checkAndOpenConcertGuidePopup } from "./components/concertGuidePopup.js";
 
 let activeTab = "calendar"; // 'calendar' | 'programs' | 'reviews' | 'padlet'
 
@@ -263,9 +264,10 @@ function initApp() {
   // 초기 화면 렌더링 (첫 화면: 캘린더)
   switchTab("calendar");
 
-  // 공지 팝업창 띄우기 (오늘 하루 보지 않기 여부 체크 후 노출)
+  // 교육콘서트 안내문 팝업을 먼저 띄우고, 닫은 뒤 공지 팝업창을 이어서 띄운다
+  // (각 팝업은 오늘 하루 보지 않기 여부를 체크한 뒤 노출)
   setTimeout(() => {
-    checkAndOpenNoticePopup();
+    checkAndOpenConcertGuidePopup(() => checkAndOpenNoticePopup());
   }, 350);
 
   // 이미 로그인된 상태에서 동의 기록이 없으면 다시 안내한다

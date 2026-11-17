@@ -3135,3 +3135,20 @@
   }
 }
 
+/* ==========================================================================
+   교육콘서트 안내문 팝업
+   ========================================================================== */
+.concert-guide-page-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #eaf6fb;
+}
+
+.concert-guide-pdf-btn {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
